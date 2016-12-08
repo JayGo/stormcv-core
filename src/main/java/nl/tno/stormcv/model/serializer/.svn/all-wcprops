@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/model/serializer
+END
+FrameSerializer.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/model/serializer/FrameSerializer.java
+END
+FeatureSerializer.java
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/model/serializer/FeatureSerializer.java
+END
+CVParticleSerializer.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/model/serializer/CVParticleSerializer.java
+END
+DescriptorSerializer.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/model/serializer/DescriptorSerializer.java
+END
+GroupOfFramesSerializer.java
+K 25
+svn:wc:ra_dav:version-url
+V 107
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/model/serializer/GroupOfFramesSerializer.java
+END
+VideoChunkSerializer.java
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/model/serializer/VideoChunkSerializer.java
+END

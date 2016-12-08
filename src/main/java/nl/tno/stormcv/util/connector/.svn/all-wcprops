@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/util/connector
+END
+S3Connector.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/stormcv/!svn/ver/43/stormcv/src/main/java/nl/tno/stormcv/util/connector/S3Connector.java
+END
+FtpConnector.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/util/connector/FtpConnector.java
+END
+LocalFileConnector.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/stormcv/!svn/ver/43/stormcv/src/main/java/nl/tno/stormcv/util/connector/LocalFileConnector.java
+END
+ConnectorHolder.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/stormcv/!svn/ver/43/stormcv/src/main/java/nl/tno/stormcv/util/connector/ConnectorHolder.java
+END
+FileConnector.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/stormcv/!svn/ver/43/stormcv/src/main/java/nl/tno/stormcv/util/connector/FileConnector.java
+END
+ClasspathConnector.java
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/stormcv/!svn/ver/43/stormcv/src/main/java/nl/tno/stormcv/util/connector/ClasspathConnector.java
+END

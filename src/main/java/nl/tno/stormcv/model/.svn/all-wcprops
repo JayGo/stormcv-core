@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/model
+END
+GroupOfFrames.java
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/model/GroupOfFrames.java
+END
+VideoChunk.java
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/model/VideoChunk.java
+END
+Frame.java
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/model/Frame.java
+END
+Feature.java
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/model/Feature.java
+END
+CVParticle.java
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/model/CVParticle.java
+END
+Descriptor.java
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/model/Descriptor.java
+END

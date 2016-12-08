@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/stormcv/!svn/ver/43/stormcv/src/main/java/nl/tno/stormcv/batcher
+END
+IBatcher.java
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/stormcv/!svn/ver/43/stormcv/src/main/java/nl/tno/stormcv/batcher/IBatcher.java
+END
+SequenceNrBatcher.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/stormcv/!svn/ver/43/stormcv/src/main/java/nl/tno/stormcv/batcher/SequenceNrBatcher.java
+END
+DiscreteWindowBatcher.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/stormcv/!svn/ver/43/stormcv/src/main/java/nl/tno/stormcv/batcher/DiscreteWindowBatcher.java
+END
+SlidingWindowBatcher.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/stormcv/!svn/ver/43/stormcv/src/main/java/nl/tno/stormcv/batcher/SlidingWindowBatcher.java
+END

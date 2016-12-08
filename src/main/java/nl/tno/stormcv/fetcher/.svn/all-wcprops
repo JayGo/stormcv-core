@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/fetcher
+END
+RefreshingImageFetcher.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/fetcher/RefreshingImageFetcher.java
+END
+RawStreamFrameFetcher.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/fetcher/RawStreamFrameFetcher.java
+END
+OpenCVStreamFrameFetcher.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/fetcher/OpenCVStreamFrameFetcher.java
+END
+ImageFetcher.java
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/fetcher/ImageFetcher.java
+END
+StreamFrameFetcher.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/fetcher/StreamFrameFetcher.java
+END
+IFetcher.java
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/fetcher/IFetcher.java
+END
+FileFrameFetcher.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/fetcher/FileFrameFetcher.java
+END
+FetchAndOperateFetcher.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/fetcher/FetchAndOperateFetcher.java
+END
