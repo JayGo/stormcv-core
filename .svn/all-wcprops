@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 32
+/svn/stormcv/!svn/ver/45/stormcv
+END
+logback.xml
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/stormcv/!svn/ver/43/stormcv/logback.xml
+END
+LICENSE
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/stormcv/!svn/ver/43/stormcv/LICENSE
+END
+pom.xml
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/stormcv/!svn/ver/44/stormcv/pom.xml
+END
+run.sh
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/stormcv/!svn/ver/43/stormcv/run.sh
+END

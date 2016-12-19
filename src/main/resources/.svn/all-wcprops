@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/stormcv/!svn/ver/43/stormcv/src/main/resources
+END
+lbpcascade_frontalface.xml
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/stormcv/!svn/ver/43/stormcv/src/main/resources/lbpcascade_frontalface.xml
+END
+mac64_opencv_java248.dylib
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/stormcv/!svn/ver/43/stormcv/src/main/resources/mac64_opencv_java248.dylib
+END
+win32_opencv_java248.dll
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/stormcv/!svn/ver/43/stormcv/src/main/resources/win32_opencv_java248.dll
+END
+win64_opencv_java248.dll
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/stormcv/!svn/ver/43/stormcv/src/main/resources/win64_opencv_java248.dll
+END

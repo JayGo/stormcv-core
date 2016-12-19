@@ -1,0 +1,167 @@
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation
+END
+InpaintOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/InpaintOp.java
+END
+VideoToFramesOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/VideoToFramesOp.java
+END
+FramesToVideoOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/FramesToVideoOp.java
+END
+GradientCalculator.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/stormcv/!svn/ver/43/stormcv/src/main/java/nl/tno/stormcv/operation/GradientCalculator.java
+END
+FeatureCombinerOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/FeatureCombinerOp.java
+END
+GrayscaleOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/GrayscaleOp.java
+END
+IOperation.java
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/IOperation.java
+END
+ForegroundExtractionOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/ForegroundExtractionOp.java
+END
+MjpegStreamingOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/MjpegStreamingOp.java
+END
+IBatchOperation.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/stormcv/!svn/ver/43/stormcv/src/main/java/nl/tno/stormcv/operation/IBatchOperation.java
+END
+RTMPWriterOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/RTMPWriterOp.java
+END
+GroupOfFramesOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/GroupOfFramesOp.java
+END
+HaarCascadeOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/HaarCascadeOp.java
+END
+OpticalFlowOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/OpticalFlowOp.java
+END
+Inpaint2.java
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/stormcv/!svn/ver/43/stormcv/src/main/java/nl/tno/stormcv/operation/Inpaint2.java
+END
+SequentialFrameOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/SequentialFrameOp.java
+END
+TilesRecombinerOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/TilesRecombinerOp.java
+END
+TilingOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/TilingOp.java
+END
+OpenCVOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/OpenCVOp.java
+END
+ROIExtractionOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/ROIExtractionOp.java
+END
+ScaleImageOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/ScaleImageOp.java
+END
+ISingleInputOperation.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/stormcv/!svn/ver/43/stormcv/src/main/java/nl/tno/stormcv/operation/ISingleInputOperation.java
+END
+FeatureExtractionOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/FeatureExtractionOp.java
+END
+DrawFeaturesOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/DrawFeaturesOp.java
+END
+ColorHistogramOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/ColorHistogramOp.java
+END
+CannyEdgeOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/CannyEdgeOp.java
+END
+FrameGrouperOp.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/stormcv/!svn/ver/44/stormcv/src/main/java/nl/tno/stormcv/operation/FrameGrouperOp.java
+END
