@@ -7,7 +7,8 @@ import org.apache.log4j.Logger;
 
 public class Queue<E> {
 	private static Logger logger = Logger.getLogger(Queue.class);
-	public  static final int DEFAUTL_MAX_SIZE = 150;
+	public  static final int DEFAUTL_MAT_LIMIT = 150;
+	public static final int DEFAULT_FRAME_LIMIT = 1600;
 	private int limit;
 	private int size = 0;
 	private String queueId;
@@ -17,7 +18,7 @@ public class Queue<E> {
 	private BlockingQueue<E> queue = new LinkedBlockingDeque<E>();
 
 	public Queue(String quueId) {
-		this(quueId, DEFAUTL_MAX_SIZE);
+		this(quueId, DEFAUTL_MAT_LIMIT);
 	}
 
 	public Queue(String queueId, int limit) {
@@ -46,6 +47,7 @@ public class Queue<E> {
 	}
 
 	public void enqueue(E input) {
+		// logger.info("Queue size: "+size + ", BlockingQueue size: "+queue.size());
 		if (size == limit) {
 			try {
 				if (queue.take() != null) {
@@ -71,7 +73,7 @@ public class Queue<E> {
 			--size;
 			dropCount=0;
 		} else {
-			logger.info("The queue has no element!");
+			// logger.info("The queue has no element!");
 		}
 		return result;
 	}

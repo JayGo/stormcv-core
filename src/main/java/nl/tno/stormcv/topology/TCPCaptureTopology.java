@@ -102,9 +102,9 @@ public class TCPCaptureTopology extends BaseTopology {
 //		source = "codec";
 		
 		// For debug
-//		builder.setBolt("debug", new SingleInputBolt(new EmptyOperation()).setSourceInfo(sourceInfo),
-//				1).shuffleGrouping(source);
-//		source = "debug";
+		builder.setBolt("debug", new SingleInputBolt(new EmptyOperation()).setSourceInfo(sourceInfo),
+				1).shuffleGrouping(source);
+		source = "debug";
 		
 		// for RTMP operation 
 //		builder.setBolt(

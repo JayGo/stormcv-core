@@ -1,8 +1,10 @@
 package edu.fudan.lwang.codec;
 
 import edu.fudan.lwang.codec.Common.CodecType;
+import nl.tno.stormcv.util.TimeElasper;
 
 import org.apache.log4j.Logger;
+import org.omg.CORBA.PRIVATE_MEMBER;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
@@ -126,6 +128,9 @@ public class EncoderWorker extends Thread {
 	
 	@Override
 	public void run() {
+		int frameNr = 0;
+		TimeElasper timeElasper = new TimeElasper();
+		
 		frame = new Mat();
 		while(!Thread.interrupted() && (capture == null || (capture != null && capture.open(videoAddr)))) {
 			if(capture!=null) logger.info("capture is opened for: "+videoAddr);
@@ -133,7 +138,23 @@ public class EncoderWorker extends Thread {
 				if(!frame.empty()) {
 					Mat processedMat = mEncoderCallBack.beforeDataEncoded(frame);
 					frame = new Mat();
+					
+					long start = System.currentTimeMillis();
 					byte[] encodedData = CodecHelper.getInstance().encodeFrame(encoderId, processedMat.nativeObj);
+					long end = System.currentTimeMillis();
+					
+					timeElasper.push((int)(end-start));
+					frameNr++;
+					
+					if(frameNr == 100) {
+						logger.info("Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(100));
+					}				
+					
+					if(frameNr == 2000) {
+						logger.info("Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(2000));
+					}
+					
+					// logger.info(++frameNr + "frame ecoded data bytes length: "+encodedData.length);
 					mEncoderCallBack.onDataEncoded(encodedData);
 				}
 			}

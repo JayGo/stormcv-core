@@ -5,8 +5,6 @@ import java.util.WeakHashMap;
 
 import org.apache.log4j.Logger;
 
-
-
 public class BufferQueueManager {
 	
     private final static Logger logger = Logger.getLogger(BufferQueueManager.class);
@@ -39,7 +37,7 @@ public class BufferQueueManager {
 	}
 	
 	public void registerBufferQueue(String queueId) {
-		BufferQueue mBufferQueue = new BufferQueue(queueId);
+		registerBufferQueue(queueId, BufferQueue.DEFAULT_MAX_SIZE);
 	}
 	
 	/**

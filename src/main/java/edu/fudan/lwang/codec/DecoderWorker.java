@@ -1,11 +1,15 @@
 package edu.fudan.lwang.codec;
 
 import edu.fudan.lwang.codec.Common.CodecType;
+import nl.tno.stormcv.util.TimeElasper;
+import scala.collection.parallel.ParIterableLike.ToParMap;
 
 import org.apache.log4j.Logger;
 import org.apache.storm.generated.DistributedRPCInvocations.AsyncProcessor.result;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
+
+import clojure.lang.LockingTransaction.Info;
 
 
 public class DecoderWorker extends Thread {
@@ -65,21 +69,36 @@ public class DecoderWorker extends Thread {
 		int[] results = new int[2];
 		Mat yuvMat = new Mat((int)1.5*frameHeight, frameWidth, frameType, new Scalar(0));
 		
+		TimeElasper timeElasper = new TimeElasper();
+		int frameNr = 0;
+		
 		while(!Thread.interrupted()) {
 			encodedData = mDecoderCallback.getEncodedData();
-			if(encodedData != null) {
+			if(encodedData != null && encodedData.length > 0) {
 //				logger.info("Decoding thread info: [decoderId: "+decoderId+", size: "+encodedData.length);
-				
+				// logger.info("======================== decode start ==============================");
+				long start = System.currentTimeMillis();
 				CodecHelper.getInstance()
 						.decodeFrame(decoderId, encodedData, results, yuvMat.nativeObj);
+				long end = System.currentTimeMillis();
+				timeElasper.push((int)(end-start));
+				
+				if(frameNr == 100) {
+					logger.info("Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(100));
+				}				
+				
+				if(frameNr == 2000) {
+					logger.info("Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(2000));
+				}
 				
 				// logger.info("decode results: "+results[0]+", "+results[1]);
 				if(results[0] != 0) {
-					logger.info("The yuvMat size: "+ yuvMat.width() +"x"+yuvMat.height());
+					frameNr++;
+					// logger.info("The yuvMat size: "+ yuvMat.width() +"x"+yuvMat.height());
 				}
 				
 				// The yuvMat is complete
-				mDecoderCallback.onDataDecoded(yuvMat, results[1]);
+				mDecoderCallback.onDataDecoded(yuvMat, results);
 
 			}
 		}

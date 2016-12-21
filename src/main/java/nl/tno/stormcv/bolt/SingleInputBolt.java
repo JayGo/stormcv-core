@@ -11,6 +11,8 @@ import nl.tno.stormcv.operation.ISingleInputOperation;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.opencv.core.Mat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.fudan.lwang.codec.BufferQueue;
 import edu.fudan.lwang.codec.BufferQueueManager;
@@ -36,7 +38,8 @@ public class SingleInputBolt extends CVParticleBolt {
 	 */
 	private static final long serialVersionUID = 2919345121819900242L;
 	
-
+	private final Logger logger = LoggerFactory.getLogger(SingleInputBolt.class);
+	
 	private MatQueueManager mMatQueueManager;
 	private BufferQueueManager mBufferQueueManager;
 	
@@ -90,6 +93,8 @@ public class SingleInputBolt extends CVParticleBolt {
 		// Register the source queue.
 		mBufferQueueManager = BufferQueueManager.getInstance();
 		mBufferQueueManager.registerBufferQueue(mSourceQueueId);
+		mSourceBufferQueue = mBufferQueueManager.getBufferQueue(mSourceQueueId);
+		
 		
 		// Register the mat buffer queue for decoder.
 		mMatQueueManager = MatQueueManager.getInstance();
@@ -97,8 +102,6 @@ public class SingleInputBolt extends CVParticleBolt {
 		
 		// Start to decode the data sourcing from mSourceQueueId
 		setDecoder();
-		
-		mSourceBufferQueue = mBufferQueueManager.getBufferQueue(mSourceQueueId);
 		mDecodedMatQueue = mMatQueueManager.getQueueById(mDecodeQueueId);
 	}
 	
@@ -132,16 +135,21 @@ public class SingleInputBolt extends CVParticleBolt {
 
 	
 	@Override
-	List<? extends CVParticle> execute(CVParticle input) throws Exception{
-		
+	List<? extends CVParticle> execute(CVParticle input) throws Exception {
+		// fill buffer with input.imageBytes first.
 		List<? extends CVParticle> results = operation.execute(input, new OperationHandler() {
-
+			
+			org.apache.log4j.Logger logger1 = org.apache.log4j.Logger.getLogger(OperationHandler.class);
+			
 			@Override
 			public boolean fillSourceBufferQueue(Frame frame) {
 				// TODO Auto-generated method stub
 				byte [] encodedData = frame.getImageBytes();
-				while(mSourceBufferQueue.fillBuffer(encodedData));
-				return false;
+				// logger1.info("get image bytes length: "+encodedData.length);
+				while(!mSourceBufferQueue.fillBuffer(encodedData)) {
+					logger1.info("atempt to fill buffer...");
+				}
+				return true;
 			}
 
 			@Override

@@ -2,6 +2,7 @@ package edu.fudan.lwang.codec;
 
 import org.opencv.core.Mat;
 
+
 public interface DecoderCallback {
 	
 	/**
@@ -20,8 +21,8 @@ public interface DecoderCallback {
 	 * Notice:
 	 * 		frame is in YUV format for H264 codec type
 	 * @param frame
-	 * @param lastEncDataUsedSize
+	 * @param [0] - frames number decoded [1] lastEncDataUsedSize
 	 */
-	public void onDataDecoded(Mat frame, int dataUsed);
+	public void onDataDecoded(Mat frame, int [] result);
 	
 }

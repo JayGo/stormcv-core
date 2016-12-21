@@ -19,9 +19,13 @@ import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 
+import edu.fudan.lwang.codec.BufferQueue;
+import edu.fudan.lwang.codec.BufferQueueManager;
 import edu.fudan.lwang.codec.Codec;
 import edu.fudan.lwang.codec.MatQueueManager;
+import edu.fudan.lwang.codec.Queue;
 import edu.fudan.lwang.codec.Common.CodecType;
+import edu.fudan.lwang.codec.FrameQueueManager;
 import edu.fudan.lwang.codec.SourceInfo;
 
 /**
@@ -35,6 +39,7 @@ public class TCPCaptureSpout implements IRichSpout {
 	private static final long serialVersionUID = 7340743805719206817L;
 	private SpoutOutputCollector collector;
 	private FrameSerializer serializer;
+	private final int ENCODE_DATA_SEG = 2048;
 
 	private String streamId;
 	private String videoAddr;
@@ -42,6 +47,11 @@ public class TCPCaptureSpout implements IRichSpout {
 	private long frameNr;
 	
 	private SourceInfo mSourceInfo;
+	private String mEncodedFrameQueueId;
+	private Queue<Frame> mEncodedFrameQueue;
+	
+	private String mBufferQueueId;
+	private BufferQueue mBufferQueue;
 
 	public TCPCaptureSpout(String streamId, String videoAddr, CodecType type) {
 		// TODO Auto-generated constructor stub
@@ -92,24 +102,28 @@ public class TCPCaptureSpout implements IRichSpout {
 	@Override
 	public void nextTuple() {
 		// TODO Auto-generated method stub
-//		byte[] buffer = null;
-//		// mock the blocking effect
-//		while (buffer == null) {
-//			buffer = Codec.getEncodeDataFromBuffer(mSourceInfo.getEncodeQueueId());
-//		}
+		
+//		byte[] encodedData = null;
+//		do {
+//			encodedData = mBufferQueue.getBuffer(ENCODE_DATA_SEG);
+//		} while (encodedData == null || encodedData.length < ENCODE_DATA_SEG);
+//		
 //		long timeStamp = System.currentTimeMillis();
-//		try {
-//			
-//			Frame newFrame = new Frame(streamId, frameNr, Frame.X264_Bytes, buffer, timeStamp, 
-//					new Rectangle(0, 0, mSourceInfo.getFrameWidth(), mSourceInfo.getFrameHeight()));
-//			
-//			frameNr++;
-//			collector.emit(serializer.toTuple(newFrame), streamId + "_" + frameNr);
-//			logger.info("target: "+mSourceInfo+""+frameNr);
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+//		
+//		Frame frame = new Frame(mSourceInfo.getEncodeQueueId(), frameNr, Frame.X264_Bytes, encodedData, timeStamp, 
+//		new Rectangle(0, 0, mSourceInfo.getFrameWidth(), mSourceInfo.getFrameHeight()));
+		
+		Frame frame = null;
+		while((frame = mEncodedFrameQueue.dequeue()) == null);
+		try {
+			collector.emit(serializer.toTuple(frame), streamId + "_" + frameNr++);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// logger.info("Emmit frame: "+frame);
+//		// logger.info("target: "+mSourceInfo+""+frameNr);
+
 
 	}
 
@@ -123,13 +137,21 @@ public class TCPCaptureSpout implements IRichSpout {
 		System.load("/usr/local/LwangCodec/lib/libHgCodec.so");
 		logger.info("TCPCaptureSpout ready to start: "+mSourceInfo);
 		
-		//************* this block is a test of lwang's encoder and decoder ********
-		Codec.startEncodeToBuffer(mSourceInfo);
-		
-		String decoderQueueId = mSourceInfo.getEncodeQueueId()+"_decoder";
-		MatQueueManager.getInstance().registerQueue(decoderQueueId);
-		Codec.registerDecoder(mSourceInfo, mSourceInfo.getEncodeQueueId(), decoderQueueId);
-		// ************************* end of block **********************************
+		mEncodedFrameQueueId = Codec.startEncodeToFrameQueue(mSourceInfo);
+		if(mEncodedFrameQueueId == null) {
+			logger.info("Encode to frame queue failed!");
+			return;
+		}
+		mEncodedFrameQueue = FrameQueueManager.getInstance().getQueueById(mEncodedFrameQueueId);
+
+ 		//************* this block is a test of lwang's encoder and decoder ********
+// 		mBufferQueueId = Codec.startEncodeToBuffer(mSourceInfo);
+// 		mBufferQueue = BufferQueueManager.getInstance().getBufferQueue(mBufferQueueId);
+ 		
+ 		// String decoderQueueId = mSourceInfo.getEncodeQueueId()+"_decoder";
+ 		// MatQueueManager.getInstance().registerQueue(decoderQueueId);
+ 		// Codec.registerDecoder(mSourceInfo, mSourceInfo.getEncodeQueueId(), decoderQueueId);
+ 		// ************************* end of block **********************************
 		
 		logger.info("TCPCaptureSpout is opened!");
 //		BaseMessage streamIdMsg = new BaseMessage(RequestCode.DEFAULT);

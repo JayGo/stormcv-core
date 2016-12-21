@@ -1,8 +1,12 @@
 package edu.fudan.lwang.codec;
 
+import org.apache.log4j.Logger;
+
 public class BufferQueue {
 	
-	public final static int DEFAULT_MAX_SIZE = 32*1024*1024 - 1;
+	private static final Logger logger = Logger.getLogger(BufferQueue.class);
+	
+	public final static int DEFAULT_MAX_SIZE = 16*1024*1024 - 1;
 	private String queueId;
 	private byte[] buffer;
 	private int head;
@@ -41,6 +45,7 @@ public class BufferQueue {
 		int currentLength = getQueueSize();
 		if(length > currentLength) {
 			//log here
+			// logger.info("");
 			return null;
 		}
 		
@@ -78,6 +83,7 @@ public class BufferQueue {
 		
 		if(bufferLength + currentLength >= maxQueueSize) {
 			//log here
+			logger.info("fillBuffer failed!");
 			return false;
 		}
 		

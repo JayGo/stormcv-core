@@ -60,15 +60,14 @@ public class EmptyOperation implements ISingleInputOperation<Frame>{
 	public List<Frame> execute(CVParticle particle, OperationHandler operationHandler) throws Exception {
 		// TODO Auto-generated method stub
 		Frame frame = (Frame) particle;
-		logger.info("Receive frame: "+frame);
-		
+		// logger.info("Receive frame: "+frame);
 		operationHandler.fillSourceBufferQueue(frame);
 		
 		Mat mat = operationHandler.getMat();
 		
 		if(mat != null) {
-			logger.info("Decode "+frameNr+" done");
-			Highgui.imwrite("/root/Pictures/"+ frameNr++ +".jpg", mat);
+			// logger.info("Decode "+frameNr+" done");
+			// Highgui.imwrite("/root/Pictures/"+ frameNr++ +".jpg", mat);
 		}
 		
 		List<Frame> results = new ArrayList<>();
