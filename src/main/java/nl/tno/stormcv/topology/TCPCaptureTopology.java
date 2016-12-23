@@ -10,6 +10,7 @@ import nl.tno.stormcv.operation.CannyEdgeOp;
 import nl.tno.stormcv.operation.CodecTestOperation;
 import nl.tno.stormcv.operation.ColorHistogramOp;
 import nl.tno.stormcv.operation.EmptyOperation;
+import nl.tno.stormcv.operation.EmptyOperation2;
 import nl.tno.stormcv.operation.FGExtranctionOp;
 import nl.tno.stormcv.operation.GrayscaleOp;
 import nl.tno.stormcv.operation.SingleRTMPWriterOp;
@@ -105,6 +106,11 @@ public class TCPCaptureTopology extends BaseTopology {
 		builder.setBolt("debug", new SingleInputBolt(new EmptyOperation()).setSourceInfo(sourceInfo),
 				1).shuffleGrouping(source);
 		source = "debug";
+		
+		// For debug
+		builder.setBolt("debug2", new SingleInputBolt(new EmptyOperation2()).setSourceInfo(sourceInfo), 
+				1).shuffleGrouping(source);
+		
 		
 		// for RTMP operation 
 //		builder.setBolt(

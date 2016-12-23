@@ -4,6 +4,8 @@ import org.opencv.core.Mat;
 
 public interface EncoderCallback {
 	
+	public Mat getDecodedData();
+	
 	/**
 	 * Description :
 	 * 		process need to be done before data encoded

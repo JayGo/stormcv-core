@@ -16,9 +16,9 @@ import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.model.serializer.CVParticleSerializer;
 import nl.tno.stormcv.model.serializer.FrameSerializer;
 
-public class EmptyOperation implements ISingleInputOperation<Frame>{
+public class EmptyOperation2 implements ISingleInputOperation<Frame>{
 
-	private static final Logger logger = Logger.getLogger(EmptyOperation.class);
+	private static final Logger logger = Logger.getLogger(EmptyOperation2.class);
 	private String name;
 	private int frameNr = 0;
 	private FrameSerializer serializer = new FrameSerializer();
@@ -68,7 +68,7 @@ public class EmptyOperation implements ISingleInputOperation<Frame>{
 		
 		if(mat != null) {
 			// logger.info("Decode "+frameNr+" done");
-			// Highgui.imwrite("/root/Pictures/"+ frameNr++ +".jpg", mat);
+			Highgui.imwrite("/root/Pictures/"+ frameNr++ +".jpg", mat);
 			byte [] encodedData = operationHandler.getEncodedData(mat);
 			if(encodedData == null) {
 				logger.error("encode data is null!!");

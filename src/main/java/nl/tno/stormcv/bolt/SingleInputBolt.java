@@ -17,6 +17,9 @@ import org.slf4j.LoggerFactory;
 import edu.fudan.lwang.codec.BufferQueue;
 import edu.fudan.lwang.codec.BufferQueueManager;
 import edu.fudan.lwang.codec.Codec;
+import edu.fudan.lwang.codec.CodecManager;
+import edu.fudan.lwang.codec.EncoderWorker;
+import edu.fudan.lwang.codec.FrameQueueManager;
 import edu.fudan.lwang.codec.OperationHandler;
 import edu.fudan.lwang.codec.MatQueueManager;
 import edu.fudan.lwang.codec.Queue;
@@ -42,11 +45,14 @@ public class SingleInputBolt extends CVParticleBolt {
 	
 	private MatQueueManager mMatQueueManager;
 	private BufferQueueManager mBufferQueueManager;
+	private FrameQueueManager mFrameQueueManager;
 	
 	private String mDecodeQueueId;
-	private String mSourceQueueId;	
+	private String mSourceQueueId;
 	private Queue<Mat> mDecodedMatQueue;
 	private BufferQueue mSourceBufferQueue;
+	private String mResultMatQueueId;
+	private Queue<Mat> mResultMatQueue;
 	
 	private SourceInfo mSourceInfo;
 	
@@ -86,9 +92,15 @@ public class SingleInputBolt extends CVParticleBolt {
 	}
 	
 
+	private String mEncodedQueueId;
+	private Queue<Frame> mEncodedFrameQueue;
+	
 	private void init() {
 		mDecodeQueueId = mSourceInfo.getEncodeQueueId() + "_" + operation.getContext() +"_decode";
 		mSourceQueueId = mSourceInfo.getEncodeQueueId() + "_" + operation.getContext() +"_source";
+		mResultMatQueueId = mSourceInfo.getEncodeQueueId() + "_" + operation.getContext() +"_result";
+		mEncodedQueueId = mSourceInfo.getEncodeQueueId() + "_" + operation.getContext() +"_encode";
+		
 		
 		// Register the source queue.
 		mBufferQueueManager = BufferQueueManager.getInstance();
@@ -100,9 +112,33 @@ public class SingleInputBolt extends CVParticleBolt {
 		mMatQueueManager = MatQueueManager.getInstance();
 		mMatQueueManager.registerQueue(mDecodeQueueId);
 		
+		// Reigster the mat queue for processing result
+		mMatQueueManager.registerQueue(mResultMatQueueId);
+		
 		// Start to decode the data sourcing from mSourceQueueId
 		setDecoder();
 		mDecodedMatQueue = mMatQueueManager.getQueueById(mDecodeQueueId);
+		mResultMatQueue = mMatQueueManager.getQueueById(mResultMatQueueId);
+		
+		// Register the result encoded queue
+		mFrameQueueManager = FrameQueueManager.getInstance();
+		mFrameQueueManager.registerQueue(mEncodedQueueId);
+		mEncodedFrameQueue = mFrameQueueManager.getQueueById(mEncodedQueueId);
+		
+		if(setEncoder()) {
+			mEncoderWorker = CodecManager.getInstance().getEncoder(mEncodedQueueId);
+		}
+	}
+	
+	private EncoderWorker mEncoderWorker;
+	private boolean setEncoder() {
+
+		if(!Codec.registerEncoder(mSourceInfo, mResultMatQueueId, mEncodedQueueId)) {
+			logger.error("Register encoder for result: "+mSourceQueueId+" failed!");
+			return false;
+		}
+		
+		return true;
 	}
 	
 	/**
@@ -156,6 +192,25 @@ public class SingleInputBolt extends CVParticleBolt {
 			public Mat getMat() {
 				// TODO Auto-generated method stub
 				return mDecodedMatQueue.dequeue();
+			}
+
+			@Override
+			public byte[] getEncodedData(Mat proccessedResult) {
+				// TODO Auto-generated method stub
+				mResultMatQueue.enqueue(proccessedResult);
+				
+//				logger1.info("Before dequeue "+mEncodedQueueId +" size: "+ mEncodedFrameQueue.getSize());
+				Frame encodedFrame = null;
+				 while((encodedFrame = mEncodedFrameQueue.dequeue())==null){
+					 // logger1.info("encoded frame queue has no element!");
+				 };
+//				 logger1.info("After dequeue "+mEncodedQueueId +" size: "+ mEncodedFrameQueue.getSize());
+//				if((encodedFrame = mEncodedFrameQueue.dequeue())==null) {
+//					return null;
+//				} else {
+//					return encodedFrame.getImageBytes();
+//				}
+				 return encodedFrame.getImageBytes();
 			}
 		});
 		

@@ -8,4 +8,5 @@ import nl.tno.stormcv.model.Frame;
 public interface OperationHandler {
 	public boolean fillSourceBufferQueue(Frame frame);
 	public Mat getMat();
+	public byte [] getEncodedData(Mat processedResult);
 }

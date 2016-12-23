@@ -24,6 +24,9 @@ public class EncoderWorker extends Thread {
 	private int frameHeight;
 	private Mat frame;
 	
+	private int frameNr = 0;
+	private TimeElasper timeElasper = new TimeElasper();
+	
 	public EncoderWorker(String encoderId, CodecType codecType, EncoderCallback mEncoderCallBack, VideoCapture capture) {
 		this.encoderId = encoderId;
 		this.codecType = codecType;
@@ -122,44 +125,50 @@ public class EncoderWorker extends Thread {
 		CodecHelper.getInstance().releaseEncoder(encoderId);
 	}
 	
-	public void swapDecodedData(Mat mat) {
-		this.frame.setTo(mat);
+	private void processEncoding() {
+		Mat processedMat = mEncoderCallBack.beforeDataEncoded(frame);
+
+		long start = System.currentTimeMillis();
+		logger.info("encode "+ ++frameNr + "frame started!");
+		byte[] encodedData = CodecHelper.getInstance().encodeFrame(encoderId, processedMat.nativeObj);
+		long end = System.currentTimeMillis();
+		logger.info("encode "+frameNr + "frame done!");
+//		timeElasper.push((int)(end-start));
+//		
+//		if(frameNr == 100) {
+//			logger.info("Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(100));
+//		}				
+//		
+//		if(frameNr == 2000) {
+//			logger.info("Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(2000));
+//		}
+		
+		logger.info(++frameNr + "frame ecoded data bytes length: "+encodedData.length);
+		mEncoderCallBack.onDataEncoded(encodedData);
+		logger.info("encode complete!");
 	}
 	
 	@Override
 	public void run() {
-		int frameNr = 0;
-		TimeElasper timeElasper = new TimeElasper();
+		frame = null;
 		
-		frame = new Mat();
-		while(!Thread.interrupted() && (capture == null || (capture != null && capture.open(videoAddr)))) {
-			if(capture!=null) logger.info("capture is opened for: "+videoAddr);
-			while(!Thread.interrupted() && (capture == null || (capture != null && capture.read(frame)))) {
-				if(!frame.empty()) {
-					Mat processedMat = mEncoderCallBack.beforeDataEncoded(frame);
-					frame = new Mat();
-					
-					long start = System.currentTimeMillis();
-					byte[] encodedData = CodecHelper.getInstance().encodeFrame(encoderId, processedMat.nativeObj);
-					long end = System.currentTimeMillis();
-					
-					timeElasper.push((int)(end-start));
-					frameNr++;
-					
-					if(frameNr == 100) {
-						logger.info("Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(100));
-					}				
-					
-					if(frameNr == 2000) {
-						logger.info("Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(2000));
+		if(capture == null) {
+			while(!Thread.interrupted()) {
+				while((frame = mEncoderCallBack.getDecodedData()) == null);
+				processEncoding();
+			}
+		} else {
+			frame = new Mat();
+			while(!Thread.interrupted() && (capture != null && capture.open(videoAddr))) {
+				if(capture!=null) logger.info("capture is opened for: "+videoAddr);
+				while(!Thread.interrupted() && (capture != null && capture.read(frame))) {
+					if(!frame.empty()) {
+						processEncoding();
 					}
-					
-					// logger.info(++frameNr + "frame ecoded data bytes length: "+encodedData.length);
-					mEncoderCallBack.onDataEncoded(encodedData);
 				}
 			}
 		}
-
+		
 		releaseEncoder();
 		/**
 		 * send msg to stop decoder

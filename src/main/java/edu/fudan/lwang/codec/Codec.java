@@ -95,6 +95,12 @@ public class Codec {
  				// TODO Auto-generated method stub
  				
  			}
+
+			@Override
+			public Mat getDecodedData() {
+				// TODO Auto-generated method stub
+				return null;
+			}
  		});
  		
  		if(null == encoderWorker) {
@@ -166,6 +172,12 @@ public class Codec {
 				// TODO Auto-generated method stub
 				
 			}
+
+			@Override
+			public Mat getDecodedData() {
+				// TODO Auto-generated method stub
+				return null;
+			}
 		});
 		
 		if(null == encoderWorker) {
@@ -182,21 +194,40 @@ public class Codec {
 		return encodeFrameQueueId;
 	}
 
-	public static String registerEncoder(SourceInfo si, String context) {
-		final String encodeQueueId = si.getEncodeQueueId() + "_" + context;
-		si.setEncodeQueueId(encodeQueueId);
+	public static boolean registerEncoder(SourceInfo si, final String sourceQueueId, final String encodedQueueId) {
+		String sourceId = si.getEncodeQueueId();
 		final CodecType type = si.getType();
 		final int frameWidth = si.getFrameWidth();
 		final int frameHeight = si.getFrameHeight();
 
-		final String encoderId = encodeQueueId;
-
-		mBufferQueueManager.registerBufferQueue(encodeQueueId, maxEncoderQueueSize);
-
+		if(mMatQueueManager.getQueueById(sourceQueueId) == null) {
+			logger.error("Mat queue for source " + sourceId + " hasn't register yet!");
+			return false;
+		}
+		
+		if(mFrameQueueManager.getQueueById(encodedQueueId) == null) {
+			logger.error("Frame queue for source result " + sourceId + " hasn't register yet!");
+			return false;
+		}
+		
+		final String encoderId = encodedQueueId;
+		
 		EncoderWorker encoderWorker = EncoderFactory.create(type).build(encoderId, frameWidth, frameHeight,
 				
 				new EncoderCallback() {
 					private final Logger logger1 = Logger.getLogger(EncoderCallback.class);
+					
+					@Override
+					public Mat getDecodedData() {
+						// TODO Auto-generated method stub
+						Mat decodedMat = null;
+//						logger1.info("Before get element "+ sourceQueueId +" queue size:" + mMatQueueManager.getQueueById(sourceQueueId).getSize());
+						while ((decodedMat = mMatQueueManager.getElement(sourceQueueId)) ==null) {
+						}
+//						logger1.info("After get element "+ sourceQueueId +" queue size:" + mMatQueueManager.getQueueById(sourceQueueId).getSize());
+						return decodedMat;
+					}
+					
 					@Override
 					public Mat beforeDataEncoded(Mat frame) {
 						// TODO Auto-generated method stub
@@ -208,31 +239,35 @@ public class Codec {
 					@Override
 					public void onDataEncoded(byte[] encodedData) {
 						// TODO Auto-generated method stub
-						while (!mBufferQueueManager.fillBuffer(encodeQueueId, encodedData));
+//						logger1.info("Before put element "+ encodedQueueId +" queue size: "+mFrameQueueManager.getQueueById(encodedQueueId).getSize());
+						mFrameQueueManager.putElement(encodedQueueId, new Frame(encodedData));
+//						logger1.info("After put element "+ encodedQueueId +" queue size: "+mFrameQueueManager.getQueueById(encodedQueueId).getSize());
 					}
 
 					@Override
 					public void onEncoderClosed() {
 						// TODO Auto-generated method stub
 					}
+
+
 				});
 
 		if (null == encoderWorker) {
 			logger.info("Unknow encoder type, encoderWorker is null!");
 			System.exit(1);
-			return null;
+			return false;
 		}
 
 		if (Common.CODEC_OK != mCodecManager.registerEncoder(encoderWorker)) {
 			logger.info("Register encoder for " + encoderWorker.getEncoderId() + " failed!");
-			return null;
+			return false;
 		}
 
 		mCodecManager.startEncode(encoderId);
 
 		logger.info("EncodeWoker has started: " + si);
 
-		return encodeQueueId;
+		return true;
 	}
 
 	public static boolean registerDecoder(SourceInfo si, final String sourceQueueId, final String decoderQueueId) {

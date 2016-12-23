@@ -121,7 +121,7 @@ public class TCPCaptureSpout implements IRichSpout {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// logger.info("Emmit frame: "+frame);
+		 logger.info("Emmit frame: "+frame);
 //		// logger.info("target: "+mSourceInfo+""+frameNr);
 
 

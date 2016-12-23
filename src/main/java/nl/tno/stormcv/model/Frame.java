@@ -46,6 +46,10 @@ public class Frame extends CVParticle {
 	private List<Feature> features = new ArrayList<Feature>();
 	private boolean needGen = false;
 	
+	public Frame(byte [] imageBytes) {
+		this.imageBytes = imageBytes;
+	}
+	
 	public Frame(String streamId, long sequenceNr, String imageType, BufferedImage image, long timeStamp, Rectangle boundingBox, List<Feature> features) throws IOException {
 		this(streamId, sequenceNr, imageType, image, timeStamp, boundingBox);
 		if(features != null) this.features = features;

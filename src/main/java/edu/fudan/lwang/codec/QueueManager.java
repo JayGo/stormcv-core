@@ -53,7 +53,7 @@ public abstract class QueueManager<E> {
 	public void putElement(String queueId, E input) {
 		Queue<E> q = getQueueById(queueId);
 		if(null == q) {
-			logger.info("getMat: "+queueId+"'s Queue is not exsited!");
+			logger.error("getMat: "+queueId+"'s Queue is not exsited!");
 			return;
 		}
 		q.enqueue(input);
