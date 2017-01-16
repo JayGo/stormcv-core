@@ -153,6 +153,7 @@ public class SingleInputBolt extends CVParticleBolt {
 		try {
 			System.load("/usr/local/opencv/share/OpenCV/java/libopencv_java2413.so");
 			System.load("/usr/local/LwangCodec/lib/libHgCodec.so");
+			System.load("/usr/local/LwangCodec/lib/libH264RtmpStreamer.so");
 			
 			operation.prepare(stormConf, context);
 

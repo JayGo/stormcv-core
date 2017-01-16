@@ -56,25 +56,14 @@
 			<artifactId>storm-kafka</artifactId>
 			<version>1.0.1</version>
 		</dependency>
-		
-		<!-- for KafkaSpout debugging including noting storm-kafka-->
-		<!-- <dependency>
-            <groupId>org.apache.curator</groupId>
-            <artifactId>curator-framework</artifactId>
-            <version>2.5.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency> -->
-        
-        
+
+		<!-- for KafkaSpout debugging including noting storm-kafka -->
+		<!-- <dependency> <groupId>org.apache.curator</groupId> <artifactId>curator-framework</artifactId> 
+			<version>2.5.0</version> <exclusions> <exclusion> <groupId>log4j</groupId> 
+			<artifactId>log4j</artifactId> </exclusion> <exclusion> <groupId>org.slf4j</groupId> 
+			<artifactId>slf4j-log4j12</artifactId> </exclusion> </exclusions> </dependency> -->
+
+
 		<dependency>
 			<groupId>org</groupId>
 			<artifactId>opencv</artifactId>
@@ -130,6 +119,7 @@
 			<artifactId>kafka-clients</artifactId>
 			<version>0.8.2.0</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.zookeeper</groupId>
 			<artifactId>zookeeper</artifactId>

@@ -68,7 +68,7 @@ public class EmptyOperation2 implements ISingleInputOperation<Frame>{
 		
 		if(mat != null) {
 			// logger.info("Decode "+frameNr+" done");
-			Highgui.imwrite("/root/Pictures/"+ frameNr++ +".jpg", mat);
+			// Highgui.imwrite("/root/Pictures/"+ frameNr++ +".jpg", mat);
 			byte [] encodedData = operationHandler.getEncodedData(mat);
 			if(encodedData == null) {
 				logger.error("encode data is null!!");

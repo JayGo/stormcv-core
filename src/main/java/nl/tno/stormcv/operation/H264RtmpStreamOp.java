@@ -9,36 +9,65 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-import org.apache.storm.shade.clojure.tools.namespace.file__init;
 import org.apache.storm.task.TopologyContext;
 import org.opencv.core.Mat;
-import org.opencv.highgui.Highgui;
 
-import edu.fudan.lwang.codec.Common.CodecType;
 import edu.fudan.lwang.codec.OperationHandler;
 import nl.tno.stormcv.model.CVParticle;
 import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.model.serializer.CVParticleSerializer;
 import nl.tno.stormcv.model.serializer.FrameSerializer;
+import nl.tno.stormcv.util.StreamerHelper;
 
-public class EmptyOperation implements ISingleInputOperation<Frame> {
+public class H264RtmpStreamOp implements ISingleInputOperation<Frame> {
 
-	private static final Logger logger = Logger.getLogger(EmptyOperation.class);
-	private String name;
-	private int frameNr = 0;
+	
+	private final static Logger logger = Logger.getLogger(H264RtmpStreamOp.class);
 	private FrameSerializer serializer = new FrameSerializer();
+	
+	private String url;
+	private String appName;
+	private double frameRate = 25.0;
+	private StreamerHelper sh;
+	private int frameNr = 0;
+	
 	private static final String H264Dir = "/root/H264Data/";
+	
+	public H264RtmpStreamOp RTMPServer(String url) {
+		this.url = url;
+		return this;
+	}
 
+	public H264RtmpStreamOp appName(String appName) {
+		this.appName = appName;
+		return this;
+	}
+	
+	public H264RtmpStreamOp frameRate(double frameRate) {
+		this.frameRate = frameRate;
+		return this;
+	}
+	
+	private void initStreamer() {
+		String rtmpAddr = url+"/"+appName;
+		sh = StreamerHelper.getInstance();
+		if(sh.connectToRtmp(rtmpAddr)) {
+			logger.info("Conneted to rtmp server: "+rtmpAddr);
+		} else {
+			logger.error("Connect to rtmp server: "+rtmpAddr +" failed!");
+		}
+	}
+	
 	@Override
 	public void prepare(Map stormConf, TopologyContext context) throws Exception {
 		// TODO Auto-generated method stub
-
+		initStreamer();
 	}
 
 	@Override
 	public void deactivate() {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
@@ -47,14 +76,11 @@ public class EmptyOperation implements ISingleInputOperation<Frame> {
 		return serializer;
 	}
 
+
 	@Override
 	public List<Frame> execute(CVParticle particle) throws Exception {
 		// TODO Auto-generated method stub
-		Frame frame = (Frame) particle;
-		logger.info("Receive frame: " + frame);
-		List<Frame> results = new ArrayList<>();
-		results.add(frame);
-		return results;
+		return null;
 	}
 
 	@Override
@@ -101,34 +127,30 @@ public class EmptyOperation implements ISingleInputOperation<Frame> {
 			e.printStackTrace();
 		}
 	}
-
+	
 	@Override
 	public List<Frame> execute(CVParticle particle, OperationHandler operationHandler) throws Exception {
 		// TODO Auto-generated method stub
 		Frame frame = (Frame) particle;
 		logger.info("Receive frame: " + frame);
-
+		
 		// printData(frame);
 
-		operationHandler.fillSourceBufferQueue(frame);
-
-		Mat mat = operationHandler.getMat();
-
-		if (mat != null) {
-			// logger.info("Decode "+frameNr+" done");
-			// Highgui.imwrite("/root/Pictures/"+ frameNr++ +".jpg", mat);
-			// logger.info("image size: " + mat.width() + "x" + mat.height());
-			byte[] encodedData = operationHandler.getEncodedData(mat);
-			if (encodedData == null) {
-				logger.error("encode data is null!!");
+		byte [] frameBytes = frame.getImageBytes();
+		if(frameBytes.length >0) {
+			if(frameBytes[4] == 103) {
+				sh.sendFirstFrame(frameBytes);
+			} else {
+				sh.sendNormalFrame(frameBytes);
 			}
-			frame.swapImageBytes(encodedData);
+			logger.info("Emmit frame to rtmp: "+frame);
+		} else {
+			logger.info("Frame is empty, ignore: "+frame);
 		}
 
 		List<Frame> results = new ArrayList<>();
 		results.add(frame);
 		return results;
-
 	}
 
 }

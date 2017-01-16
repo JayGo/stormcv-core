@@ -13,6 +13,7 @@ import nl.tno.stormcv.operation.EmptyOperation;
 import nl.tno.stormcv.operation.EmptyOperation2;
 import nl.tno.stormcv.operation.FGExtranctionOp;
 import nl.tno.stormcv.operation.GrayscaleOp;
+import nl.tno.stormcv.operation.H264RtmpStreamOp;
 import nl.tno.stormcv.operation.SingleRTMPWriterOp;
 import nl.tno.stormcv.spout.TCPCaptureSpout;
 
@@ -107,9 +108,15 @@ public class TCPCaptureTopology extends BaseTopology {
 				1).shuffleGrouping(source);
 		source = "debug";
 		
+		// For H264 rtmp operation
+		builder.setBolt("streamer", new SingleInputBolt(new H264RtmpStreamOp().
+				RTMPServer(rtmpAddr).
+				appName(streamId)).setSourceInfo(sourceInfo), 1).shuffleGrouping(source);
+		source = "streamer";
+		
 		// For debug
-		builder.setBolt("debug2", new SingleInputBolt(new EmptyOperation2()).setSourceInfo(sourceInfo), 
-				1).shuffleGrouping(source);
+//		builder.setBolt("debug2", new SingleInputBolt(new EmptyOperation2()).setSourceInfo(sourceInfo), 
+//				1).shuffleGrouping(source);
 		
 		
 		// for RTMP operation 
