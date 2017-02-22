@@ -13,7 +13,10 @@ import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import edu.fudan.lwang.codec.OperationHandler;
+
+
 import nl.tno.stormcv.model.CVParticle;
 import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.model.serializer.CVParticleSerializer;
@@ -90,6 +93,7 @@ public class CannyEdgeOp extends OpenCVOp<CVParticle> implements
 		return serializer;
 	}
 
+
 	@Override
 	public String getContext() {
 		// TODO Auto-generated method stub
@@ -135,5 +139,7 @@ public class CannyEdgeOp extends OpenCVOp<CVParticle> implements
 
 		return results;
 	}
+
+
 
 }

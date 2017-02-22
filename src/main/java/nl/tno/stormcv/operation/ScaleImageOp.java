@@ -11,9 +11,12 @@ import java.util.Map;
 import nl.tno.stormcv.model.*;
 import nl.tno.stormcv.model.serializer.*;
 import org.apache.storm.task.TopologyContext;
+
 import org.opencv.core.Mat;
 
 import edu.fudan.lwang.codec.OperationHandler;
+
+
 
 /**
  * Scales an image into a new image. The original java drawImage function using RenderingHints is used
@@ -96,6 +99,7 @@ public class ScaleImageOp implements ISingleInputOperation<Frame>{
 		}
 	}
 
+
 	@Override
 	public String getContext() {
 		// TODO Auto-generated method stub
@@ -107,6 +111,8 @@ public class ScaleImageOp implements ISingleInputOperation<Frame>{
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 
 
 }

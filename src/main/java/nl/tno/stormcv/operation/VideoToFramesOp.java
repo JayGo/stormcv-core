@@ -11,7 +11,10 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.storm.task.TopologyContext;
+
 import org.opencv.core.Mat;
+
+>>>>>>> ec7e72b957babfe05e75ab37b9dd8f5295550875
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +23,10 @@ import com.xuggle.mediatool.MediaListenerAdapter;
 import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.mediatool.event.IVideoPictureEvent;
 
+
 import edu.fudan.lwang.codec.OperationHandler;
+
+
 import nl.tno.stormcv.StormCVConfig;
 import nl.tno.stormcv.model.CVParticle;
 import nl.tno.stormcv.model.Frame;
@@ -131,6 +137,7 @@ public class VideoToFramesOp extends MediaListenerAdapter implements ISingleInpu
 		}
     }
 
+
 	@Override
 	public String getContext() {
 		// TODO Auto-generated method stub
@@ -142,6 +149,8 @@ public class VideoToFramesOp extends MediaListenerAdapter implements ISingleInpu
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 
 
 }

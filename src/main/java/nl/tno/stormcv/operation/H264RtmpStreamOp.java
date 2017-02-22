@@ -132,7 +132,7 @@ public class H264RtmpStreamOp implements ISingleInputOperation<Frame> {
 	public List<Frame> execute(CVParticle particle, OperationHandler operationHandler) throws Exception {
 		// TODO Auto-generated method stub
 		Frame frame = (Frame) particle;
-		logger.info("Receive frame: " + frame);
+//		logger.info("Receive frame: " + frame);
 		
 		// printData(frame);
 
@@ -143,7 +143,7 @@ public class H264RtmpStreamOp implements ISingleInputOperation<Frame> {
 			} else {
 				sh.sendNormalFrame(frameBytes);
 			}
-			logger.info("Emmit frame to rtmp: "+frame);
+//			logger.info("Emmit frame to rtmp: "+frame);
 		} else {
 			logger.info("Frame is empty, ignore: "+frame);
 		}

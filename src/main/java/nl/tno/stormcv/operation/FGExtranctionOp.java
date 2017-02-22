@@ -18,7 +18,10 @@ import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
 
 import edu.fudan.lwang.FGEHelper;
+
 import edu.fudan.lwang.codec.OperationHandler;
+
+
 
 /**
  * 
@@ -90,6 +93,7 @@ public class FGExtranctionOp implements ISingleInputOperation<Frame> {
 		return result;
 	}
 
+
 	@Override
 	public String getContext() {
 		// TODO Auto-generated method stub
@@ -101,6 +105,8 @@ public class FGExtranctionOp implements ISingleInputOperation<Frame> {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 
 
 }

@@ -5,11 +5,17 @@ import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.model.serializer.CVParticleSerializer;
 import nl.tno.stormcv.model.serializer.FrameSerializer;
 import org.apache.storm.task.TopologyContext;
+
 import org.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.fudan.lwang.codec.OperationHandler;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -59,6 +65,7 @@ public class InpaintOp implements ISingleInputOperation<Frame> {
         return serializer;
     }
 
+
 	@Override
 	public String getContext() {
 		// TODO Auto-generated method stub
@@ -70,6 +77,8 @@ public class InpaintOp implements ISingleInputOperation<Frame> {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 
 
 }

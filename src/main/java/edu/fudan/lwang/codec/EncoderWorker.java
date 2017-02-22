@@ -128,11 +128,11 @@ public class EncoderWorker extends Thread {
 	private void processEncoding() {
 		Mat processedMat = mEncoderCallBack.beforeDataEncoded(frame);
 
-		long start = System.currentTimeMillis();
-		logger.info("encode "+ ++frameNr + "frame started!");
+//		long start = System.currentTimeMillis();
+//		logger.info("encode "+ ++frameNr + "frame started!");
 		byte[] encodedData = CodecHelper.getInstance().encodeFrame(encoderId, processedMat.nativeObj);
-		long end = System.currentTimeMillis();
-		logger.info("encode "+frameNr + "frame done!");
+//		long end = System.currentTimeMillis();
+//		logger.info("encode "+frameNr + "frame done!");
 //		timeElasper.push((int)(end-start));
 //		
 //		if(frameNr == 100) {
@@ -143,9 +143,9 @@ public class EncoderWorker extends Thread {
 //			logger.info("Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(2000));
 //		}
 		
-		logger.info(++frameNr + "frame ecoded data bytes length: "+encodedData.length);
+//		logger.info(++frameNr + "frame ecoded data bytes length: "+encodedData.length);
 		mEncoderCallBack.onDataEncoded(encodedData);
-		logger.info("encode complete!");
+//		logger.info("encode complete!");
 	}
 	
 	@Override

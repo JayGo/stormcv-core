@@ -16,7 +16,10 @@ import org.opencv.core.MatOfByte;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
+
 import edu.fudan.lwang.codec.OperationHandler;
+
+
 import nl.tno.stormcv.model.Descriptor;
 import nl.tno.stormcv.model.Feature;
 import nl.tno.stormcv.model.Frame;
@@ -172,6 +175,7 @@ public class ColorHistogramOp extends OpenCVOp<CVParticle> implements
 		return this.serializer;
 	}
 
+
 	@Override
 	public String getContext() {
 		// TODO Auto-generated method stub
@@ -183,6 +187,8 @@ public class ColorHistogramOp extends OpenCVOp<CVParticle> implements
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 
 
 }

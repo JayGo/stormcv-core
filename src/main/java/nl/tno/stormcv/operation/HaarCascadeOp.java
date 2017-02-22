@@ -20,7 +20,13 @@ import org.opencv.objdetect.CascadeClassifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import edu.fudan.lwang.codec.OperationHandler;
+
+import nl.tno.stormcv.model.Descriptor;
+import nl.tno.stormcv.model.Feature;
+import nl.tno.stormcv.model.Frame;
+
 import nl.tno.stormcv.util.ImageUtils;
 import nl.tno.stormcv.util.NativeUtils;
 import nl.tno.stormcv.model.*;
@@ -174,6 +180,7 @@ public class HaarCascadeOp extends OpenCVOp<CVParticle> implements ISingleInputO
 		return this.serializer;
 	}
 
+
 	@Override
 	public String getContext() {
 		// TODO Auto-generated method stub
@@ -185,6 +192,8 @@ public class HaarCascadeOp extends OpenCVOp<CVParticle> implements ISingleInputO
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 
 
 }

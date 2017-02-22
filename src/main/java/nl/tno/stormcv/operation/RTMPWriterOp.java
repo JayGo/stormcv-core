@@ -10,7 +10,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.storm.task.TopologyContext;
+<<<<<<< HEAD
 import org.opencv.core.Mat;
+=======
+>>>>>>> ec7e72b957babfe05e75ab37b9dd8f5295550875
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -215,5 +218,8 @@ public class RTMPWriterOp implements IBatchOperation<Frame> {
 		}
 		return result;
 	}
+
+
+
 
 }

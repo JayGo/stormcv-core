@@ -7,11 +7,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.storm.task.TopologyContext;
+
 import org.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.fudan.lwang.codec.OperationHandler;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 import nl.tno.stormcv.model.*;
 import nl.tno.stormcv.model.serializer.*;
 import nl.tno.stormcv.util.ForegroundExtractionJNI;
@@ -78,6 +84,7 @@ public class ForegroundExtractionOp implements ISingleInputOperation<Frame> {
 		return serializer;
 	}
 
+
 	@Override
 	public String getContext() {
 		// TODO Auto-generated method stub
@@ -89,6 +96,8 @@ public class ForegroundExtractionOp implements ISingleInputOperation<Frame> {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 
 
 }

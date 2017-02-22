@@ -10,9 +10,12 @@ import nl.tno.stormcv.fetcher.StreamFrameFetcher;
 import nl.tno.stormcv.model.*;
 import nl.tno.stormcv.model.serializer.*;
 import org.apache.storm.task.TopologyContext;
+
 import org.opencv.core.Mat;
 
 import edu.fudan.lwang.codec.OperationHandler;
+
+
 
 /**
  * A special {@link ISingleInputOperation} that executes a {@link IBatchOperation} on {@link Frame} objects contained in a single received {@link GroupOfFrames}.
@@ -58,6 +61,7 @@ public class GroupOfFramesOp implements ISingleInputOperation<CVParticle>{
 		return new ArrayList<CVParticle>();
 	}
 
+
 	@Override
 	public String getContext() {
 		// TODO Auto-generated method stub
@@ -69,6 +73,8 @@ public class GroupOfFramesOp implements ISingleInputOperation<CVParticle>{
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 
 
 }

@@ -36,7 +36,9 @@ public class Frame extends CVParticle {
 	public final static String PNG_IMAGE = "png";
 	public final static String GIF_IMAGE = "gif";
 	public final static String RAW_IMAGE = "mat";  //add by jkyan at 2016/07/30
+
 	public final static String X264_Bytes = "x264_bytes"; // add by jiu on 2016/12/12
+
 	
 	private long timeStamp;
 	private String imageType = JPG_IMAGE;
@@ -46,10 +48,12 @@ public class Frame extends CVParticle {
 	private List<Feature> features = new ArrayList<Feature>();
 	private boolean needGen = false;
 	
+
 	public Frame(byte [] imageBytes) {
 		this.imageBytes = imageBytes;
 	}
 	
+
 	public Frame(String streamId, long sequenceNr, String imageType, BufferedImage image, long timeStamp, Rectangle boundingBox, List<Feature> features) throws IOException {
 		this(streamId, sequenceNr, imageType, image, timeStamp, boundingBox);
 		if(features != null) this.features = features;
@@ -63,6 +67,7 @@ public class Frame extends CVParticle {
 		this.boundingBox = boundingBox;
 	}
 	
+
 	public Frame(String streamId, long sequenceNr, String imageType, byte[] imageBytes, long timeStamp, Rectangle boundingBox, List<Feature> features) {
 		this(streamId, sequenceNr, imageType, imageBytes, timeStamp, boundingBox);
 		if(features != null) this.features = features;
@@ -72,6 +77,16 @@ public class Frame extends CVParticle {
 		super(streamId, sequenceNr);
 		this.imageType = imageType;
 		this.imageBytes = imageBytes;
+
+	public Frame(String streamId, long sequenceNr, String imageType, byte[] image, long timeStamp, Rectangle boundingBox, List<Feature> features) {
+		this(streamId, sequenceNr, imageType, image, timeStamp, boundingBox);
+		if(features != null) this.features = features;
+	}
+	
+	public Frame(String streamId, long sequenceNr, String imageType, byte[] image, long timeStamp, Rectangle boundingBox ) {
+		super(streamId, sequenceNr);
+		this.imageType = imageType;
+		this.imageBytes = image;
 		this.timeStamp = timeStamp;
 		this.boundingBox = boundingBox;
 	}
@@ -83,10 +98,18 @@ public class Frame extends CVParticle {
 		this.timeStamp = timeStamp;
 		this.boundingBox = box;
 	}
+
 	
 	public Rectangle getBoundingBox() {
 		return boundingBox;
 	}
+
+
+	public Rectangle getBoundingBox() {
+		return boundingBox;
+	}
+
+
 	
 //	public BufferedImage getImage() throws IOException {
 //		if(imageBytes == null) {
@@ -161,10 +184,13 @@ public class Frame extends CVParticle {
 		this.image = null;
 	}
 	
+
 	public void swapImageBytes(byte[] imageBytes) {
 		this.imageBytes = imageBytes;
 	}
 	
+
+
 	public void removeImage(){
 		this.image = null;
 		this.imageBytes = null;
@@ -216,6 +242,7 @@ public class Frame extends CVParticle {
 //		return imageBytes;
 //	}
 	
+
 	public byte[] getImageBytes() {
 		return imageBytes;
 	}
@@ -238,6 +265,25 @@ public class Frame extends CVParticle {
 	@Override
 	public String toString() {
 		String result= "Frame : {streamId:"+getStreamId()+", sequenceNr:"+getSequenceNr()+", timestamp:"+getTimestamp()+", imageType:"+imageType+", bytesLength:"+imageBytes.length+", features:[ ";
+
+	public byte[] getImageBytes() throws IOException {
+		if (imageBytes == null) {
+			if (image != null) {
+				if (imageType.equals(RAW_IMAGE)) {
+					imageBytes = ImageUtils.imageToBytesWithOpenCV(image);
+				} else {
+					imageBytes = ImageUtils.imageToBytes(image, imageType);
+				}
+			} else {
+				return null;
+			}
+		}
+		return imageBytes;
+	}
+
+	@Override
+	public String toString() {
+		String result= "Frame : {streamId:"+getStreamId()+", sequenceNr:"+getSequenceNr()+", timestamp:"+getTimestamp()+", imageType:"+imageType+", features:[ ";
 		for(Feature f : features) result += f.getName()+" = "+f.getSparseDescriptors().size()+", ";
 		return result + "] }";
 	}

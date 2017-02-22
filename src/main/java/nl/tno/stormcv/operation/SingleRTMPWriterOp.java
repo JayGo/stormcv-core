@@ -1,6 +1,10 @@
 package nl.tno.stormcv.operation;
 
 import java.awt.image.BufferedImage;
+
+
+import java.io.File;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -10,8 +14,14 @@ import java.util.Map;
 import java.util.Set;
 
 
+
 import org.apache.storm.task.TopologyContext;
 import org.opencv.core.Mat;
+
+import javax.imageio.ImageIO;
+
+import org.apache.storm.task.TopologyContext;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,9 +38,12 @@ import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
 import com.xuggle.xuggler.video.ConverterFactory.Type;
 
+
 import edu.fudan.lwang.codec.Codec;
 import edu.fudan.lwang.codec.OperationHandler;
 import edu.fudan.lwang.codec.SourceInfo;
+
+
 import edu.fudan.lwang.converter.GrayConverter;
 import nl.tno.stormcv.model.*;
 import nl.tno.stormcv.model.serializer.*;
@@ -45,7 +58,10 @@ import nl.tno.stormcv.util.Constant;
 public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
 
 	private static final long serialVersionUID = 3591538303646724289L;
+
 	private final String context = this.getClass().getSimpleName();
+
+
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	private String url = Constant.DefaulteRTMPServer;
 	private String appName = "";
@@ -56,12 +72,15 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
 	private Boolean isCoderInit = false;
 	private double frameRate = 0.0;
 	
+
 //	private String mEncodedFrameQueueId;
 //	private String mEncoderId;
 //	
 //	private String mDecodedMatQueueId;
 //	private String mDecorderId;
 	
+
+
 	private IContainerFormat containerFormat;
 
 	public SingleRTMPWriterOp RTMPServer(String url) {
@@ -79,6 +98,7 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
 		return this;
 	}
 
+
 //	public SingleRTMPWriterOp setDecoder(SourceInfo si) {
 //		// TODO Auto-generated constructor stub
 //		mDecorderId = si.getEncodeQueueId();
@@ -95,6 +115,8 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
 //		return this;
 //	}
 	
+
+
 	/**
 	 * Sets the classes to be used as resources for this application
 	 */
@@ -257,6 +279,7 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
 		}
 		return result;
 	}
+
 	
 	public String getContext() {
 		return this.getClass().getSimpleName();
@@ -269,4 +292,6 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
 	}
 
 	
+
+
 }

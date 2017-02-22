@@ -43,10 +43,12 @@ public abstract class CVParticle implements Comparable<CVParticle>{
 		this.setMetadata((HashMap<String, Object>)tuple.getValueByField(CVParticleSerializer.METADATA));
 	}
 	
+
 	public CVParticle() {
 		
 	}
 	
+
 	/**
 	 * Constructs a GenericType object for some piece of information regarding a stream
 	 * @param streamId the id of the stream

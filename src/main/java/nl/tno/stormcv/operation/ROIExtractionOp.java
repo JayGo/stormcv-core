@@ -7,13 +7,22 @@ import java.util.List;
 import java.util.Map;
 
 import nl.tno.stormcv.StormCVConfig;
+
+
+import nl.tno.stormcv.model.Descriptor;
+import nl.tno.stormcv.model.Feature;
+import nl.tno.stormcv.model.Frame;
+
 import nl.tno.stormcv.util.ImageUtils;
 import nl.tno.stormcv.model.*;
 import nl.tno.stormcv.model.serializer.*;
 import org.apache.storm.task.TopologyContext;
+
 import org.opencv.core.Mat;
 
 import edu.fudan.lwang.codec.OperationHandler;
+
+
 
 /**
  * Extracts Region's Of Interest from {@link Frame}'s it receives. The ROI's to extract are determined by {@link Feature}'s contained
@@ -174,6 +183,7 @@ public class ROIExtractionOp implements ISingleInputOperation<Frame> {
 		return result;
 	}
 
+
 	@Override
 	public String getContext() {
 		// TODO Auto-generated method stub
@@ -185,5 +195,7 @@ public class ROIExtractionOp implements ISingleInputOperation<Frame> {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 
 }

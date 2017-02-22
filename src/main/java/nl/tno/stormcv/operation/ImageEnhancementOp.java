@@ -14,7 +14,10 @@ import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import edu.fudan.lwang.codec.OperationHandler;
+
+
 import nl.tno.stormcv.model.CVParticle;
 import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.model.serializer.CVParticleSerializer;
@@ -152,6 +155,7 @@ public class ImageEnhancementOp extends OpenCVOp<CVParticle> implements ISingleI
 
 	}
 
+
 	@Override
 	public String getContext() {
 		// TODO Auto-generated method stub
@@ -163,6 +167,8 @@ public class ImageEnhancementOp extends OpenCVOp<CVParticle> implements ISingleI
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 
 
 
