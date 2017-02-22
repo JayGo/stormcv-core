@@ -20,7 +20,6 @@ import org.apache.storm.tuple.Values;
 
 public class FrameSerializer extends CVParticleSerializer<Frame> implements
 		Serializable {
-
 	private static final long serialVersionUID = 1952141838734994463L;
 	public static final String IMAGETYPE = "imagetype";
 	public static final String IMAGE = "imagebytes";
@@ -53,21 +52,23 @@ public class FrameSerializer extends CVParticleSerializer<Frame> implements
 		Frame frame = (Frame) particle;
 
 		// BufferedImage image = frame.getImage();
-		byte [] imageBytes = frame.getImageBytes();
+		byte[] imageBytes = frame.getImageBytes();
 		if (imageBytes == null) {
 
-		BufferedImage image = frame.getImage();
-		if (image == null) {
+			BufferedImage image = frame.getImage();
+			if (image == null) {
 
-			return new Values(frame.getImageType(), (Object[]) null,
-					frame.getTimestamp(), frame.getBoundingBox(),
-					frame.getFeatures());
-		} else {
-			
-			return new Values(frame.getImageType(), frame.getImageBytes(),
-					frame.getTimestamp(), frame.getBoundingBox(),
-					frame.getFeatures());
+				return new Values(frame.getImageType(), (Object[]) null,
+						frame.getTimestamp(), frame.getBoundingBox(),
+						frame.getFeatures());
+			} else {
+
+				return new Values(frame.getImageType(), frame.getImageBytes(),
+						frame.getTimestamp(), frame.getBoundingBox(),
+						frame.getFeatures());
+			}
 		}
+		return null;
 	}
 
 	@Override

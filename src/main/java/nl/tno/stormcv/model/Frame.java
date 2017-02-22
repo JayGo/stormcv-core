@@ -72,17 +72,7 @@ public class Frame extends CVParticle {
 		this(streamId, sequenceNr, imageType, imageBytes, timeStamp, boundingBox);
 		if(features != null) this.features = features;
 	}
-	
-	public Frame(String streamId, long sequenceNr, String imageType, byte[] imageBytes, long timeStamp, Rectangle boundingBox ) {
-		super(streamId, sequenceNr);
-		this.imageType = imageType;
-		this.imageBytes = imageBytes;
 
-	public Frame(String streamId, long sequenceNr, String imageType, byte[] image, long timeStamp, Rectangle boundingBox, List<Feature> features) {
-		this(streamId, sequenceNr, imageType, image, timeStamp, boundingBox);
-		if(features != null) this.features = features;
-	}
-	
 	public Frame(String streamId, long sequenceNr, String imageType, byte[] image, long timeStamp, Rectangle boundingBox ) {
 		super(streamId, sequenceNr);
 		this.imageType = imageType;
@@ -104,13 +94,6 @@ public class Frame extends CVParticle {
 		return boundingBox;
 	}
 
-
-	public Rectangle getBoundingBox() {
-		return boundingBox;
-	}
-
-
-	
 //	public BufferedImage getImage() throws IOException {
 //		if(imageBytes == null) {
 //			imageType = NO_IMAGE;
@@ -247,6 +230,7 @@ public class Frame extends CVParticle {
 		return imageBytes;
 	}
 	
+
 //	public byte[] getImageBytes() throws IOException {
 //		if (imageBytes == null) {
 //			if (image != null) {
@@ -261,25 +245,6 @@ public class Frame extends CVParticle {
 //		}
 //		return imageBytes;
 //	}
-
-	@Override
-	public String toString() {
-		String result= "Frame : {streamId:"+getStreamId()+", sequenceNr:"+getSequenceNr()+", timestamp:"+getTimestamp()+", imageType:"+imageType+", bytesLength:"+imageBytes.length+", features:[ ";
-
-	public byte[] getImageBytes() throws IOException {
-		if (imageBytes == null) {
-			if (image != null) {
-				if (imageType.equals(RAW_IMAGE)) {
-					imageBytes = ImageUtils.imageToBytesWithOpenCV(image);
-				} else {
-					imageBytes = ImageUtils.imageToBytes(image, imageType);
-				}
-			} else {
-				return null;
-			}
-		}
-		return imageBytes;
-	}
 
 	@Override
 	public String toString() {
