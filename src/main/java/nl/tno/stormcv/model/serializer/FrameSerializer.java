@@ -51,14 +51,13 @@ public class FrameSerializer extends CVParticleSerializer<Frame> implements
 	@Override
 	protected Values getValues(CVParticle particle) throws IOException {
 		Frame frame = (Frame) particle;
-<<<<<<< HEAD
+
 		// BufferedImage image = frame.getImage();
 		byte [] imageBytes = frame.getImageBytes();
 		if (imageBytes == null) {
-=======
+
 		BufferedImage image = frame.getImage();
 		if (image == null) {
->>>>>>> ec7e72b957babfe05e75ab37b9dd8f5295550875
 
 			return new Values(frame.getImageType(), (Object[]) null,
 					frame.getTimestamp(), frame.getBoundingBox(),
