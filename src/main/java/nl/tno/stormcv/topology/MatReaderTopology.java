@@ -31,13 +31,11 @@ public class MatReaderTopology extends BaseTopology {
 	
 	@Override
 	public void setSpout() {
-		// TODO Auto-generated method stub
 		builder.setSpout("matSpout", new MatSpout(videoAddr, streamId));
 	}
 
 	@Override
 	public void setBolts() {
-		// TODO Auto-generated method stub
 		String source = "matSpout";
 		if (effect != null && !effect.isEmpty()) {
 			if (effect.equals("gray")) {
@@ -55,8 +53,6 @@ public class MatReaderTopology extends BaseTopology {
 
 	@Override
 	public String getStreamId() {
-		// TODO Auto-generated method stub
 		return streamId;
 	}
-
 }

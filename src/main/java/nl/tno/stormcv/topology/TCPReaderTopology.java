@@ -1,8 +1,8 @@
 package nl.tno.stormcv.topology;
 
+import nl.tno.stormcv.bolt.SingleH264InputBolt;
 import org.apache.storm.Config;
 
-import nl.tno.stormcv.bolt.SingleInputBolt;
 import nl.tno.stormcv.operation.CannyEdgeOp;
 import nl.tno.stormcv.operation.ColorHistogramOp;
 import nl.tno.stormcv.operation.FGExtranctionOp;
@@ -53,36 +53,34 @@ public class TCPReaderTopology extends BaseTopology {
 
 	@Override
 	public void setSpout() {
-		// TODO Auto-generated method stub
 		builder.setSpout("tcpSpout", new TCPReaderSpout(streamId, serverIp,
 				port));
 	}
 
 	@Override
 	public void setBolts() {
-		// TODO Auto-generated method stub
 		String source = "tcpSpout";
 		if (effect != null && !effect.isEmpty()) {
 			if (effect.equals("gray")) {
-				builder.setBolt("gray", new SingleInputBolt(new GrayscaleOp()),
+				builder.setBolt("gray", new SingleH264InputBolt(new GrayscaleOp()),
 						4).shuffleGrouping(source);
 				source = "gray";
 			}
 			else if (effect.equals("cannyEdge")) {
 				builder.setBolt("cannyEdge",
-						new SingleInputBolt(new CannyEdgeOp()), 4)
+						new SingleH264InputBolt(new CannyEdgeOp()), 4)
 						.shuffleGrouping(source);
 				source = "cannyEdge";
 			}
 			else if (effect.equals("colorHistogram")) {
 				builder.setBolt("colorHistogram",
-						new SingleInputBolt(new ColorHistogramOp(streamId)), 4)
+						new SingleH264InputBolt(new ColorHistogramOp(streamId)), 4)
 						.shuffleGrouping(source);
 				source = "colorHistogram";
 			}
 			else if (effect.equals("foregroundExtraction")) {
 				builder.setBolt("foregroundExtraction",
-						new SingleInputBolt(new FGExtranctionOp()), 1)
+						new SingleH264InputBolt(new FGExtranctionOp()), 1)
 						.shuffleGrouping(source);
 				source = "foregroundExtraction";
 				conf.setNumWorkers(3);
@@ -96,14 +94,13 @@ public class TCPReaderTopology extends BaseTopology {
 		logger.info("rtmpAddr: "+rtmpAddr+", streamId: "+streamId);
 		builder.setBolt(
 				"streamer",
-				new SingleInputBolt(new SingleRTMPWriterOp()
+				new SingleH264InputBolt(new SingleRTMPWriterOp()
 						.RTMPServer(rtmpAddr).appName(streamId).frameRate(25)),
 				1).shuffleGrouping(source);
 	}
 
 	@Override
 	public String getStreamId() {
-		// TODO Auto-generated method stub
 		return streamId;
 	}
 

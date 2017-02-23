@@ -1,8 +1,12 @@
 package nl.tno.stormcv.topology;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import nl.tno.stormcv.bolt.SingleH264InputBolt;
+import nl.tno.stormcv.bolt.SingleInputBolt;
+import nl.tno.stormcv.constant.GlobalConstants;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -25,12 +29,10 @@ import nl.tno.stormcv.StormCVConfig;
 import nl.tno.stormcv.batcher.SlidingWindowBatcher;
 import nl.tno.stormcv.bolt.BatchInputBolt;
 import nl.tno.stormcv.bolt.CVParticleBolt;
-import nl.tno.stormcv.bolt.SingleInputBolt;
 import nl.tno.stormcv.fetcher.ImageFetcher;
 import nl.tno.stormcv.fetcher.OpenCVStreamFrameFetcher;
 import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.model.serializer.CVParticleSerializer;
-import nl.tno.stormcv.model.serializer.FrameSerializer;
 import nl.tno.stormcv.operation.DrawFeaturesOp;
 import nl.tno.stormcv.operation.RTMPWriterOp;
 import nl.tno.stormcv.spout.CVParticleSpout;
@@ -41,7 +43,6 @@ public class GrayScaledTopologyWithOpts {
 	private static Logger logger = LoggerFactory.getLogger(GrayScaledTopologyWithOpts.class);
 
 	public static void main(String[] args) throws ParseException {
-		// first some global (topology configuration)
 		StormCVConfig conf = new StormCVConfig();
 		conf.setNumWorkers(4);
 		conf.setMaxSpoutPending(32);
@@ -52,8 +53,7 @@ public class GrayScaledTopologyWithOpts {
 		conf.put(StormCVConfig.STORMCV_CACHES_TIMEOUT_SEC, 30); 
 
 		List<String> urls = new ArrayList<String>();
-	    //urls.add( "rtsp://streaming3.webcam.nl:1935/n224/n224.stream" );
-		// urls.add("rtsp://admin:123456qaz@10.134.141.176:554/h264/ch1/main/av_stream");
+		urls.add(GlobalConstants.PseudoRtspAddress);
 	    
 	    /*
 		String userDir = System.getProperty("user.dir").replaceAll("\\\\", "/");
@@ -99,9 +99,7 @@ public class GrayScaledTopologyWithOpts {
 			String[] streamPars = commandLine.getOptionValues("st");
 			for (int i = 0; i < streamPars.length; i++) {
 				logger.info(i+" st:" + streamPars[i]);
-				
 				urls.add(streamPars[i]);
-				
 			}
 		}
 		if (commandLine.hasOption("d")) {
@@ -109,14 +107,14 @@ public class GrayScaledTopologyWithOpts {
 			files = new ArrayList<>();
 			files.add("file://"+dir);
 			isStream = false;
+		} else {
+			String userDir = System.getProperty("user.dir").replaceAll("\\\\", "/");
+			files.add( "file://"+ userDir +"/resources/data/" );
 		}
-		
-		// now create the topology itself 
+
 		TopologyBuilder builder = new TopologyBuilder();
 		String preOperation = "spout";
-		
-		// just one spout reading streams; 
-		// i.e. this spout reads two streams in parallel
+
 		if (isStream) {
 			builder.setSpout(preOperation, new CVParticleSpout(
 					new OpenCVStreamFrameFetcher(urls).frameSkip(frameSkip)), 1);
@@ -136,12 +134,12 @@ public class GrayScaledTopologyWithOpts {
 		for (int i = 0; i < operations.length; ++i) {		
 			CVParticleBolt bolt = OperationUtils.operationToBolt(operations[i]);
 			if (bolt == null) {
-				logger.info("cannot initialize the " + operations[i] + " bolt");
+				logger.error("cannot initialize the " + operations[i] + " bolt");
 				continue;
 			}
 			if (OperationUtils.isSingleOperation(operations[i])) {
 				logger.info("set bolt " + operations[i] + " from " + preOperation);
-				builder.setBolt(operations[i], bolt,4).shuffleGrouping(preOperation);
+				builder.setBolt(operations[i], bolt, 1).shuffleGrouping(preOperation);
 				preOperation = operations[i];
 			} else {
 				continue;
@@ -157,22 +155,22 @@ public class GrayScaledTopologyWithOpts {
 							.groupBy(new Fields(CVParticleSerializer.STREAMID)), 1)
 					.shuffleGrouping(preOperation); 
 		} else {
-			logger.info(files.get(0)+"/output/");
-			// simple bolt that draws Features (i.e. locations of features) 
-			// into the frame and writes the frame to the local file system at /output/
+			File tmp = new File(files.get(0)+"/output/");
+			if (!tmp.exists()) {
+				tmp.mkdir();
+			}
 			builder.setBolt("drawer", new SingleInputBolt(
 					new DrawFeaturesOp().destination(files.get(0)+"/output/")), 1)
 				.shuffleGrouping(preOperation);
 		}
-		
+
+		String topoName = "grayscaledwithopts";
 		if (local) {
 			try {
-				// run in local mode
 				LocalCluster cluster = new LocalCluster();
-				cluster.submitTopology("grayscaledwithopts", conf,
+				cluster.submitTopology(topoName, conf,
 						builder.createTopology());
-				// run for one minute and then kill the topology
-				Utils.sleep(30000 * 1000);
+				Utils.sleep(300 * 1000);
 				cluster.shutdown();
 				System.exit(1);   
 			} catch (Exception e) {
@@ -180,12 +178,9 @@ public class GrayScaledTopologyWithOpts {
 			}
 		} else {
 			try {
-				StormSubmitter.submitTopologyWithProgressBar("grayscaled",
+				StormSubmitter.submitTopologyWithProgressBar(topoName,
 						conf, builder.createTopology());
-				//Utils.sleep(1200 * 1000); 
-			} catch (AlreadyAliveException | InvalidTopologyException e) {
-				e.printStackTrace();
-			} catch (AuthorizationException e) {
+			} catch (AlreadyAliveException | InvalidTopologyException | AuthorizationException e) {
 				e.printStackTrace();
 			}
 		}

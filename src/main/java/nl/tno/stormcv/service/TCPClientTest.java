@@ -20,7 +20,7 @@ public class TCPClientTest {
         try {
             Socket socket = new Socket("127.0.0.1", 9000);
             String rtspUrl = GlobalConstants.PseudoRtspAddress;
-            String rtmpAddress = ZKConstant.DefaultRTMPServer;
+            String rtmpAddress = GlobalConstants.DefaultRTMPServer;
             String appName = "tcptest";
             BaseMessage streamIdMsg = new BaseMessage(7, rtspUrl,
                     rtmpAddress+appName, appName);

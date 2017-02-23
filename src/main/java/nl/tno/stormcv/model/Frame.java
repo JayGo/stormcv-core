@@ -141,6 +141,7 @@ public class Frame extends CVParticle {
 	public void setImage(BufferedImage image) throws IOException {
 		this.image = image;
 		this.needGen = true;
+        updataImageBytes();
 	}
 		
 	private void updataImageBytes() throws IOException {
@@ -158,7 +159,8 @@ public class Frame extends CVParticle {
 				this.imageBytes = null;
 				this.imageType = NO_IMAGE;
 			}
-		}
+			this.needGen = false;
+        }
 	}
 	
 	public void setImage(byte[] imageBytes, String imgType){

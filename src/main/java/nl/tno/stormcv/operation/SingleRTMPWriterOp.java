@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 
+import nl.tno.stormcv.constant.GlobalConstants;
 import nl.tno.stormcv.constant.ZKConstant;
 import org.apache.storm.task.TopologyContext;
 
@@ -53,7 +54,7 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
 
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
-	private String url = ZKConstant.DefaultRTMPServer;
+	private String url = GlobalConstants.DefaultRTMPServer;
 	private String appName = "";
 	private int height = 0;
 	private int width = 0;
