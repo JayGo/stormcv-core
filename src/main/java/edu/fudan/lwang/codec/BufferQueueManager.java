@@ -3,11 +3,11 @@ package edu.fudan.lwang.codec;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BufferQueueManager {
-	
-    private final static Logger logger = Logger.getLogger(BufferQueueManager.class);
+
+	private static final org.slf4j.Logger logger = LoggerFactory.getLogger(BufferQueueManager.class);
     
 	private Map<String,BufferQueue> bufferQueues;
 	

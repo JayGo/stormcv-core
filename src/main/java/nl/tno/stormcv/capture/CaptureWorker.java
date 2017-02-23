@@ -1,5 +1,6 @@
 package nl.tno.stormcv.capture;
 
+import nl.tno.stormcv.constant.GlobalConstants;
 import nl.tno.stormcv.spout.CVParticleSpout;
 
 import org.opencv.core.CvException;
@@ -20,10 +21,11 @@ public class CaptureWorker extends Thread {
 	private MatPackQueue mMatPackQueue;
 	private long currentFrameIndex = 0;
 	private Logger logger = LoggerFactory.getLogger(CVParticleSpout.class);
+	private String rtspUrl = GlobalConstants.PseudoRtspAddress;
 	
 	public CaptureWorker() {
-		capture = new VideoCapture("rtsp://admin:123456qaz@10.134.141.177:554/h264/ch1/main/av_stream");
-		capture.open("rtsp://admin:123456qaz@10.134.141.177:554/h264/ch1/main/av_stream");
+		capture = new VideoCapture(rtspUrl);
+		capture.open(rtspUrl);
 		mMatPackQueue = MatPackQueue.getInstance();
 	}
 	
@@ -59,7 +61,7 @@ public class CaptureWorker extends Thread {
 			} catch(Exception e) {
                 System.out.println("Null Pointer Exception during Read");
                 if (e instanceof CvException) {
-					capture.open("rtsp://admin:123456qaz@10.134.141.177:554/h264/ch1/main/av_stream");
+					capture.open(rtspUrl);
 				}
 			}
 		}

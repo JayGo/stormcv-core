@@ -1,6 +1,5 @@
 package nl.tno.stormcv.topology;
 
-import org.apache.log4j.Logger;
 import org.apache.storm.Config;
 
 import nl.tno.stormcv.bolt.SingleInputBolt;
@@ -10,10 +9,12 @@ import nl.tno.stormcv.operation.FGExtranctionOp;
 import nl.tno.stormcv.operation.GrayscaleOp;
 import nl.tno.stormcv.operation.SingleRTMPWriterOp;
 import nl.tno.stormcv.spout.TCPReaderSpout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TCPReaderTopology extends BaseTopology {
 
-	private static final Logger logger = Logger.getLogger(TCPReaderTopology.class);
+	private static final Logger logger = LoggerFactory.getLogger(TCPReaderTopology.class);
 	private String streamId;
 	private String serverIp;
 	private String rtmpAddr;

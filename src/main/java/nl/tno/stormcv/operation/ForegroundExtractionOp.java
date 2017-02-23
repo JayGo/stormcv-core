@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import nl.tno.stormcv.util.LibLoader;
 import org.apache.storm.task.TopologyContext;
 
 import org.opencv.core.Mat;
@@ -22,7 +23,6 @@ import nl.tno.stormcv.model.*;
 import nl.tno.stormcv.model.serializer.*;
 import nl.tno.stormcv.util.ForegroundExtractionJNI;
 import nl.tno.stormcv.util.ImageUtils;
-import nl.tno.stormcv.util.NativeUtils;
 
 /**
  * A simple operation that extract foreground of the image within received {@link Frame} objects to gray
@@ -47,7 +47,8 @@ public class ForegroundExtractionOp implements ISingleInputOperation<Frame> {
 		} catch (UnsatisfiedLinkError e) {
 			logger.error("Cannot load foreground so library!");
 		}
-		NativeUtils.load();
+		LibLoader.loadOpenCVLib();
+//		NativeUtils.load();
 	}
 
 	@Override

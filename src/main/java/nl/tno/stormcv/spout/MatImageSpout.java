@@ -7,7 +7,7 @@ import nl.tno.stormcv.fetcher.OpenCVStreamFrameFetcher2;
 import nl.tno.stormcv.model.CVParticle;
 import nl.tno.stormcv.model.MatImage;
 import nl.tno.stormcv.model.serializer.MatImageSerializer;
-import nl.tno.stormcv.util.NativeUtils;
+import nl.tno.stormcv.util.LibLoader;
 
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -46,7 +46,7 @@ public class MatImageSpout implements IRichSpout {
 		// pass configuration to subclasses
 		try {
 			fetcher.prepare(conf, context);
-			NativeUtils.loadOpencvLib();
+			LibLoader.loadOpenCVLib();
 		} catch (IOException e) {
 			logger.error("Unable to load opencv dynamic lib due to e", e);
 		} catch (Exception e) {

@@ -29,7 +29,7 @@ import com.xuggle.xuggler.video.ConverterFactory.Type;
 import edu.fudan.lwang.converter.GrayConverter;
 import nl.tno.stormcv.model.MatImage;
 import nl.tno.stormcv.model.serializer.MatImageSerializer;
-import nl.tno.stormcv.util.Constant;
+import nl.tno.stormcv.constant.ZKConstant;
 import nl.tno.stormcv.util.ImageUtils;
 
 public class MatRTMPWriterOp implements IMatOperation<MatImage> {
@@ -37,7 +37,7 @@ public class MatRTMPWriterOp implements IMatOperation<MatImage> {
 	private static final long serialVersionUID = 6453978086650507695L;
 	
 	private Logger logger = LoggerFactory.getLogger(getClass());
-	private String url = Constant.DefaulteRTMPServer;
+	private String url = ZKConstant.DefaultRTMPServer;
 	private String appName = "";
 	private int height = 0;
 	private int width = 0;

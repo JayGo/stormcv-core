@@ -8,13 +8,13 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import edu.fudan.jliu.message.BaseMessage;
 import edu.fudan.jliu.message.EffectMessage;
 import nl.tno.stormcv.constant.RequestCode;
 import nl.tno.stormcv.constant.ResultCode;
 import nl.tno.stormcv.topology.TCPCaptureTopology;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -28,7 +28,7 @@ public class TCPCaptureServer {
 //		ts.startListeningMsg();
 //	}
 	
-	private static Logger logger = Logger.getLogger(TCPCaptureServer.class);
+	private static Logger logger = LoggerFactory.getLogger(TCPCaptureServer.class);
 
 	private final int serverMsgPort = 9000;
 	private ServerSocket msgServerSocket;

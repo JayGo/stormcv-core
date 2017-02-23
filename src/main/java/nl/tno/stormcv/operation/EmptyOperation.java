@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.apache.storm.shade.clojure.tools.namespace.file__init;
 import org.apache.storm.task.TopologyContext;
 import org.opencv.core.Mat;
@@ -20,10 +19,12 @@ import nl.tno.stormcv.model.CVParticle;
 import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.model.serializer.CVParticleSerializer;
 import nl.tno.stormcv.model.serializer.FrameSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EmptyOperation implements ISingleInputOperation<Frame> {
 
-	private static final Logger logger = Logger.getLogger(EmptyOperation.class);
+	private static final Logger logger = LoggerFactory.getLogger(EmptyOperation.class);
 	private String name;
 	private int frameNr = 0;
 	private FrameSerializer serializer = new FrameSerializer();

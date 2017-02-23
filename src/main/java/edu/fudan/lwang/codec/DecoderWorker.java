@@ -2,9 +2,10 @@ package edu.fudan.lwang.codec;
 
 import edu.fudan.lwang.codec.Common.CodecType;
 import nl.tno.stormcv.util.TimeElasper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.collection.parallel.ParIterableLike.ToParMap;
 
-import org.apache.log4j.Logger;
 import org.apache.storm.generated.DistributedRPCInvocations.AsyncProcessor.result;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
@@ -14,7 +15,7 @@ import clojure.lang.LockingTransaction.Info;
 
 public class DecoderWorker extends Thread {
 
-	private final static Logger logger = Logger.getLogger(DecoderWorker.class);
+	private final static Logger logger = LoggerFactory.getLogger(DecoderWorker.class);
 	
 	private String decoderId;
 	private CodecType codecType;

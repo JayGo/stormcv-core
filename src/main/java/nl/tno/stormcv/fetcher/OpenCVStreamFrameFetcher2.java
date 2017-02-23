@@ -10,11 +10,11 @@ import nl.tno.stormcv.model.serializer.FrameSerializer;
 import nl.tno.stormcv.model.serializer.GroupOfFramesSerializer;
 import nl.tno.stormcv.model.serializer.MatImageSerializer;
 import nl.tno.stormcv.operation.GroupOfFramesOp;
-import nl.tno.stormcv.util.Constant;
-import nl.tno.stormcv.util.OpenCVStreamReader2;
+import nl.tno.stormcv.constant.ZKConstant;
+import nl.tno.stormcv.util.reader.OpenCVStreamReader2;
 
 import org.apache.storm.task.TopologyContext;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -49,9 +49,9 @@ public class OpenCVStreamFrameFetcher2 implements IFetcher<CVParticle> {
 	protected List<String> locations;
 	protected int frameSkip = 1;
 	private int groupSize = 1;
-	//protected LinkedBlockingQueue<Frame> frameQueue = new LinkedBlockingQueue<Frame>(Constant.SpoutQueueSize);
-	protected LinkedBlockingQueue<Frame> frameQueue = new LinkedBlockingQueue<Frame>(Constant.SpoutQueueSize);
-	protected LinkedBlockingQueue<MatImage> matQueue = new LinkedBlockingQueue<MatImage>(Constant.SpoutQueueSize);
+	//protected LinkedBlockingQueue<Frame> frameQueue = new LinkedBlockingQueue<Frame>(ZKConstant.SpoutQueueSize);
+	protected LinkedBlockingQueue<Frame> frameQueue = new LinkedBlockingQueue<Frame>(ZKConstant.SpoutQueueSize);
+	protected LinkedBlockingQueue<MatImage> matQueue = new LinkedBlockingQueue<MatImage>(ZKConstant.SpoutQueueSize);
 	private LinkedList<MatImage> matCache = new LinkedList<>();
 	protected Map<String, OpenCVStreamReader2> streamReaders;
 	private int sleepTime = 0;
@@ -61,12 +61,6 @@ public class OpenCVStreamFrameFetcher2 implements IFetcher<CVParticle> {
 	private String id;
 
 	public OpenCVStreamFrameFetcher2(List<String> locations){
-//		try {
-//			NativeUtils.loadOpencvLib();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 		this.locations = locations;
 	}
 	

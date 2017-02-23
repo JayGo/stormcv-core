@@ -1,10 +1,12 @@
 package edu.fudan.lwang.codec;
 
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BufferQueue {
-	
-	private static final Logger logger = Logger.getLogger(BufferQueue.class);
+
+	private static final Logger logger = LoggerFactory.getLogger(BufferQueue.class);
 	
 	public final static int DEFAULT_MAX_SIZE = 16*1024*1024 - 1;
 	private String queueId;

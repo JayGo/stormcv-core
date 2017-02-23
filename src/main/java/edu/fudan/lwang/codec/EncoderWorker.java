@@ -3,18 +3,16 @@ package edu.fudan.lwang.codec;
 import edu.fudan.lwang.codec.Common.CodecType;
 import nl.tno.stormcv.util.TimeElasper;
 
-import org.apache.log4j.Logger;
-import org.omg.CORBA.PRIVATE_MEMBER;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
-
-import com.amazonaws.services.elasticache.model.transform.CacheNodeTypeSpecificParameterStaxUnmarshaller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EncoderWorker extends Thread {
 
-	private final static Logger logger = Logger.getLogger(EncoderWorker.class);
+	private final static Logger logger = LoggerFactory.getLogger(EncoderWorker.class);
 	private String videoAddr;
 	private String encoderId;
 	private CodecType codecType;

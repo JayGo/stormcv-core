@@ -1,6 +1,5 @@
 package nl.tno.stormcv.topology;
 
-import org.apache.log4j.Logger;
 import org.apache.storm.Config;
 
 import edu.fudan.lwang.codec.Common.CodecType;
@@ -16,12 +15,14 @@ import nl.tno.stormcv.operation.GrayscaleOp;
 import nl.tno.stormcv.operation.H264RtmpStreamOp;
 import nl.tno.stormcv.operation.SingleRTMPWriterOp;
 import nl.tno.stormcv.spout.TCPCaptureSpout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TCPCaptureTopology extends BaseTopology {
 	
 
 
-	private static final Logger logger = Logger.getLogger(TCPCaptureTopology.class);
+	private static final Logger logger = LoggerFactory.getLogger(TCPCaptureTopology.class);
 	private String streamId;
 	private String videoAddr;
 	private String rtmpAddr;

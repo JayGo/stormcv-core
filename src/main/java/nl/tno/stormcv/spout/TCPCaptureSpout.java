@@ -10,7 +10,7 @@ import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.model.serializer.FrameSerializer;
 import nl.tno.stormcv.service.TCPClient;
 
-import org.apache.log4j.Logger;
+import nl.tno.stormcv.util.LibLoader;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichSpout;
@@ -27,6 +27,8 @@ import edu.fudan.lwang.codec.Queue;
 import edu.fudan.lwang.codec.Common.CodecType;
 import edu.fudan.lwang.codec.FrameQueueManager;
 import edu.fudan.lwang.codec.SourceInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -35,7 +37,7 @@ import edu.fudan.lwang.codec.SourceInfo;
  */
 public class TCPCaptureSpout implements IRichSpout {
 
-	private static final Logger logger = Logger.getLogger(TCPCaptureSpout.class);
+	private static final Logger logger = LoggerFactory.getLogger(TCPCaptureSpout.class);
 	private static final long serialVersionUID = 7340743805719206817L;
 	private SpoutOutputCollector collector;
 	private FrameSerializer serializer;
@@ -131,10 +133,9 @@ public class TCPCaptureSpout implements IRichSpout {
 	@Override
 	public void open(Map paramMap, TopologyContext paramTopologyContext,
 			SpoutOutputCollector paramSpoutOutputCollector) {
-		// TODO Auto-generated method stub
 		collector = paramSpoutOutputCollector;
-		System.load("/usr/local/opencv/share/OpenCV/java/libopencv_java2413.so");
-		System.load("/usr/local/LwangCodec/lib/libHgCodec.so");
+		LibLoader.loadH264CodecLib();
+		LibLoader.loadOpenCVLib();
 		logger.info("TCPCaptureSpout ready to start: "+mSourceInfo);
 		
 		mEncodedFrameQueueId = Codec.startEncodeToFrameQueue(mSourceInfo);

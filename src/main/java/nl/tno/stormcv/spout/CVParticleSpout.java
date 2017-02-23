@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import nl.tno.stormcv.StormCVConfig;
 import nl.tno.stormcv.fetcher.IFetcher;
 import nl.tno.stormcv.model.CVParticle;
-import nl.tno.stormcv.util.NativeUtils;
+import nl.tno.stormcv.util.LibLoader;
 
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -102,11 +102,7 @@ public class CVParticleSpout implements IRichSpout {
 			logger.warn("Unable to configure spout due to ", e);
 		}
 
-		try {
-			NativeUtils.loadOpencvLib();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		LibLoader.loadOpenCVLib();
 	}
 
 	@Override

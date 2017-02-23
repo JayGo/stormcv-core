@@ -8,8 +8,8 @@ import nl.tno.stormcv.model.serializer.CVParticleSerializer;
 import nl.tno.stormcv.model.serializer.FrameSerializer;
 import nl.tno.stormcv.model.serializer.GroupOfFramesSerializer;
 import nl.tno.stormcv.operation.GroupOfFramesOp;
-import nl.tno.stormcv.util.Constant;
-import nl.tno.stormcv.util.OpenCVStreamReader;
+import nl.tno.stormcv.constant.ZKConstant;
+import nl.tno.stormcv.util.reader.OpenCVStreamReader;
 
 import org.apache.storm.task.TopologyContext;
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class OpenCVStreamFrameFetcher implements IFetcher<CVParticle> {
 	protected int frameSkip = 1;
 	private int groupSize = 1;
 	protected LinkedBlockingQueue<Frame> frameQueue = new LinkedBlockingQueue<Frame>(
-			Constant.SpoutQueueSize);
+			ZKConstant.SpoutQueueSize);
 	protected Map<String, OpenCVStreamReader> streamReaders;
 	private int sleepTime = 0;
 	private String imageType;
@@ -64,12 +64,6 @@ public class OpenCVStreamFrameFetcher implements IFetcher<CVParticle> {
 	private String id;
 
 	public OpenCVStreamFrameFetcher(List<String> locations) {
-		// try {
-		// NativeUtils.loadOpencvLib();
-		// } catch (IOException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
 		this.locations = locations;
 	}
 

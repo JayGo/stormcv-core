@@ -15,13 +15,14 @@ import nl.tno.stormcv.model.serializer.FrameSerializer;
 import nl.tno.stormcv.service.TCPClient;
 import nl.tno.stormcv.util.ImageUtils;
 
-import org.apache.log4j.Logger;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichSpout;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 
 import edu.fudan.jliu.message.BaseMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -30,7 +31,7 @@ import edu.fudan.jliu.message.BaseMessage;
  */
 public class TCPReaderSpout implements IRichSpout {
 
-	private static final Logger logger = Logger.getLogger(TCPReaderSpout.class);
+	private static final Logger logger = LoggerFactory.getLogger(TCPReaderSpout.class);
 	private static final long serialVersionUID = 7340743805719206817L;
 	private SpoutOutputCollector collector;
 	private FrameSerializer serializer;

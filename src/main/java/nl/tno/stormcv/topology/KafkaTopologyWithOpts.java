@@ -11,10 +11,9 @@ import nl.tno.stormcv.bolt.SingleInputBolt;
 import nl.tno.stormcv.kafka.MessageScheme;
 import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.model.serializer.CVParticleSerializer;
-import nl.tno.stormcv.model.serializer.FrameSerializer;
 import nl.tno.stormcv.operation.DrawFeaturesOp;
 import nl.tno.stormcv.operation.RTMPWriterOp;
-import nl.tno.stormcv.util.Constant;
+import nl.tno.stormcv.constant.ZKConstant;
 import nl.tno.stormcv.util.OperationUtils;
 
 import org.apache.commons.cli.CommandLine;
@@ -94,7 +93,7 @@ public class KafkaTopologyWithOpts {
 		
 		// for storm-kafka test
 		// String zks = "10.134.143.51:2181,10.134.143.55:2181,10.134.142.111:2181";
-		String zks = Constant.ZookeeperServer;
+		String zks = ZKConstant.ZookeeperServer;
 		// String zks = "10.134.143.51:2191";
         String zkRoot = "/" + topic; // default zookeeper root configuration for storm
         //String zkRoot = ""; // default zookeeper root configuration for storm
@@ -106,9 +105,9 @@ public class KafkaTopologyWithOpts {
         spoutConf.startOffsetTime = kafka.api.OffsetRequest.LatestTime();
 		spoutConf.ignoreZkOffsets = true;
         //spoutConf.forceFromStart = false;
-        spoutConf.zkServers = Constant.ZookeeperServerList;
+        spoutConf.zkServers = ZKConstant.ZookeeperServerList;
         // spoutConf.zkServers = Arrays.asList(new String[] {"10.134.143.51"});
-        spoutConf.zkPort = Constant.ZkPort;
+        spoutConf.zkPort = ZKConstant.ZkPort;
         spoutConf.zkRoot = "/" + topic;
         //spoutConf.fetchSizeBytes = 104857600;
         //spoutConf.zkRoot = "";
