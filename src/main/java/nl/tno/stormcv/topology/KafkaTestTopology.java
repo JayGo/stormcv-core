@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.UUID;
 
+import ch.qos.logback.core.joran.spi.JoranException;
 import nl.tno.stormcv.LogBackConfigLoader;
 import nl.tno.stormcv.StormCVConfig;
 import nl.tno.stormcv.bolt.SingleInputBolt;
@@ -18,7 +19,6 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import ch.qos.logback.core.joran.spi.JoranException;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
 import org.apache.storm.StormSubmitter;

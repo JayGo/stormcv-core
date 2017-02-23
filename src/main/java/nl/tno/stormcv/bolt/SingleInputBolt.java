@@ -212,7 +212,4 @@ public class SingleInputBolt extends CVParticleBolt {
 		}
 		return results;
 	}
-	
-	
-
 }

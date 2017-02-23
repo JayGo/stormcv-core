@@ -24,7 +24,6 @@ public abstract class BaseTopology {
 		conf.put(Config.TOPOLOGY_WORKER_MAX_HEAP_SIZE_MB, 8192);
 		conf.put(Config.WORKER_HEAP_MEMORY_MB, 4096);
 		conf.put(Config.TOPOLOGY_COMPONENT_RESOURCES_ONHEAP_MEMORY_MB, 4096);
-		//conf.put(Config.TOPOLOGY_COMPONENT_RESOURCES_OFFHEAP_MEMORY_MB, 1024);
 
 		conf.put(Config.TOPOLOGY_ACKER_EXECUTORS, 0);
 		conf.put(StormCVConfig.STORMCV_OPENCV_LIB, "linux64_opencv_java248.so");
