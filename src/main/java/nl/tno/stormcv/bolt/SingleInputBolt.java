@@ -1,6 +1,5 @@
 package nl.tno.stormcv.bolt;
 
-import java.nio.Buffer;
 import java.util.List;
 import java.util.Map;
 
@@ -8,6 +7,7 @@ import nl.tno.stormcv.model.CVParticle;
 import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.operation.ISingleInputOperation;
 
+import nl.tno.stormcv.util.LibLoader;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.opencv.core.Mat;
@@ -141,43 +141,33 @@ public class SingleInputBolt extends CVParticleBolt {
 		return true;
 	}
 	
-	/**
-	 * Set decoder for this bolt. The method must be called after its constructor.
-	 * @param the infomation of its video source to be decoded 
-	 */
-	
-
 	@SuppressWarnings("rawtypes")
 	@Override
 	void prepare(Map stormConf, TopologyContext context) {
 		try {
-			System.load("/usr/local/opencv/share/OpenCV/java/libopencv_java2413.so");
-			System.load("/usr/local/LwangCodec/lib/libHgCodec.so");
-			System.load("/usr/local/LwangCodec/lib/libH264RtmpStreamer.so");
-			
+			LibLoader.loadOpenCVLib();
+			LibLoader.loadH264CodecLib();
+			LibLoader.loadHgCodecLib();
+//			System.load("/usr/local/opencv/share/OpenCV/java/libopencv_java2413.so");
+//			System.load("/usr/local/LwangCodec/lib/libHgCodec.so");
+//			System.load("/usr/local/LwangCodec/lib/libH264RtmpStreamer.so");
 			operation.prepare(stormConf, context);
-
 			init();
-			
 		} catch (Exception e) {
 			logger.error("Unale to prepare Operation ", e);
 		}		
 	}
-	
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		declarer.declare(operation.getSerializer().getFields());
 	}
-
 	
 	@Override
 	List<? extends CVParticle> execute(CVParticle input) throws Exception {
 		// fill buffer with input.imageBytes first.
 		List<? extends CVParticle> results = operation.execute(input, new OperationHandler() {
-			
 			org.apache.log4j.Logger logger1 = org.apache.log4j.Logger.getLogger(OperationHandler.class);
-			
 			@Override
 			public boolean fillSourceBufferQueue(Frame frame) {
 				// TODO Auto-generated method stub

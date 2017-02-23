@@ -7,7 +7,6 @@ public class Constant {
 
 	public static int SpoutQueueSize = 100;
 	public static String DefaulteRTMPServer = "rtmp://10.134.142.114:1935/live1/";
-	public static String opencvLibName = "linux64_opencv_java248.so";
 	public static String ZookeeperServer =
 			  "10.134.142.100:2181,"+ 
 			  "10.134.142.101:2181,"+ 
@@ -51,5 +50,4 @@ public class Constant {
 			  "10.134.142.123", 
 			  "10.134.142.114"});
 	public static int ZkPort = 2181;
-	public static int SCALE_RATE = 2;
 }

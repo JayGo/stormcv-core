@@ -10,6 +10,7 @@ import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.model.serializer.FrameSerializer;
 import nl.tno.stormcv.service.TCPClient;
 
+import nl.tno.stormcv.util.LibLoader;
 import org.apache.log4j.Logger;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -133,8 +134,10 @@ public class TCPCaptureSpout implements IRichSpout {
 			SpoutOutputCollector paramSpoutOutputCollector) {
 		// TODO Auto-generated method stub
 		collector = paramSpoutOutputCollector;
-		System.load("/usr/local/opencv/share/OpenCV/java/libopencv_java2413.so");
-		System.load("/usr/local/LwangCodec/lib/libHgCodec.so");
+		LibLoader.loadH264CodecLib();
+		LibLoader.loadOpenCVLib();
+//		System.load("/usr/local/opencv/share/OpenCV/java/libopencv_java2413.so");
+//		System.load("/usr/local/LwangCodec/lib/libHgCodec.so");
 		logger.info("TCPCaptureSpout ready to start: "+mSourceInfo);
 		
 		mEncodedFrameQueueId = Codec.startEncodeToFrameQueue(mSourceInfo);
