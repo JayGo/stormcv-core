@@ -1,0 +1,3 @@
+maven-build:
+  script: 
+    - mvn clean package
