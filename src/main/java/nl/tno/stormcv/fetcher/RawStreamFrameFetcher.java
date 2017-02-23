@@ -18,7 +18,7 @@ import nl.tno.stormcv.model.serializer.FrameSerializer;
 import nl.tno.stormcv.model.serializer.CVParticleSerializer;
 import nl.tno.stormcv.model.serializer.GroupOfFramesSerializer;
 import nl.tno.stormcv.operation.GroupOfFramesOp;
-import nl.tno.stormcv.util.RawStreamReader;
+import nl.tno.stormcv.util.reader.RawStreamReader;
 
 /**
  * A {@link IFetcher} implementation that reads video streams (either live or

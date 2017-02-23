@@ -14,7 +14,7 @@ import nl.tno.stormcv.model.serializer.FrameSerializer;
 import nl.tno.stormcv.model.serializer.CVParticleSerializer;
 import nl.tno.stormcv.model.serializer.GroupOfFramesSerializer;
 import nl.tno.stormcv.operation.GroupOfFramesOp;
-import nl.tno.stormcv.util.StreamReader;
+import nl.tno.stormcv.util.reader.StreamReader;
 import org.apache.storm.task.TopologyContext;
 
 /**

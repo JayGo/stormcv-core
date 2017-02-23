@@ -59,9 +59,7 @@ public class KafkaReadTopology {
 		
 		List<String> urls = new ArrayList<String>();
 		String address;
-		
-		// urls.add("rtsp://218.204.223.237:554/live/1/66251FC11353191F/e7ooqwcfbqjoo80j.sdp");
-		
+
 
 		// parse the command line
 		CommandLineParser parser = new DefaultParser();

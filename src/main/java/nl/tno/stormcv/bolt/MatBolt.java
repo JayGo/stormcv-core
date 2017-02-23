@@ -7,8 +7,7 @@ import java.util.Map;
 import nl.tno.stormcv.model.MatImage;
 import nl.tno.stormcv.model.serializer.MatImageSerializer;
 import nl.tno.stormcv.operation.IMatOperation;
-import nl.tno.stormcv.util.NativeUtils;
-
+import nl.tno.stormcv.util.LibLoader;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -35,12 +34,8 @@ public class MatBolt extends BaseRichBolt {
 			OutputCollector collector) {
 		this.collector = collector;
 		try {
-			NativeUtils.load();
+			LibLoader.loadOpenCVLib();
 		} catch (RuntimeException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

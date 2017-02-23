@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 import org.apache.storm.task.TopologyContext;
 import org.opencv.core.Mat;
 
@@ -18,11 +17,13 @@ import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.model.serializer.CVParticleSerializer;
 import nl.tno.stormcv.model.serializer.FrameSerializer;
 import nl.tno.stormcv.util.StreamerHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class H264RtmpStreamOp implements ISingleInputOperation<Frame> {
 
 	
-	private final static Logger logger = Logger.getLogger(H264RtmpStreamOp.class);
+	private final static Logger logger = LoggerFactory.getLogger(H264RtmpStreamOp.class);
 	private FrameSerializer serializer = new FrameSerializer();
 	
 	private String url;

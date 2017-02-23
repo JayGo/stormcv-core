@@ -1,13 +1,14 @@
 package edu.fudan.lwang.codec;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 public abstract class QueueManager<E> {
 	private Map<String,Queue<E>> map;
-	private static  Logger logger = Logger.getLogger(QueueManager.class);
+	private static Logger logger = LoggerFactory.getLogger(QueueManager.class);
 	
 	protected QueueManager() {
 		map = new HashMap<String, Queue<E>>();

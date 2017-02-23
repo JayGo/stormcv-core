@@ -93,7 +93,7 @@ public class KafkaReadTopology2 {
 		 **/
 		//TODO: move the zookeeper info to utils.Constans or config file
 		
-//		String zks = Constant.ZookeeperServer;
+//		String zks = ZKConstant.ZookeeperServer;
 //		//String zks = "10.134.143.51:2191";
 //        String zkRoot = "/" + topic; // default zookeeper root configuration for storm
 //        //String zkRoot = ""; // default zookeeper root configuration for storm
@@ -106,9 +106,9 @@ public class KafkaReadTopology2 {
 //		spoutConf.startOffsetTime = kafka.api.OffsetRequest.LatestTime();
 //		spoutConf.ignoreZkOffsets = true;
 //		
-//        spoutConf.zkServers = Constant.ZookeeperServerList;
+//        spoutConf.zkServers = ZKConstant.ZookeeperServerList;
 //        //spoutConf.zkServers = Arrays.asList(new String[] {"10.134.143.51"});
-//        spoutConf.zkPort = Constant.ZkPort;
+//        spoutConf.zkPort = ZKConstant.ZkPort;
 //        spoutConf.zkRoot = "/" + topic;
 //        //spoutConf.fetchSizeBytes = 104857600;
 //        //spoutConf.zkRoot = "";

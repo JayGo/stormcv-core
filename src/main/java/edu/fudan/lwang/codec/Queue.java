@@ -1,12 +1,13 @@
 package edu.fudan.lwang.codec;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import org.apache.log4j.Logger;
-
 public class Queue<E> {
-	private static Logger logger = Logger.getLogger(Queue.class);
+	private static Logger logger = LoggerFactory.getLogger(Queue.class);
 	public  static final int DEFAUTL_MAT_LIMIT = 150;
 	public static final int DEFAULT_FRAME_LIMIT = 1600;
 	private int limit;

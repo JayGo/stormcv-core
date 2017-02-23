@@ -2,28 +2,21 @@ package edu.fudan.lwang.codec;
 
 import java.awt.Rectangle;
 
-import org.apache.log4j.Logger;
-import org.apache.storm.generated.DistributedRPCInvocations.AsyncProcessor.result;
-import org.omg.CORBA.PRIVATE_MEMBER;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.video.Video;
 
-import com.amazonaws.services.elasticbeanstalk.model.transform.RetrieveEnvironmentInfoResultStaxUnmarshaller;
-import com.amazonaws.services.opsworks.model.Source;
-import com.amazonaws.services.rds.model.ProvisionedIopsNotAvailableInAZException;
-import com.amazonaws.services.simpleworkflow.model.SignalExternalWorkflowExecutionFailedCause;
-import com.google.common.base.FinalizablePhantomReference;
-
 import edu.fudan.lwang.codec.Common.CodecType;
 import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.util.HashUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import scala.collection.generic.BitOperations.Int;
 
 public class Codec {
-	private static Logger logger = Logger.getLogger(Codec.class);
+	private static Logger logger = LoggerFactory.getLogger(Codec.class);
 	private static final int maxEncoderQueueSize = 32 * 1024 * 1024 - 1;
 	private static final int maxEncoderQueueFrames = 1800;
 	private static final int maxDecoderQueueFrames = 120;
@@ -140,7 +133,7 @@ public class Codec {
 		
 		EncoderWorker encoderWorker = EncoderFactory.create(type).build(videoAddr, encoderId, capture, new EncoderCallback() {
 			private int frameNr = 0;
-			private final Logger logger1 = Logger.getLogger(EncoderCallback.class);
+			private final Logger logger1 = LoggerFactory.getLogger(EncoderCallback.class);
 			@Override
 			public Mat beforeDataEncoded(Mat frame) {
 				// TODO Auto-generated method stub
@@ -215,7 +208,7 @@ public class Codec {
 		EncoderWorker encoderWorker = EncoderFactory.create(type).build(encoderId, frameWidth, frameHeight,
 				
 				new EncoderCallback() {
-					private final Logger logger1 = Logger.getLogger(EncoderCallback.class);
+					private final Logger logger1 = LoggerFactory.getLogger(EncoderCallback.class);
 					
 					@Override
 					public Mat getDecodedData() {
@@ -291,7 +284,7 @@ public class Codec {
 		DecoderWorker decoderWorker = DecoderFactory.create(type).build(decoderId, frameWidth, frameHeight,
 				new DecoderCallback() {
 					private int frNum = 0;
-					private final Logger logger1 = Logger.getLogger(DecoderCallback.class); 
+					private final Logger logger1 = LoggerFactory.getLogger(DecoderCallback.class);
 					@Override
 					public byte[] getEncodedData() {
 						// TODO Auto-generated method stub

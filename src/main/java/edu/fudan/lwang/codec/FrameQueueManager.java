@@ -1,11 +1,12 @@
 package edu.fudan.lwang.codec;
 
-import org.apache.log4j.Logger;
 
 import nl.tno.stormcv.model.Frame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FrameQueueManager extends QueueManager<Frame>{
-	private static  Logger logger = Logger.getLogger(FrameQueueManager.class);
+	private static Logger logger = LoggerFactory.getLogger(FrameQueueManager.class);
 	private static FrameQueueManager instance = null;
 	
 	private FrameQueueManager() {

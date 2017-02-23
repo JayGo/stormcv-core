@@ -11,11 +11,10 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.security.KeyStore.PrivateKeyEntry;
 
-import org.apache.log4j.Logger;
-import org.apache.storm.shade.clojure.core.incubator__init;
-
 import edu.fudan.jliu.message.BaseMessage;
 import nl.tno.stormcv.util.MathUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * send: "start,[videoAddress]" ---> received:
@@ -36,7 +35,7 @@ public class TCPClient implements Serializable {
 
 	private static final long serialVersionUID = -2854001775235980342L;
 	
-	private static Logger logger = Logger.getLogger(TCPClient.class);
+	private static Logger logger = LoggerFactory.getLogger(TCPClient.class);
 	
 	private Socket socket;
 	private String serverIp;

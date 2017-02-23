@@ -11,8 +11,6 @@ import java.util.Set;
 
 import org.apache.storm.task.TopologyContext;
 
-import org.opencv.core.Mat;
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +29,7 @@ import com.xuggle.xuggler.video.IConverter;
 
 import nl.tno.stormcv.model.*;
 import nl.tno.stormcv.model.serializer.*;
-import nl.tno.stormcv.util.Constant;
+import nl.tno.stormcv.constant.ZKConstant;
 
 /**
  *
@@ -43,7 +41,7 @@ public class RTMPWriterOp implements IBatchOperation<Frame> {
 
 	private static final long serialVersionUID = 3591538303646724289L;
 	private Logger logger = LoggerFactory.getLogger(getClass());
-	private String url = Constant.DefaulteRTMPServer;
+	private String url = ZKConstant.DefaultRTMPServer;
 	private String appName = "";
 	private int height = 0;
 	private int width = 0;

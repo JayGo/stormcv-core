@@ -6,7 +6,7 @@ import java.util.Map;
 
 import nl.tno.stormcv.model.MatImage;
 import nl.tno.stormcv.model.serializer.MatImageSerializer;
-import nl.tno.stormcv.util.NativeUtils;
+import nl.tno.stormcv.util.LibLoader;
 
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -99,15 +99,10 @@ public class MatSpout implements IRichSpout {
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
-		// TODO Auto-generated method stub
 		this.collector = collector;
 		try {
-			NativeUtils.load();
+			LibLoader.loadOpenCVLib();
 		} catch (RuntimeException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		capture = new VideoCapture(videoAddr);

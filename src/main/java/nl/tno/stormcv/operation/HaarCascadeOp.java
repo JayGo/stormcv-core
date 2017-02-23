@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import nl.tno.stormcv.util.LibLoader;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.utils.Utils;
 import org.opencv.core.Mat;
@@ -28,7 +29,6 @@ import nl.tno.stormcv.model.Feature;
 import nl.tno.stormcv.model.Frame;
 
 import nl.tno.stormcv.util.ImageUtils;
-import nl.tno.stormcv.util.NativeUtils;
 import nl.tno.stormcv.model.*;
 import nl.tno.stormcv.model.serializer.*;
 
@@ -114,7 +114,8 @@ public class HaarCascadeOp extends OpenCVOp<CVParticle> implements ISingleInputO
 	protected void prepareOpenCVOp(Map stormConf, TopologyContext context) throws Exception {
 		try {
 			if(haarXML.charAt(0) != '/') haarXML = "/"+haarXML;
-			File cascadeFile = NativeUtils.extractTmpFileFromJar(haarXML, true);
+			File cascadeFile = new File(LibLoader.getSelfJarDenpendencyFileTmp(haarXML, true));
+//			File cascadeFile = NativeUtils.extractTmpFileFromJar(haarXML, true);
 			haarDetector = new CascadeClassifier(cascadeFile.getAbsolutePath());
 			Utils.sleep(100); // make sure the classifier has loaded before removing the tmp xml file
 			if(!cascadeFile.delete()) cascadeFile.deleteOnExit();

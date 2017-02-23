@@ -21,13 +21,11 @@ public class CollectorBolt extends CVParticleBolt {
 	@Override
 	public void declareOutputFields(
 			OutputFieldsDeclarer declarer) {
-		// TODO Auto-generated method stub
 		declarer.declare(serializer.getFields());
 	}
 
 	@Override
 	List<? extends CVParticle> execute(CVParticle input) throws Exception {
-		// TODO Auto-generated method stub
 		List<Frame> result = new ArrayList<Frame>();
 		Frame sf = (Frame) input;
 //		while(!ReceiverQueue.getInstance().push(sf)) {

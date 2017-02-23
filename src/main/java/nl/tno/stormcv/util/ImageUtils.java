@@ -29,12 +29,7 @@ import edu.fudan.lwang.FGEHelper;
 public class ImageUtils {
 
 	static {
-		try {
-			NativeUtils.loadOpencvLib();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		LibLoader.loadOpenCVLib();
 	}
 
 	public static Color[] colors = new Color[] { Color.RED, Color.BLUE,

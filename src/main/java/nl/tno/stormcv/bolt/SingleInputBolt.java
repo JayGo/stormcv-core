@@ -148,9 +148,6 @@ public class SingleInputBolt extends CVParticleBolt {
 			LibLoader.loadOpenCVLib();
 			LibLoader.loadH264CodecLib();
 			LibLoader.loadHgCodecLib();
-//			System.load("/usr/local/opencv/share/OpenCV/java/libopencv_java2413.so");
-//			System.load("/usr/local/LwangCodec/lib/libHgCodec.so");
-//			System.load("/usr/local/LwangCodec/lib/libH264RtmpStreamer.so");
 			operation.prepare(stormConf, context);
 			init();
 		} catch (Exception e) {
@@ -167,7 +164,7 @@ public class SingleInputBolt extends CVParticleBolt {
 	List<? extends CVParticle> execute(CVParticle input) throws Exception {
 		// fill buffer with input.imageBytes first.
 		List<? extends CVParticle> results = operation.execute(input, new OperationHandler() {
-			org.apache.log4j.Logger logger1 = org.apache.log4j.Logger.getLogger(OperationHandler.class);
+			Logger logger1 = LoggerFactory.getLogger(OperationHandler.class);
 			@Override
 			public boolean fillSourceBufferQueue(Frame frame) {
 				// TODO Auto-generated method stub
