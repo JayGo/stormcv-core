@@ -85,6 +85,6 @@ public class FrameFdu extends CVParticle{
 		for(Feature f : features) result += f.getName()+" = "+f.getSparseDescriptors().size()+", ";
 		return result + "] }";
 	}
-	
-	
+
+
 }

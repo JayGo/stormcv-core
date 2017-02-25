@@ -99,7 +99,7 @@ public class TCPReaderSpout implements IRichSpout {
 			
 			// ImageIO.write(image, "JPG", new File("/root/pics/"+frameNr+".jpg"));
 			
-			Frame newFrame = new Frame(streamId + "", frameNr, Frame.JPG_IMAGE, image,
+			Frame newFrame = new Frame(streamId + "", frameNr, Frame.JPG_IMAGE, buffer,
 					timestamp, new Rectangle(0, 0, image.getWidth(),
 							image.getHeight()));
 			frameNr++;

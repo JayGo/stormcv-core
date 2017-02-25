@@ -17,8 +17,8 @@ public class MatGrayOp implements IMatOperation<MatImage>{
 	private static final long serialVersionUID = -4101402095941832384L;
 
 	private MatImageSerializer mMatImageSerializer = new MatImageSerializer();
-	
-	
+
+
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void prepare(Map stormConf, TopologyContext context)
@@ -29,7 +29,7 @@ public class MatGrayOp implements IMatOperation<MatImage>{
 	@Override
 	public void deactivate() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -42,11 +42,11 @@ public class MatGrayOp implements IMatOperation<MatImage>{
 	public List<MatImage> execute(MatImage image) throws Exception {
 		// TODO Auto-generated method stub
 		List<MatImage> images = new ArrayList<MatImage>();
-		
+
 		Mat img = image.getMat();
 		Mat out = new Mat(img.height(), img.width(), CvType.CV_8UC1);
 		Imgproc.cvtColor(img, out, Imgproc.COLOR_BGR2GRAY);
-		
+
 		image.setMat(out);
 		images.add(image);
 		return images;

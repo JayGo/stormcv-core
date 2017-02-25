@@ -8,7 +8,6 @@ import nl.tno.stormcv.util.ImageUtils;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
 
 public class MatImage {
 	private String streamId;
@@ -53,22 +52,24 @@ public class MatImage {
 			return null;
 		Frame frame = null;
 		BufferedImage image;
-		if (this.mat != null) {
-			image = ImageUtils.matToBufferedImage(this.mat);
-		}
-		else {
-			image = ImageUtils.matBytesToBufferedImage(this.matbytes,
-					this.width, this.height, CvType.CV_8UC3);
-			// this method has a wrong translation of RGB to BGR
-			// image = ImageUtils.bytesToBufferedImage(this.matbytes,
-			// this.width,
-			// this.height, BufferedImage.TYPE_3BYTE_BGR);
-		}
-		frame = new Frame(this.streamId, this.sequence, "jpg", image,
+
+//		if (this.mat != null) {
+//			image = ImageUtils.matToBufferedImage(this.mat);
+//		}
+//		else {
+//			image = ImageUtils.matBytesToBufferedImage(this.matbytes,
+//					this.width, this.height, CvType.CV_8UC3);
+//			// this method has a wrong translation of RGB to BGR
+//			// image = ImageUtils.bytesToBufferedImage(this.matbytes,
+//			// this.width,
+//			// this.height, BufferedImage.TYPE_3BYTE_BGR);
+//		}
+
+		frame = new Frame(this.streamId, this.sequence, "jpg", getMatbytes(),
 				this.timestamp, new Rectangle(0, 0, this.width, this.height));
 		return frame;
 	}
-	
+
 	public void release() {
 		mat = null;
 		matbytes = null;
@@ -97,7 +98,7 @@ public class MatImage {
 		if(mat == null && matbytes != null) {
 			mat = ImageUtils.bytesToMat(matbytes, width, height, type);
 		}
-		
+
 		return mat;
 	}
 
@@ -136,7 +137,7 @@ public class MatImage {
 	public void setSequence(long sequence) {
 		this.sequence = sequence;
 	}
-	
+
 	public int getType() {
 		return type;
 	}

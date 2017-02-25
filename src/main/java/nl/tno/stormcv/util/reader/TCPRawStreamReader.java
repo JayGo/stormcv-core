@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 
 import nl.tno.stormcv.model.Frame;
 
-public class RawStreamReader extends Thread {
-	private Logger logger = LoggerFactory.getLogger(StreamReader.class);
+public class TCPRawStreamReader extends Thread {
+	private Logger logger = LoggerFactory.getLogger(XugglerStreamReader.class);
 
 	private int dataLength;
 	private byte[] buffer;
@@ -42,9 +42,9 @@ public class RawStreamReader extends Thread {
 	private int frameMs;
 	private String imageType = Frame.JPG_IMAGE;
 
-	public RawStreamReader(String ip, int port, int bufferSize,
-			String streamId, String imageType, int frameSkip, int groupSize,
-			int sleepTime, LinkedBlockingQueue<Frame> frameQueue) {
+	public TCPRawStreamReader(String ip, int port, int bufferSize,
+                              String streamId, String imageType, int frameSkip, int groupSize,
+                              int sleepTime, LinkedBlockingQueue<Frame> frameQueue) {
 
 		buffer = new byte[bufferSize];
 		picData = new byte[4096000];
@@ -185,14 +185,14 @@ public class RawStreamReader extends Thread {
 	}
 	
 	/**
-	 * Tells the RawStreamReader to stop reading frames
+	 * Tells the TCPRawStreamReader to stop reading frames
 	 */
 	public void stopStreamReader() {
 		running = false;
 	}
 	
 	/**
-	 * Returns whether the RawStreamReader is still active or not
+	 * Returns whether the TCPRawStreamReader is still active or not
 	 * @return
 	 */
 	public boolean isRunning() {

@@ -5,13 +5,11 @@ import java.util.List;
 import java.util.Map;
 
 import nl.tno.stormcv.batcher.IBatcher;
-import nl.tno.stormcv.fetcher.FileFrameFetcher;
-import nl.tno.stormcv.fetcher.StreamFrameFetcher;
+//import nl.tno.stormcv.fetcher.FileFrameFetcher;
+import nl.tno.stormcv.fetcher.XugglerStreamFrameFetcher;
 import nl.tno.stormcv.model.*;
 import nl.tno.stormcv.model.serializer.*;
 import org.apache.storm.task.TopologyContext;
-
-import org.opencv.core.Mat;
 
 import edu.fudan.lwang.codec.OperationHandler;
 
@@ -20,7 +18,7 @@ import edu.fudan.lwang.codec.OperationHandler;
 /**
  * A special {@link ISingleInputOperation} that executes a {@link IBatchOperation} on {@link Frame} objects contained in a single received {@link GroupOfFrames}.
  * This enables the platform to execute batch operations as if they are stateless and does not require a {@link IBatcher}.
- * {@link GroupOfFrames} can be created by the {@link FrameGrouperOp} or directly emitted by the {@link FileFrameFetcher} or {@link StreamFrameFetcher}
+ * {@link GroupOfFrames} can be created by the {@link FrameGrouperOp} or directly emitted by the {@link XugglerStreamFrameFetcher}
  * which have the option to emit GroupOfFrames instead of separate Frames. 
  * 
  * @author Corne Versloot

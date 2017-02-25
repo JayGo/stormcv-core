@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import nl.tno.stormcv.codec.JPEGImageCodec;
+import nl.tno.stormcv.codec.TurboJPEGImageCodec;
 import org.apache.storm.tuple.Tuple;
 import org.opencv.core.CvType;
 
@@ -31,47 +33,34 @@ import nl.tno.stormcv.util.ImageUtils;
  */
 public class Frame extends CVParticle {
 
-	public final static String NO_IMAGE = "none";
+    public final static String NO_IMAGE = "no";
 	public final static String JPG_IMAGE = "jpg";
-	public final static String PNG_IMAGE = "png";
-	public final static String GIF_IMAGE = "gif";
-	public final static String RAW_IMAGE = "mat";  //add by jkyan at 2016/07/30
+	public final static String X264_IMAGE = "x264"; // add by jiu on 2016/12/12
 
-	public final static String X264_Bytes = "x264_bytes"; // add by jiu on 2016/12/12
-
-	
 	private long timeStamp;
 	private String imageType = JPG_IMAGE;
 	private byte[] imageBytes = null;
-	private BufferedImage image;
-	private Rectangle boundingBox;
+	private Rectangle boundingBox = null;
 	private List<Feature> features = new ArrayList<Feature>();
-	private boolean needGen = false;
-	
+    private JPEGImageCodec codec;
 
 	public Frame(byte [] imageBytes) {
 		this.imageBytes = imageBytes;
+        this.codec = TurboJPEGImageCodec.getInstance();
 	}
-	
 
-	public Frame(String streamId, long sequenceNr, String imageType, BufferedImage image, long timeStamp, Rectangle boundingBox, List<Feature> features) throws IOException {
-		this(streamId, sequenceNr, imageType, image, timeStamp, boundingBox);
-		if(features != null) this.features = features;
-	}
-	
-	public Frame(String streamId, long sequenceNr, String imageType, BufferedImage image, long timeStamp, Rectangle boundingBox ) throws IOException {
-		super( streamId, sequenceNr);
-		this.imageType = imageType;
-		setImage(image);
-		this.timeStamp = timeStamp;
-		this.boundingBox = boundingBox;
-	}
-	
-
-	public Frame(String streamId, long sequenceNr, String imageType, byte[] imageBytes, long timeStamp, Rectangle boundingBox, List<Feature> features) {
-		this(streamId, sequenceNr, imageType, imageBytes, timeStamp, boundingBox);
-		if(features != null) this.features = features;
-	}
+//	public Frame(String streamId, long sequenceNr, String imageType, BufferedImage image, long timeStamp, Rectangle boundingBox, List<Feature> features) throws IOException {
+//		this(streamId, sequenceNr, imageType, image, timeStamp, boundingBox);
+//		if(features != null) this.features = features;
+//	}
+//
+//	public Frame(String streamId, long sequenceNr, String imageType, BufferedImage image, long timeStamp, Rectangle boundingBox ) throws IOException {
+//		super( streamId, sequenceNr);
+//		this.imageType = imageType;
+//		setImage(image);
+//		this.timeStamp = timeStamp;
+//		this.boundingBox = boundingBox;
+//	}
 
 	public Frame(String streamId, long sequenceNr, String imageType, byte[] image, long timeStamp, Rectangle boundingBox ) {
 		super(streamId, sequenceNr);
@@ -79,7 +68,13 @@ public class Frame extends CVParticle {
 		this.imageBytes = image;
 		this.timeStamp = timeStamp;
 		this.boundingBox = boundingBox;
+        this.codec = TurboJPEGImageCodec.getInstance();
 	}
+
+    public Frame(String streamId, long sequenceNr, String imageType, byte[] imageBytes, long timeStamp, Rectangle boundingBox, List<Feature> features) {
+        this(streamId, sequenceNr, imageType, imageBytes, timeStamp, boundingBox);
+        if(features != null) this.features = features;
+    }
 		
 	public Frame(Tuple tuple, String imageType, byte[] image, long timeStamp, Rectangle box) {
 		super(tuple);
@@ -87,45 +82,34 @@ public class Frame extends CVParticle {
 		this.imageBytes = image;
 		this.timeStamp = timeStamp;
 		this.boundingBox = box;
+        this.codec = TurboJPEGImageCodec.getInstance();
 	}
 
-	
 	public Rectangle getBoundingBox() {
 		return boundingBox;
 	}
 
-//	public BufferedImage getImage() throws IOException {
+//	public BufferedImage getImage(){
+//		if (image != null) {
+//			return image;
+//		}
 //		if(imageBytes == null) {
 //			imageType = NO_IMAGE;
 //			return null;
 //		}
-//		if(image == null){
-//			image = ImageUtils.bytesToImage(imageBytes);
+//		if(imageType.equals(RAW_IMAGE)){
+//			image = ImageUtils.matBytesToBufferedImage(imageBytes, boundingBox.width, boundingBox.height, CvType.CV_8UC3);
+//			//image = ImageUtils.bytesToBufferedImage(imageBytes, boundingBox.width, boundingBox.width, BufferedImage.TYPE_3BYTE_BGR);
+//		} else {
+//			try {
+//				image = ImageUtils.bytesToImage(imageBytes);
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
 //		}
+//		needGen = false;
 //		return image;
 //	}
-	
-	public BufferedImage getImage(){
-		if (image != null) {
-			return image;
-		}
-		if(imageBytes == null) {
-			imageType = NO_IMAGE;
-			return null;
-		}
-		if(imageType.equals(RAW_IMAGE)){
-			image = ImageUtils.matBytesToBufferedImage(imageBytes, boundingBox.width, boundingBox.height, CvType.CV_8UC3);
-			//image = ImageUtils.bytesToBufferedImage(imageBytes, boundingBox.width, boundingBox.width, BufferedImage.TYPE_3BYTE_BGR);
-		} else {
-			try {
-				image = ImageUtils.bytesToImage(imageBytes);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		needGen = false;
-		return image;
-	}
 
 //	public void setImage(BufferedImage image) throws IOException {
 //		this.image = image;
@@ -138,50 +122,47 @@ public class Frame extends CVParticle {
 //		}
 //	}
 	
-	public void setImage(BufferedImage image) throws IOException {
-		this.image = image;
-		this.needGen = true;
-        updataImageBytes();
-	}
-		
-	private void updataImageBytes() throws IOException {
-		if (needGen) {
-			if (image != null) {
-				if(imageType.equals(NO_IMAGE)) {
-					imageType = JPG_IMAGE;
-				}
-				if(imageType.equals(RAW_IMAGE)) {
-					this.imageBytes = ImageUtils.imageToBytesWithOpenCV(image);
-				} else {
-					this.imageBytes = ImageUtils.imageToBytes(image, imageType);
-				}
-			} else {
-				this.imageBytes = null;
-				this.imageType = NO_IMAGE;
-			}
-			this.needGen = false;
-        }
-	}
+//	public void setImage(BufferedImage image) throws IOException {
+//		this.image = image;
+//		this.needGen = true;
+//        updataImageBytes();
+//	}
+//
+//	private void updataImageBytes() throws IOException {
+//		if (needGen) {
+//			if (image != null) {
+//				if(imageType.equals(NO_IMAGE)) {
+//					imageType = JPG_IMAGE;
+//				}
+//				if(imageType.equals(RAW_IMAGE)) {
+//					this.imageBytes = ImageUtils.imageToBytesWithOpenCV(image);
+//				} else {
+//					this.imageBytes = ImageUtils.imageToBytes(image, imageType);
+//				}
+//			} else {
+//				this.imageBytes = null;
+//				this.imageType = NO_IMAGE;
+//			}
+//			this.needGen = false;
+//        }
+//	}
 	
-	public void setImage(byte[] imageBytes, String imgType){
-		this.imageBytes = imageBytes;
-		this.imageType = imgType;
-		this.image = null;
-	}
+//	public void setImage(byte[] imageBytes, String imgType){
+//		this.imageBytes = imageBytes;
+//		this.imageType = imgType;
+//		this.image = null;
+//	}
 	
 
 	public void swapImageBytes(byte[] imageBytes) {
 		this.imageBytes = imageBytes;
 	}
-	
 
-
-	public void removeImage(){
-		this.image = null;
-		this.imageBytes = null;
-		this.imageType = NO_IMAGE;
-	}
-
+//	public void removeImage(){
+//		this.image = null;
+//		this.imageBytes = null;
+//		this.imageType = NO_IMAGE;
+//	}
 
 	public long getTimestamp(){
 		return this.timeStamp;
@@ -194,6 +175,19 @@ public class Frame extends CVParticle {
 	public String getImageType() {
 		return imageType;
 	}
+
+	public BufferedImage getImage() {
+        return this.codec.JPEGBytesToBufferedImage(this.imageBytes);
+    }
+
+    public void setImage(BufferedImage image) {
+        swapImageBytes(this.codec.BufferedImageToJPEGBytes(image));
+    }
+
+    public void setImage(byte[] imageBytes, String imageType) {
+        this.imageBytes = imageBytes;
+        this.imageType = imageType;
+    }
 
 //	public void setImageType(String imageType) throws IOException {
 //		this.imageType = imageType;
@@ -222,11 +216,6 @@ public class Frame extends CVParticle {
 //			
 //		}
 //	}
-
-//	public byte[] getImageBytes() {
-//		return imageBytes;
-//	}
-	
 
 	public byte[] getImageBytes() {
 		return imageBytes;

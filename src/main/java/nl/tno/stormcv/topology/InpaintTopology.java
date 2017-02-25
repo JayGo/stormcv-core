@@ -24,7 +24,7 @@ public class InpaintTopology {
         StormCVConfig conf = new StormCVConfig();
         conf.setNumWorkers(4);
         conf.setMaxSpoutPending(32);
-        conf.put(StormCVConfig.STORMCV_FRAME_ENCODING, Frame.PNG_IMAGE);
+//        conf.put(StormCVConfig.STORMCV_FRAME_ENCODING, Frame.PNG_IMAGE);
         conf.put(Config.TOPOLOGY_ENABLE_MESSAGE_TIMEOUTS, true);
         conf.put(Config.TOPOLOGY_MESSAGE_TIMEOUT_SECS, 10);
         conf.put(StormCVConfig.STORMCV_SPOUT_FAULTTOLERANT, false);

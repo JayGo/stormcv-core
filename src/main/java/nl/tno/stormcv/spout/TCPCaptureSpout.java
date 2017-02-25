@@ -112,7 +112,7 @@ public class TCPCaptureSpout implements IRichSpout {
 //		
 //		long timeStamp = System.currentTimeMillis();
 //		
-//		Frame frame = new Frame(mSourceInfo.getEncodeQueueId(), frameNr, Frame.X264_Bytes, encodedData, timeStamp, 
+//		Frame frame = new Frame(mSourceInfo.getEncodeQueueId(), frameNr, Frame.X264_IMAGE, encodedData, timeStamp,
 //		new Rectangle(0, 0, mSourceInfo.getFrameWidth(), mSourceInfo.getFrameHeight()));
 		
 		Frame frame = null;
@@ -125,8 +125,6 @@ public class TCPCaptureSpout implements IRichSpout {
 		}
 //		 logger.info("Emmit frame: "+frame);
 //		// logger.info("target: "+mSourceInfo+""+frameNr);
-
-
 	}
 
 	@SuppressWarnings("rawtypes")

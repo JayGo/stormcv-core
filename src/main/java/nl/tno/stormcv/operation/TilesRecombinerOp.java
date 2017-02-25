@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import nl.tno.stormcv.codec.TurboJPEGImageCodec;
 import org.apache.storm.task.TopologyContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,9 +103,10 @@ public class TilesRecombinerOp implements IBatchOperation<CVParticle>{
 		}
 		
 		List<CVParticle> result = new ArrayList<CVParticle>();
+		byte[] bytes = TurboJPEGImageCodec.getInstance().BufferedImageToJPEGBytes(newImage);
 		if(outputFrame){
 			Frame newFrame = new Frame(input.get(0).getStreamId(), input.get(0).getSequenceNr(), 
-					imageType, newImage, ((Frame)input.get(0)).getTimestamp(), totalFrame);
+					imageType, bytes, ((Frame)input.get(0)).getTimestamp(), totalFrame);
 			newFrame.getFeatures().addAll(featureNameMap.values());
 			result.add(newFrame);
 		}else{

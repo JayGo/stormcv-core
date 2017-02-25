@@ -15,7 +15,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import nl.tno.stormcv.constant.GlobalConstants;
-import nl.tno.stormcv.constant.ZKConstant;
+//import nl.tno.stormcv.constant.ZKConstant;
+//import nl.tno.stormcv.topology.MatReaderTopology;
 import nl.tno.stormcv.topology.MatReaderTopology;
 import nl.tno.stormcv.util.VideoAddrValidator;
 
@@ -36,12 +37,12 @@ public class TCPMatServer {
 		try {
 			msgServerSocket = new ServerSocket(serverMsgPort);
 			topologys = new ArrayList<MatReaderTopology>();
-			
+
 			rtmpServerMap = new HashMap<String, Integer>();
 			for (int i = 0; i < rtmpServers.length; i++) {
 				rtmpServerMap.put(rtmpServers[i], 0);
 			}
-			
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -153,7 +154,7 @@ public class TCPMatServer {
 
 			}
 			else if (msgs[0] != null && msgs[0].equals("valid")) {
-				
+
 				String videoAddr = msgs[1];
 				return VideoAddrValidator.isVideoAddrValid(videoAddr) ? "true" : "false";
 			}

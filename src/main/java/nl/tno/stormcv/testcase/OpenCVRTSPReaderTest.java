@@ -10,16 +10,15 @@ import org.opencv.highgui.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 
 /**
  * Created by jkyan on 1/26/16. This is a test class. No need to concentrate on  it.
  */
-public class OpenCVRTSPReader {
+public class OpenCVRTSPReaderTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(OpenCVRTSPReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(OpenCVRTSPReaderTest.class);
 
      public static void main(String[] args) throws IOException {
          LibLoader.loadOpenCVLib();

@@ -56,7 +56,6 @@ public class TCPVideoServer {
 	}
 
 	public void startListeningMsg() {
-
 		while (true) {
 			try {
 				char[] receivedData = new char[1024];
@@ -82,12 +81,10 @@ public class TCPVideoServer {
 				in.close();
 				out.close();
 				clientSocket.close();
-
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
 		}
 	}
 

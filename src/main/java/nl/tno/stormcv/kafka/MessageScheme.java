@@ -58,11 +58,7 @@ public class MessageScheme implements Scheme {
 		byteBuffer.get(bytes, 0, bytes.length);
 		Frame frame = serializer.fromBytes(bytes);
 		//check
-		if (frame != null) {
-			if (frame.getImage() == null) {
-				logger.error("spout: image is null!");
-			}
-
+		if (frame != null && frame.getImageBytes() != null) {
 			try {
 				logger.info("read a frame " + frame.getBoundingBox().getWidth() + "x" + frame.getBoundingBox().getHeight());
 				return serializer.toTuple(frame);

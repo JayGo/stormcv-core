@@ -47,7 +47,7 @@ public class MatBolt extends BaseRichBolt {
 
 			System.out.println("image " + image.getSequence() + " : " + image.getWidth() + "x" + image.getHeight() + " type " + image.getType()
 					+ " byte size " + image.getMatbytes().length + " with " + image.getMat().cols() + "x" + image.getMat().rows()) ;
-			
+
 			if (image != null) {
 				List<MatImage> matImages = mIMatOperation.execute(image);
 				for (MatImage matImage : matImages) {
@@ -59,7 +59,7 @@ public class MatBolt extends BaseRichBolt {
 
 			}
 		} catch (Exception e) {
-			
+
 			logger.warn("Unable to process input due to ", e);
 			collector.fail(input);
 		}

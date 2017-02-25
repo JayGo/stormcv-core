@@ -21,7 +21,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * A {@link IFetcher} implementation that reads video streams (either live or
- * not). The StreamFrameFetcher is initialized with a set of url's it must read.
+ * not). The XugglerStreamFrameFetcher is initialized with a set of url's it must read.
  * These url's are divided among all StreamFrameFetchers in the topology. So if
  * the number of urls is larger than then number of Fetchers some of them will
  * read and decode multiple streams in parallel. Note that this can become a
@@ -35,7 +35,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * read.
  * 
  * It is possible to provide an additional sleep which is enforced after each
- * emitted frame. This sleep can be used to throttle the StreamFrameFetcher when
+ * emitted frame. This sleep can be used to throttle the XugglerStreamFrameFetcher when
  * it is reading streams to fast (i.e. faster than topology can process). Use of
  * the sleep should be avoided when possible and throttling of the topology
  * should be done using the MAX_SPOUT_PENDING configuration parameter.

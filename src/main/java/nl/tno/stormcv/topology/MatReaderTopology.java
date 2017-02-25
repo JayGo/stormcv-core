@@ -10,9 +10,9 @@ public class MatReaderTopology extends BaseTopology {
 	private String streamId;
 	private String rtmpAddr;
 	private String videoAddr;
-	
+
 	private String effect;
-	
+
 	public MatReaderTopology(String streamId, String rtmpAddr, String videoAddr) {
 		this.streamId = streamId;
 		this.rtmpAddr = rtmpAddr;
@@ -20,7 +20,7 @@ public class MatReaderTopology extends BaseTopology {
 		effect = null;
 		conf.setNumWorkers(2);
 	}
-	
+
 	public MatReaderTopology(String streamId, String rtmpAddr, String videoAddr, String effect) {
 		this.streamId = streamId;
 		this.rtmpAddr = rtmpAddr;
@@ -28,7 +28,7 @@ public class MatReaderTopology extends BaseTopology {
 		this.effect = effect;
 		conf.setNumWorkers(3);
 	}
-	
+
 	@Override
 	public void setSpout() {
 		builder.setSpout("matSpout", new MatSpout(videoAddr, streamId));

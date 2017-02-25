@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import nl.tno.stormcv.util.reader.TCPRawStreamReader;
 import org.apache.storm.task.TopologyContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,11 +19,10 @@ import nl.tno.stormcv.model.serializer.FrameSerializer;
 import nl.tno.stormcv.model.serializer.CVParticleSerializer;
 import nl.tno.stormcv.model.serializer.GroupOfFramesSerializer;
 import nl.tno.stormcv.operation.GroupOfFramesOp;
-import nl.tno.stormcv.util.reader.RawStreamReader;
 
 /**
  * A {@link IFetcher} implementation that reads video streams (either live or
- * not). The StreamFrameFetcher is initialized with a set of url's it must read.
+ * not). The XugglerStreamFrameFetcher is initialized with a set of url's it must read.
  * These url's are divided among all StreamFrameFetchers in the topology. So if
  * the number of urls is larger than then number of Fetchers some of them will
  * read and decode multiple streams in parallel. Note that this can become a
@@ -36,7 +36,7 @@ import nl.tno.stormcv.util.reader.RawStreamReader;
  * read.
  * 
  * It is possible to provide an additional sleep which is enforced after each
- * emitted frame. This sleep can be used to throttle the StreamFrameFetcher when
+ * emitted frame. This sleep can be used to throttle the XugglerStreamFrameFetcher when
  * it is reading streams to fast (i.e. faster than topology can process). Use of
  * the sleep should be avoided when possible and throttling of the topology
  * should be done using the MAX_SPOUT_PENDING configuration parameter.
@@ -60,7 +60,7 @@ public class RawStreamFrameFetcher implements IFetcher<CVParticle> {
 	private int groupSize = 1;
 	protected LinkedBlockingQueue<Frame> frameQueue = new LinkedBlockingQueue<Frame>(
 			20);
-	protected Map<String, RawStreamReader> rawStreamReaders;
+	protected Map<String, TCPRawStreamReader> rawStreamReaders;
 	private int sleepTime = 0;
 	private String imageType;
 	private int batchSize = 1;
@@ -139,7 +139,7 @@ public class RawStreamFrameFetcher implements IFetcher<CVParticle> {
 		if (rawStreamReaders != null) {
 			this.deactivate();
 		}
-		rawStreamReaders = new HashMap<String, RawStreamReader>();
+		rawStreamReaders = new HashMap<String, TCPRawStreamReader>();
 		for (String location : locations) {
 			String[] address = location.split(":");
 			if (address.length < 2) {
@@ -150,11 +150,11 @@ public class RawStreamFrameFetcher implements IFetcher<CVParticle> {
 			int bufferSize = 10240000;
 
 			String streamId = ip + "-" + location.hashCode();
-			RawStreamReader rawStreamReader = new RawStreamReader(ip, port,
+			TCPRawStreamReader TCPRawStreamReader = new TCPRawStreamReader(ip, port,
 					bufferSize, streamId, imageType, frameSkip, groupSize,
 					sleepTime, frameQueue);
-			rawStreamReaders.put(location, rawStreamReader);
-			new Thread(rawStreamReader).start();
+			rawStreamReaders.put(location, TCPRawStreamReader);
+			new Thread(TCPRawStreamReader).start();
 		}
 	}
 

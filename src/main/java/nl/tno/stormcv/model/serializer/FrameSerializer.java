@@ -50,7 +50,6 @@ public class FrameSerializer extends CVParticleSerializer<Frame> implements
 	@Override
 	protected Values getValues(CVParticle particle) throws IOException {
 		Frame frame = (Frame) particle;
-		// BufferedImage image = frame.getImage();
 		byte[] imageBytes = frame.getImageBytes();
 		return new Values(frame.getImageType(), imageBytes,
 				frame.getTimestamp(), frame.getBoundingBox(),
@@ -116,16 +115,11 @@ public class FrameSerializer extends CVParticleSerializer<Frame> implements
 	public byte[] toBytes(Frame frame) throws IOException {
 		Kryo kryo = new Kryo();
 		kryo.register(Feature.class);
-		
 		Output output = new Output(1024, 10240000);
-		//output.setOutputStream(new ByteArrayOutputStream());
-		//byte[] outbuffer = new byte[10240];
-		//output.setBuffer(outbuffer);
 		
 		output.writeLong(frame.getRequestId());
 		output.writeString(frame.getStreamId());
 		output.writeLong(frame.getSequenceNr());
-		//kryo.writeObject(output, frame.getMetadata());
 		
 		output.writeLong(frame.getTimestamp());
 		output.writeString(frame.getImageType());
@@ -151,12 +145,10 @@ public class FrameSerializer extends CVParticleSerializer<Frame> implements
 	// for kafka test
 	@SuppressWarnings("unchecked")
 	public Frame fromBytes(byte[] bytes) {
-		Kryo kryo = new Kryo();
 		Input input = new Input(bytes);
 		long requestId = input.readLong();
 		String streamId = input.readString();
 		long sequenceNr = input.readLong();
-		//HashMap<String, Object> metadata = kryo.readObject(input, HashMap.class);
 		long timeStamp = input.readLong();
 		String imageType = input.readString();
 		int buffSize = input.readInt();
@@ -168,13 +160,10 @@ public class FrameSerializer extends CVParticleSerializer<Frame> implements
 		Rectangle boundingBox = new Rectangle(Math.round(input.readFloat()),
 				Math.round(input.readFloat()), Math.round(input.readFloat()),
 				Math.round(input.readFloat()));
-
 		//List<Feature> features = kryo.readObject(input, ArrayList.class);
-		
 
 		Frame frame = new Frame(streamId, sequenceNr, imageType, buffer,
 				timeStamp, boundingBox, null);
-		//frame.setMetadata(metadata);
 		frame.setRequestId(requestId);
 		return frame;
 	}

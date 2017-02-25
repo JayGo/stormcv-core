@@ -13,4 +13,6 @@ public class GlobalConstants {
 
 	public static int SpoutQueueSize = 100;
 	public static String DefaultRTMPServer = "rtmp://10.134.142.114:1935/live1/";
+
+	public static int JPEGCodecQuality = 80;
 }

@@ -110,21 +110,6 @@ public class ImageUtils {
 	/**
 	 * Creates a Mat object for the image in the provided frame
 	 * 
-	 * @param frame
-	 * @return Mat object representing the image of type
-	 *         Highgui.CV_LOAD_IMAGE_COLOR
-	 * @throws IOException
-	 *             if the image cannot be read or converted into binary format
-	 */
-	public static Mat frameToMat(Frame frame) throws IOException {
-		if (frame.getImage() == null)
-			throw new IOException("Frame does not contain an image");
-		return bytesToMat(frame.getImageBytes());
-	}
-
-	/**
-	 * Creates a Mat object for the image in the provided frame
-	 * 
 	 * @param image
 	 *            the image to be converted to mat
 	 * @param imageType

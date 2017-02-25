@@ -36,7 +36,7 @@ import nl.tno.stormcv.util.ImageUtils;
 public class MatRTMPWriterOp implements IMatOperation<MatImage> {
 
 	private static final long serialVersionUID = 6453978086650507695L;
-	
+
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	private String url = GlobalConstants.DefaultRTMPServer;
 	private String appName = "";
@@ -46,7 +46,7 @@ public class MatRTMPWriterOp implements IMatOperation<MatImage> {
 	private IContainer container = null;
 	private Boolean isCoderInit = false;
 	private double frameRate = 0.0;
-	
+
 	private IContainerFormat containerFormat;
 
 	public MatRTMPWriterOp RTMPServer(String url) {
@@ -63,13 +63,13 @@ public class MatRTMPWriterOp implements IMatOperation<MatImage> {
 		this.frameRate = frameRate;
 		return this;
 	}
-	
+
 	public Set<Class<?>> getClasses() {
 		Set<Class<?>> s = new HashSet<Class<?>>();
 		s.add(MatRTMPWriterOp.class);
 		return s;
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void prepare(Map stormConf, TopologyContext context)
@@ -96,18 +96,18 @@ public class MatRTMPWriterOp implements IMatOperation<MatImage> {
 	public List<MatImage> execute(MatImage image) throws Exception {
 		// TODO Auto-generated method stub
 		List<MatImage> result = new ArrayList<MatImage>();
-		
+
 		if(image.getMat() == null || image.getMat().empty()) {
 			return result;
 		}
-		
+
 		BufferedImage bfImage = ImageUtils.matToBufferedImage(image.getMat());
 
 //		if (frame.getSequenceNr() < 400) {
 //			File file = new File("/home/lwang/workspace/image" + frame.getSequenceNr() + ".jpg");
 //			ImageIO.write(image, "jpg", file);
 //		}
-		
+
 		if (bfImage == null) {
 			logger.error("image null");
 			return result;
@@ -180,7 +180,7 @@ public class MatRTMPWriterOp implements IMatOperation<MatImage> {
 		}
 		return result;
 	}
-	
+
 	public void initCoder() throws Exception {
 		if (url == "" || appName == "")
 			logger.error("no rtmp server defined!");

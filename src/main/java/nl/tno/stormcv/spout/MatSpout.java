@@ -27,37 +27,37 @@ public class MatSpout implements IRichSpout {
 	private String streamId;
 	private MatImageSerializer mMatImageSerializer = new MatImageSerializer();;
 	private Logger logger = LoggerFactory.getLogger(MatSpout.class);
-	
+
 	private long seq;
-	
+
 	public MatSpout(String videoAddr, String streamId) {
 		this.videoAddr = videoAddr;
 		this.streamId = streamId;
 		seq = 0;
 	}
-	
+
 	@Override
 	public void ack(Object arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void activate() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void close() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void deactivate() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -83,7 +83,7 @@ public class MatSpout implements IRichSpout {
 				String id = matImage.getStreamId() + "_"
 						+ matImage.getSequence();
 				collector.emit(values, id);
-				
+
 				matImage.release();
 				matImage = null;
 				System.gc();
@@ -93,7 +93,7 @@ public class MatSpout implements IRichSpout {
 			}
 
 		}
-		
+
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -107,7 +107,7 @@ public class MatSpout implements IRichSpout {
 		}
 		capture = new VideoCapture(videoAddr);
 		capture.open(videoAddr);
-		
+
 	}
 
 	@Override
