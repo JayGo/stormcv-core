@@ -1,78 +1,82 @@
 package edu.fudan.lwang.codec;
 
-import java.io.Serializable;
-
 import edu.fudan.lwang.codec.Common.CodecType;
 
-public class SourceInfo implements Serializable{
+import java.io.Serializable;
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4198085328451136021L;
-	/**
-	 * 
-	 */
-	private int frameWidth;
-	private int frameHeight;
-	private String encodeQueueId;
-	private String videoAddr;
-	private CodecType type;
-	
-	public SourceInfo() {
-		
-	}
-	
-	public SourceInfo(int frameWidth, int frameHeight, String encodeQueueId, CodecType type) {
-		super();
-		this.frameWidth = frameWidth;
-		this.frameHeight = frameHeight;
-		this.encodeQueueId = encodeQueueId;
-		this.type = type;
-	}
-	
-	
-	
-	public String getVideoAddr() {
-		return videoAddr;
-	}
+public class SourceInfo implements Serializable {
 
-	public void setVideoAddr(String videoAddr) {
-		this.videoAddr = videoAddr;
-	}
+    /**
+     *
+     */
+    private static final long serialVersionUID = -4198085328451136021L;
+    /**
+     *
+     */
+    private int frameWidth;
+    private int frameHeight;
+    private String encodeQueueId;
+    private String videoAddr;
+    private CodecType type;
 
-	public CodecType getType() {
-		return type;
-	}
+    public SourceInfo() {
 
-	public void setType(CodecType type) {
-		this.type = type;
-	}
+    }
 
-	public int getFrameWidth() {
-		return frameWidth;
-	}
-	public void setFrameWidth(int frameWidth) {
-		this.frameWidth = frameWidth;
-	}
-	public int getFrameHeight() {
-		return frameHeight;
-	}
-	public void setFrameHeight(int frameHeight) {
-		this.frameHeight = frameHeight;
-	}
-	public String getEncodeQueueId() {
-		return encodeQueueId;
-	}
-	public void setEncodeQueueId(String encodeQueueId) {
-		this.encodeQueueId = encodeQueueId;
-	}
+    public SourceInfo(int frameWidth, int frameHeight, String encodeQueueId, CodecType type) {
+        super();
+        this.frameWidth = frameWidth;
+        this.frameHeight = frameHeight;
+        this.encodeQueueId = encodeQueueId;
+        this.type = type;
+    }
 
-	@Override
-	public String toString() {
-		return "SourceInfo [frameWidth=" + frameWidth + ", frameHeight=" + frameHeight + ", encodeQueueId="
-				+ encodeQueueId + ", videoAddr=" + videoAddr + ", type=" + type + "]";
-	}
+
+    public String getVideoAddr() {
+        return videoAddr;
+    }
+
+    public void setVideoAddr(String videoAddr) {
+        this.videoAddr = videoAddr;
+    }
+
+    public CodecType getType() {
+        return type;
+    }
+
+    public void setType(CodecType type) {
+        this.type = type;
+    }
+
+    public int getFrameWidth() {
+        return frameWidth;
+    }
+
+    public void setFrameWidth(int frameWidth) {
+        this.frameWidth = frameWidth;
+    }
+
+    public int getFrameHeight() {
+        return frameHeight;
+    }
+
+    public void setFrameHeight(int frameHeight) {
+        this.frameHeight = frameHeight;
+    }
+
+    public String getEncodeQueueId() {
+        return encodeQueueId;
+    }
+
+    public void setEncodeQueueId(String encodeQueueId) {
+        this.encodeQueueId = encodeQueueId;
+    }
+
+    @Override
+    public String toString() {
+        return "SourceInfo [frameWidth=" + frameWidth + ", frameHeight=" + frameHeight + ", encodeQueueId="
+                + encodeQueueId + ", videoAddr=" + videoAddr + ", type=" + type + "]";
+    }
 
 
 }

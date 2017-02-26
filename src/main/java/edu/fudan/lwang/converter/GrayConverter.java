@@ -1,151 +1,139 @@
 package edu.fudan.lwang.converter;
 
-import java.awt.color.ColorSpace;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
-import java.awt.image.PixelInterleavedSampleModel;
-import java.awt.image.Raster;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.IntBuffer;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.xuggle.ferry.JNIReference;
 import com.xuggle.xuggler.IPixelFormat.Type;
 import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.video.AConverter;
 
+import java.awt.color.ColorSpace;
+import java.awt.image.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.util.concurrent.atomic.AtomicReference;
+
 public class GrayConverter extends AConverter {
 
-	private static final int[] mBandOffsets = { 0 };
-	private static final ColorSpace mColorSpace = ColorSpace.getInstance(1003);
+    private static final int[] mBandOffsets = {0};
+    private static final ColorSpace mColorSpace = ColorSpace.getInstance(1003);
 
-	public GrayConverter(Type pictureType, int imageType, int pictureWidth,
-			int pictureHeight, int imageWidth, int imageHeight) {
-		super(pictureType, Type.GRAY8, imageType, pictureWidth, pictureHeight,
-				imageWidth, imageHeight);
-		// TODO Auto-generated constructor stub
-	}
-	
-	public GrayConverter(Type pictureType, int pictureWidth,
-			int pictureHeight, int imageWidth, int imageHeight) {
-		super(pictureType, Type.GRAY8, 10, pictureWidth, pictureHeight,
-				imageWidth, imageHeight);
-		// TODO Auto-generated constructor stub
-	}
+    public GrayConverter(Type pictureType, int imageType, int pictureWidth,
+                         int pictureHeight, int imageWidth, int imageHeight) {
+        super(pictureType, Type.GRAY8, imageType, pictureWidth, pictureHeight,
+                imageWidth, imageHeight);
+        // TODO Auto-generated constructor stub
+    }
 
-	@Override
-	public IVideoPicture toPicture(BufferedImage image,
-			long timestamp) {
-		// TODO Auto-generated method stub
-		validateImage(image);
-		DataBuffer imageBuffer = image.getRaster().getDataBuffer();
-		byte[] imageBytes = null;
-		int[] imageInts = null;
+    public GrayConverter(Type pictureType, int pictureWidth,
+                         int pictureHeight, int imageWidth, int imageHeight) {
+        super(pictureType, Type.GRAY8, 10, pictureWidth, pictureHeight,
+                imageWidth, imageHeight);
+        // TODO Auto-generated constructor stub
+    }
 
-		if (imageBuffer instanceof DataBufferByte) {
-			imageBytes = ((DataBufferByte) imageBuffer).getData();
-		}
-		else if (imageBuffer instanceof DataBufferInt) {
-			imageInts = ((DataBufferInt) imageBuffer).getData();
-		}
-		else {
-			throw new IllegalArgumentException(
-					"Unsupported BufferedImage data buffer type: "
-							+ imageBuffer.getDataType());
-		}
+    @Override
+    public IVideoPicture toPicture(BufferedImage image,
+                                   long timestamp) {
+        // TODO Auto-generated method stub
+        validateImage(image);
+        DataBuffer imageBuffer = image.getRaster().getDataBuffer();
+        byte[] imageBytes = null;
+        int[] imageInts = null;
 
-		AtomicReference<JNIReference> ref = new AtomicReference<JNIReference>(null);
+        if (imageBuffer instanceof DataBufferByte) {
+            imageBytes = ((DataBufferByte) imageBuffer).getData();
+        } else if (imageBuffer instanceof DataBufferInt) {
+            imageInts = ((DataBufferInt) imageBuffer).getData();
+        } else {
+            throw new IllegalArgumentException(
+                    "Unsupported BufferedImage data buffer type: "
+                            + imageBuffer.getDataType());
+        }
 
-		IVideoPicture resamplePicture = null;
-		try {
-			IVideoPicture picture = IVideoPicture.make(
-					getRequiredPictureType(), image.getWidth(),
-					image.getHeight());
+        AtomicReference<JNIReference> ref = new AtomicReference<JNIReference>(null);
 
-			ByteBuffer pictureByteBuffer = picture.getByteBuffer(ref);
-			IntBuffer pictureIntBuffer = null;
+        IVideoPicture resamplePicture = null;
+        try {
+            IVideoPicture picture = IVideoPicture.make(
+                    getRequiredPictureType(), image.getWidth(),
+                    image.getHeight());
 
-			if (imageInts != null) {
-				pictureByteBuffer.order(ByteOrder.BIG_ENDIAN);
-				pictureIntBuffer = pictureByteBuffer.asIntBuffer();
-				pictureIntBuffer.put(imageInts);
-			}
-			else {
-				pictureByteBuffer.put(imageBytes);
-			}
-			pictureByteBuffer = null;
-			picture.setComplete(true, getRequiredPictureType(),
-					image.getWidth(), image.getHeight(), timestamp);
+            ByteBuffer pictureByteBuffer = picture.getByteBuffer(ref);
+            IntBuffer pictureIntBuffer = null;
 
-			if (willResample()) {
-				resamplePicture = picture;
-				picture = resample(resamplePicture, this.mToPictureResampler);
-			}
+            if (imageInts != null) {
+                pictureByteBuffer.order(ByteOrder.BIG_ENDIAN);
+                pictureIntBuffer = pictureByteBuffer.asIntBuffer();
+                pictureIntBuffer.put(imageInts);
+            } else {
+                pictureByteBuffer.put(imageBytes);
+            }
+            pictureByteBuffer = null;
+            picture.setComplete(true, getRequiredPictureType(),
+                    image.getWidth(), image.getHeight(), timestamp);
 
-			return picture;
-			
-		} finally {
-			if (resamplePicture != null)
-				resamplePicture.delete();
-			if (ref.get() != null)
-				((JNIReference) ref.get()).delete();
-		}
-	}
+            if (willResample()) {
+                resamplePicture = picture;
+                picture = resample(resamplePicture, this.mToPictureResampler);
+            }
 
-	@Override
-	public BufferedImage toImage(IVideoPicture picture) {
-		// TODO Auto-generated method stub
-		validatePicture(picture);
+            return picture;
 
-		IVideoPicture resamplePicture = null;
-		AtomicReference<JNIReference> ref = new AtomicReference<JNIReference>(null);
-		try {
-			if (willResample()) {
-				resamplePicture = resample(picture, this.mToImageResampler);
-				picture = resamplePicture;
-			}
+        } finally {
+            if (resamplePicture != null)
+                resamplePicture.delete();
+            if (ref.get() != null)
+                ((JNIReference) ref.get()).delete();
+        }
+    }
 
-			int w = picture.getWidth();
-			int h = picture.getHeight();
+    @Override
+    public BufferedImage toImage(IVideoPicture picture) {
+        // TODO Auto-generated method stub
+        validatePicture(picture);
 
-			ByteBuffer byteBuf = picture.getByteBuffer(ref);
-			byte[] bytes = new byte[picture.getSize()];
-			byteBuf.get(bytes, 0, bytes.length);
+        IVideoPicture resamplePicture = null;
+        AtomicReference<JNIReference> ref = new AtomicReference<JNIReference>(null);
+        try {
+            if (willResample()) {
+                resamplePicture = resample(picture, this.mToImageResampler);
+                picture = resamplePicture;
+            }
 
-			DataBufferByte db = new DataBufferByte(bytes, bytes.length);
+            int w = picture.getWidth();
+            int h = picture.getHeight();
 
-			SampleModel sm = new PixelInterleavedSampleModel(db.getDataType(),
-					w, h, 1, w, mBandOffsets);
-			
+            ByteBuffer byteBuf = picture.getByteBuffer(ref);
+            byte[] bytes = new byte[picture.getSize()];
+            byteBuf.get(bytes, 0, bytes.length);
 
-			WritableRaster wr = Raster.createWritableRaster(sm, db, null);
+            DataBufferByte db = new DataBufferByte(bytes, bytes.length);
 
-			ColorModel colorModel = new ComponentColorModel(mColorSpace, false,
-					false, 1, db.getDataType());
+            SampleModel sm = new PixelInterleavedSampleModel(db.getDataType(),
+                    w, h, 1, w, mBandOffsets);
 
-			BufferedImage localBufferedImage = new BufferedImage(colorModel,
-					wr, false, null);
 
-			return localBufferedImage;
-		} finally {
-			if (resamplePicture != null)
-				resamplePicture.delete();
-			if (ref.get() != null)
-				((JNIReference) ref.get()).delete();
-		}
-	}
+            WritableRaster wr = Raster.createWritableRaster(sm, db, null);
 
-	@Override
-	public void delete() {
-		// TODO Auto-generated method stub
-		super.close();
-	}
+            ColorModel colorModel = new ComponentColorModel(mColorSpace, false,
+                    false, 1, db.getDataType());
+
+            BufferedImage localBufferedImage = new BufferedImage(colorModel,
+                    wr, false, null);
+
+            return localBufferedImage;
+        } finally {
+            if (resamplePicture != null)
+                resamplePicture.delete();
+            if (ref.get() != null)
+                ((JNIReference) ref.get()).delete();
+        }
+    }
+
+    @Override
+    public void delete() {
+        // TODO Auto-generated method stub
+        super.close();
+    }
 
 }

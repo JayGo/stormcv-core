@@ -1,31 +1,21 @@
 package nl.tno.stormcv.testcase;
 
 
-import java.awt.image.BufferedImage;
-
-import com.xuggle.xuggler.Global;
-import com.xuggle.xuggler.IContainer;
-import com.xuggle.xuggler.IPacket;
-import com.xuggle.xuggler.IPixelFormat;
-import com.xuggle.xuggler.IStream;
-import com.xuggle.xuggler.IStreamCoder;
-import com.xuggle.xuggler.ICodec;
-import com.xuggle.xuggler.IVideoPicture;
-import com.xuggle.xuggler.IVideoResampler;
-import com.xuggle.xuggler.Utils;
+import com.xuggle.xuggler.*;
 import com.xuggle.xuggler.demos.VideoImage;
 import nl.tno.stormcv.constant.GlobalConstants;
+
+import java.awt.image.BufferedImage;
 
 /**
  * Takes a media container, finds the first video stream,
  * decodes that stream, and then displays the video frames,
  * at the frame-rate specified by the container, on a
  * window.
- * @author aclarke
  *
+ * @author aclarke
  */
-public class DecodeAndPlayVideoByXuggle
-{
+public class DecodeAndPlayVideoByXuggle {
 
     /**
      * Takes a media container (file) as the first argument, opens it,
@@ -35,8 +25,7 @@ public class DecodeAndPlayVideoByXuggle
      * @param args Must contain one string which represents a filename
      */
     @SuppressWarnings("deprecation")
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
 //        if (args.length <= 0)
 //            throw new IllegalArgumentException("must pass in a filename" +
 //                    " as the first argument");
@@ -63,15 +52,13 @@ public class DecodeAndPlayVideoByXuggle
         // and iterate through the streams to find the first video stream
         int videoStreamId = -1;
         IStreamCoder videoCoder = null;
-        for(int i = 0; i < numStreams; i++)
-        {
+        for (int i = 0; i < numStreams; i++) {
             // Find the stream object
             IStream stream = container.getStream(i);
             // Get the pre-configured decoder that can decode this stream;
             IStreamCoder coder = stream.getStreamCoder();
 
-            if (coder.getCodecType() == ICodec.Type.CODEC_TYPE_VIDEO)
-            {
+            if (coder.getCodecType() == ICodec.Type.CODEC_TYPE_VIDEO) {
                 videoStreamId = i;
                 videoCoder = coder;
                 break;
@@ -79,7 +66,7 @@ public class DecodeAndPlayVideoByXuggle
         }
         if (videoStreamId == -1)
             throw new RuntimeException("could not find video stream in container: "
-                    +filename);
+                    + filename);
 
     /*
      * Now we have found the video stream in this file.  Let's open up our decoder so it can
@@ -87,11 +74,10 @@ public class DecodeAndPlayVideoByXuggle
      */
         if (videoCoder.open() < 0)
             throw new RuntimeException("could not open video decoder for container: "
-                    +filename);
+                    + filename);
 
         IVideoResampler resampler = null;
-        if (videoCoder.getPixelType() != IPixelFormat.Type.BGR24)
-        {
+        if (videoCoder.getPixelType() != IPixelFormat.Type.BGR24) {
             // if this stream is not in BGR24, we're going to need to
             // convert it.  The VideoResampler does that for us.
             resampler = IVideoResampler.make(videoCoder.getWidth(),
@@ -112,13 +98,11 @@ public class DecodeAndPlayVideoByXuggle
         IPacket packet = IPacket.make();
         long firstTimestampInStream = Global.NO_PTS;
         long systemClockStartTime = 0;
-        while(container.readNextPacket(packet) >= 0)
-        {
+        while (container.readNextPacket(packet) >= 0) {
       /*
        * Now we have a packet, let's see if it belongs to our video stream
        */
-            if (packet.getStreamIndex() == videoStreamId)
-            {
+            if (packet.getStreamIndex() == videoStreamId) {
         /*
          * We allocate a new picture to get the data out of Xuggler
          */
@@ -126,8 +110,7 @@ public class DecodeAndPlayVideoByXuggle
                         videoCoder.getWidth(), videoCoder.getHeight());
 
                 int offset = 0;
-                while(offset < packet.getSize())
-                {
+                while (offset < packet.getSize()) {
           /*
            * Now, we decode the video, checking for any errors.
            *
@@ -143,16 +126,14 @@ public class DecodeAndPlayVideoByXuggle
            * a full video picture yet.  Therefore you should always check if you
            * got a complete picture from the decoder
            */
-                    if (picture.isComplete())
-                    {
+                    if (picture.isComplete()) {
                         IVideoPicture newPic = picture;
             /*
              * If the resampler is not null, that means we didn't get the
              * video in BGR24 format and
              * need to convert it into BGR24 format.
              */
-                        if (resampler != null)
-                        {
+                        if (resampler != null) {
                             // we must resample
                             newPic = IVideoPicture.make(resampler.getOutputPixelFormat(),
                                     picture.getWidth(), picture.getHeight());
@@ -178,8 +159,7 @@ public class DecodeAndPlayVideoByXuggle
                          * be in different units depending on your IContainer, and IStream
                          * and things can get hairy quickly.
                          */
-                        if (firstTimestampInStream == Global.NO_PTS)
-                        {
+                        if (firstTimestampInStream == Global.NO_PTS) {
                             // This is our first time through
                             firstTimestampInStream = picture.getTimeStamp();
                             // get the starting clock time so we can hold up frames
@@ -195,20 +175,16 @@ public class DecodeAndPlayVideoByXuggle
                             // always in MICROSECONDS,
                             // so we divide by 1000 to get milliseconds.
                             long millisecondsStreamTimeSinceStartOfVideo =
-                                    (picture.getTimeStamp() - firstTimestampInStream)/1000;
+                                    (picture.getTimeStamp() - firstTimestampInStream) / 1000;
                             final long millisecondsTolerance = 50; // and we give ourselfs 50 ms of tolerance
                             final long millisecondsToSleep =
                                     (millisecondsStreamTimeSinceStartOfVideo -
                                             (millisecondsClockTimeSinceStartofVideo +
                                                     millisecondsTolerance));
-                            if (millisecondsToSleep > 0)
-                            {
-                                try
-                                {
+                            if (millisecondsToSleep > 0) {
+                                try {
                                     Thread.sleep(millisecondsToSleep);
-                                }
-                                catch (InterruptedException e)
-                                {
+                                } catch (InterruptedException e) {
                                     // we might get this when the user closes the dialog box, so
                                     // just return from the method.
                                     return;
@@ -223,14 +199,13 @@ public class DecodeAndPlayVideoByXuggle
                         updateJavaWindow(javaImage);
                     }
                 }
-            }
-            else
-            {
+            } else {
         /*
          * This packet isn't part of our video stream, so we just
          * silently drop it.
          */
-                do {} while(false);
+                do {
+                } while (false);
             }
 
         }
@@ -239,13 +214,11 @@ public class DecodeAndPlayVideoByXuggle
      * the garbage collector... but because we're nice people and want
      * to be invited places for Christmas, we're going to show how to clean up.
      */
-        if (videoCoder != null)
-        {
+        if (videoCoder != null) {
             videoCoder.close();
             videoCoder = null;
         }
-        if (container !=null)
-        {
+        if (container != null) {
             container.close();
             container = null;
         }
@@ -255,20 +228,17 @@ public class DecodeAndPlayVideoByXuggle
 
     /**
      * The window we'll draw the video on.
-     *
      */
     private static VideoImage mScreen = null;
 
-    private static void updateJavaWindow(BufferedImage javaImage)
-    {
+    private static void updateJavaWindow(BufferedImage javaImage) {
         mScreen.setImage(javaImage);
     }
 
     /**
      * Opens a Swing window on screen.
      */
-    private static void openJavaWindow()
-    {
+    private static void openJavaWindow() {
         mScreen = new VideoImage();
     }
 
@@ -276,8 +246,7 @@ public class DecodeAndPlayVideoByXuggle
      * Forces the swing thread to terminate; I'm sure there is a right
      * way to do this in swing, but this works too.
      */
-    private static void closeJavaWindow()
-    {
+    private static void closeJavaWindow() {
         System.exit(0);
     }
 }

@@ -1,17 +1,12 @@
 package nl.tno.stormcv.util.reader;
 
-import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.MediaListenerAdapter;
-import com.xuggle.mediatool.event.IVideoPictureEvent;
-
 import nl.tno.stormcv.capture.BufferedImagePackQueue;
-import nl.tno.stormcv.capture.ThreadManager;
 import nl.tno.stormcv.capture.BufferedImagePackQueue.BufferedImagePack;
+import nl.tno.stormcv.capture.ThreadManager;
 import nl.tno.stormcv.codec.JPEGImageCodec;
 import nl.tno.stormcv.codec.TurboJPEGImageCodec;
 import nl.tno.stormcv.model.Frame;
-
-import nl.tno.stormcv.util.ImageUtils;
 import org.apache.storm.utils.Utils;
 import org.opencv.core.CvException;
 import org.opencv.core.Mat;
@@ -22,10 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This class reads a video stream or file, decodes frames and puts those in a queue for further processing.
@@ -60,11 +52,11 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
         this.frameQueue = frameQueue;
         this.streamId = streamId;
         lastRead = System.currentTimeMillis() + 10000;
-        this.codec = TurboJPEGImageCodec.getInstance();
+        this.codec = new TurboJPEGImageCodec();
     }
 
     @Override
-	public void run() {
+    public void run() {
         running = true;
         startStreamReading();
         //startMultiThreadStreamReading();
@@ -74,26 +66,22 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
         running = false;
     }
 
-    public void startMultiThreadStreamReading() {
+    private void startMultiThreadStreamReading() {
         if (streamLocation == null) return;
-    	BufferedImagePackQueue mBufferedImagePackQueue = BufferedImagePackQueue.getInstance();
-    	ThreadManager.getInstance().startProcessingAndReading();
-    	frameNr = 0;
+        BufferedImagePackQueue mBufferedImagePackQueue = BufferedImagePackQueue.getInstance();
+        ThreadManager.getInstance().startProcessingAndReading();
+        frameNr = 0;
         while (running) {
             try {
-    			BufferedImagePack mBufferedImagePack = mBufferedImagePackQueue.pop(frameNr);
-    			if(mBufferedImagePack == null) {
-    				continue;
-    			}
-    			BufferedImage bufferedImage = mBufferedImagePack.getImage();
-//            	byte[] buffer = ImageUtils.imageToBytes(bufferedImage, imageType);
-//            	byte[] buffer = {1,0,1,0};
+                BufferedImagePack mBufferedImagePack = mBufferedImagePackQueue.pop(frameNr);
+                if (mBufferedImagePack == null) {
+                    continue;
+                }
+                BufferedImage bufferedImage = mBufferedImagePack.getImage();
                 long timestamp = System.currentTimeMillis();
                 byte[] bytes = codec.BufferedImageToJPEGBytes(bufferedImage);
                 Frame newFrame = new Frame(streamId, frameNr, imageType, bytes, timestamp, new Rectangle(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight()));
-//                Frame newFrame = new Frame(streamId, frameNr, imageType, buffer, timestamp, new Rectangle(0, 0, 1, 1));
-//                Frame newFrame = new Frame(streamId, frameNr, imageType, bufferedImage, timestamp, new Rectangle(0, 0, 1, 1));
-                newFrame.getMetadata().put("uri", streamLocation);
+                //newFrame.getMetadata().put("uri", streamLocation);
                 frameQueue.put(newFrame);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -102,11 +90,13 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
         }
     }
 
-    public void startStreamReading() {
+    private void startStreamReading() {
         if (streamLocation == null) return;
-    	VideoCapture capture = new VideoCapture();
+        VideoCapture capture = new VideoCapture();
         Mat mat = new Mat();
         frameNr = 0;
+        long start = 0, end;
+
         capture.open(this.streamLocation);
         int width = (int) capture.get(Highgui.CV_CAP_PROP_FRAME_WIDTH);
         int height = (int) capture.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT);
@@ -119,13 +109,12 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
                 try {
                     capture.read(mat);
                     imageBytes = this.codec.MatToJPEGBytes(mat);
-                    //imageBytes = ImageUtils.matToBytes(image);
                 } catch (Exception e) {
                     e.printStackTrace();
                     logger.info("Exception during executing matToBufferedImage " + streamLocation);
                     if (e instanceof CvException) {
-                    	capture.open(streamLocation);
-                    	continue;
+                        capture.open(streamLocation);
+                        continue;
                     }
                 }
                 lastRead = System.currentTimeMillis();
@@ -138,9 +127,15 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
                 } catch (Exception e) {
                     logger.warn("Unable to process new frame due to: " + e.getMessage());
                 }
+
+
+                if (frameNr % 500 == 0) {
+                    start = System.currentTimeMillis();
+                }
                 frameNr++;
-                if (frameNr >= 4) {
-                    break;
+                if (frameNr % 500 == 0) {
+                    end = System.currentTimeMillis();
+                    logger.info("OpenCVRtspReader Rate: {}", (500 / ((end - start) / 1000.0f)));
                 }
             }
         }

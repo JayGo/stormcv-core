@@ -26,7 +26,7 @@ public class OpenCVJPEGImageCodec implements JPEGImageCodec {
     }
 
     public synchronized static OpenCVJPEGImageCodec getInstance() {
-        if(mOpenCVJPEGImageCodec == null) {
+        if (mOpenCVJPEGImageCodec == null) {
             mOpenCVJPEGImageCodec = new OpenCVJPEGImageCodec();
         }
         return mOpenCVJPEGImageCodec;
@@ -61,15 +61,12 @@ public class OpenCVJPEGImageCodec implements JPEGImageCodec {
         Mat out;
         if (in.getType() == BufferedImage.TYPE_3BYTE_BGR) {
             out = new Mat(in.getHeight(), in.getWidth(), CvType.CV_8UC3);
-        }
-        else if (in.getType() == BufferedImage.TYPE_4BYTE_ABGR
+        } else if (in.getType() == BufferedImage.TYPE_4BYTE_ABGR
                 || in.getType() == BufferedImage.TYPE_4BYTE_ABGR_PRE) {
             out = new Mat(in.getHeight(), in.getWidth(), CvType.CV_8UC4);
-        }
-        else if (in.getType() == BufferedImage.TYPE_BYTE_GRAY) {
+        } else if (in.getType() == BufferedImage.TYPE_BYTE_GRAY) {
             out = new Mat(in.getHeight(), in.getWidth(), CvType.CV_8UC3);
-        }
-        else {
+        } else {
             return null;
         }
         byte[] data = ((DataBufferByte) in.getRaster().getDataBuffer())
@@ -90,5 +87,17 @@ public class OpenCVJPEGImageCodec implements JPEGImageCodec {
             e.printStackTrace();
         }
         return img;
+    }
+
+    public static byte[] MatToRawBytes(Mat in) {
+        byte[] out = new byte[in.width() * in.height() * (int) in.elemSize()];
+        in.get(0, 0, out);
+        return out;
+    }
+
+    public static Mat RawBytesToMat(byte[] in, int width, int height, int type) {
+        Mat out = Mat.eye(height, width, type);
+        out.put(0, 0, in);
+        return out;
     }
 }

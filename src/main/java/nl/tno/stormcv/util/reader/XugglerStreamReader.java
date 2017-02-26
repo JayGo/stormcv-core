@@ -1,28 +1,20 @@
 package nl.tno.stormcv.util.reader;
 
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import nl.tno.stormcv.codec.JPEGImageCodec;
-import nl.tno.stormcv.codec.TurboJPEGImageCodec;
-import org.apache.storm.utils.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import nl.tno.stormcv.model.Frame;
-
 import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.MediaListenerAdapter;
 import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.mediatool.event.IVideoPictureEvent;
-import com.xuggle.xuggler.Global;
-import com.xuggle.xuggler.ICodec;
-import com.xuggle.xuggler.IContainer;
-import com.xuggle.xuggler.IPacket;
-import com.xuggle.xuggler.IStream;
-import com.xuggle.xuggler.IStreamCoder;
-import com.xuggle.xuggler.IVideoPicture;
+import com.xuggle.xuggler.*;
+import nl.tno.stormcv.codec.JPEGImageCodec;
+import nl.tno.stormcv.codec.TurboJPEGImageCodec;
+import nl.tno.stormcv.model.Frame;
+import org.apache.storm.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * This class reads a video stream or file, decodes frames and puts those in a queue for further processing.
@@ -33,7 +25,6 @@ import com.xuggle.xuggler.IVideoPicture;
  * @author Corne Versloot
  */
 public class XugglerStreamReader extends MediaListenerAdapter implements Runnable {
-
     private Logger logger = LoggerFactory.getLogger(XugglerStreamReader.class);
     private int streamIndex = -1;
     private String streamId;
@@ -55,7 +46,7 @@ public class XugglerStreamReader extends MediaListenerAdapter implements Runnabl
         this.sleepTime = sleepTime;
         this.frameQueue = frameQueue;
         this.streamId = streamId;
-        this.codec = TurboJPEGImageCodec.getInstance();
+        this.codec = new TurboJPEGImageCodec();
     }
 
     @Override
@@ -167,9 +158,9 @@ public class XugglerStreamReader extends MediaListenerAdapter implements Runnabl
 
     private void processFrame(BufferedImage image) {
         if (frameNr % frameSkip < groupSize) {
-                byte[] buffer = this.codec.BufferedImageToJPEGBytes(image);
-                long timestamp = System.currentTimeMillis();
-                Frame newFrame = new Frame(streamId, frameNr, imageType, buffer, timestamp, new Rectangle(0, 0, image.getWidth(), image.getHeight()));
+            byte[] buffer = this.codec.BufferedImageToJPEGBytes(image);
+            long timestamp = System.currentTimeMillis();
+            Frame newFrame = new Frame(streamId, frameNr, imageType, buffer, timestamp, new Rectangle(0, 0, image.getWidth(), image.getHeight()));
             newFrame.getMetadata().put("uri", streamLocation);
             try {
                 frameQueue.put(newFrame);

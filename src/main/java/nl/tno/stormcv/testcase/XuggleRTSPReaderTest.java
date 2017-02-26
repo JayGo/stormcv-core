@@ -19,15 +19,14 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * This class reads a video stream or file, decodes frames and puts those in a queue for further processing. 
+ * This class reads a video stream or file, decodes frames and puts those in a queue for further processing.
  * The XuggleRTSPReaderTest will automatically throttle itself based on the size of the queue it writes the frames to.
- * This is done to avoid memory overload if production of frames is higher than the consumption. The actual decoding of 
+ * This is done to avoid memory overload if production of frames is higher than the consumption. The actual decoding of
  * frames is done by Xuggler which in turn uses FFMPEG (xuggler jar file is shipped with ffmpeg binaries).
- *  
- * @author Corne Versloot
  *
+ * @author Corne Versloot
  */
-public class XuggleRTSPReaderTest{
+public class XuggleRTSPReaderTest {
     public static void main(String[] args) {
         String streamId = "test";
         String streamLocation = GlobalConstants.PseudoRtspAddress;
@@ -73,7 +72,7 @@ public class XuggleRTSPReaderTest{
             this.running = true;
             this.streamIndex = -1;
             this.frameNr = 0;
-            this.codec = TurboJPEGImageCodec.getInstance();
+            this.codec = new TurboJPEGImageCodec();
         }
 
         public XuggleRTSPReader(String streamId, String streamLocation, int frameSkip, boolean showVideo) {
@@ -84,7 +83,7 @@ public class XuggleRTSPReaderTest{
             this.running = true;
             this.streamIndex = -1;
             this.frameNr = 0;
-            this.codec = TurboJPEGImageCodec.getInstance();
+            this.codec = new TurboJPEGImageCodec();
             this.videoImage = new VideoImage();
         }
 
@@ -216,4 +215,4 @@ public class XuggleRTSPReaderTest{
 
     }
 }
-	
+

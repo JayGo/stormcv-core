@@ -20,9 +20,9 @@ public class TurboJPEGImageCodec implements JPEGImageCodec {
     private TJDecompressor decompressor;
     private int quality;
 
-    private static TurboJPEGImageCodec mTurboJPEGImageCodec;
+    //private static TurboJPEGImageCodec mTurboJPEGImageCodec;
 
-    private TurboJPEGImageCodec() {
+    public TurboJPEGImageCodec() {
         quality = GlobalConstants.JPEGCodecQuality;
         try {
             compressor = new TJCompressor();
@@ -32,12 +32,12 @@ public class TurboJPEGImageCodec implements JPEGImageCodec {
         }
     }
 
-    public synchronized static TurboJPEGImageCodec getInstance() {
-        if(mTurboJPEGImageCodec == null) {
-            mTurboJPEGImageCodec = new TurboJPEGImageCodec();
-        }
-        return mTurboJPEGImageCodec;
-    }
+//    public synchronized static TurboJPEGImageCodec getInstance() {
+//        if(mTurboJPEGImageCodec == null) {
+//            mTurboJPEGImageCodec = new TurboJPEGImageCodec();
+//        }
+//        return mTurboJPEGImageCodec;
+//    }
 
     @Override
     public byte[] BufferedImageToJPEGBytes(BufferedImage image) {
@@ -58,9 +58,9 @@ public class TurboJPEGImageCodec implements JPEGImageCodec {
         BufferedImage image = null;
         try {
             decompressor.setSourceImage(bytes, bytes.length);
-            System.out.println("decompress:" + decompressor.getWidth() +"x" + decompressor.getHeight());
+            //System.out.println("decompress:" + decompressor.getWidth() +"x" + decompressor.getHeight());
             image = decompressor.decompress(decompressor.getWidth(), decompressor.getHeight(),
-                    BufferedImage.TYPE_INT_RGB, 0);
+                    BufferedImage.TYPE_3BYTE_BGR, 0);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -87,23 +87,19 @@ public class TurboJPEGImageCodec implements JPEGImageCodec {
     public byte[] MatToJPEGBytes(Mat mat) {
         long size = mat.total() * mat.channels();
         byte[] buffer = new byte[(int) size];
-        mat.get(0,0,buffer);
+        mat.get(0, 0, buffer);
         int fromType;
         int sampType;
         if (mat.channels() == 3) {
             fromType = TJ.PF_BGR;
             sampType = TJ.SAMP_420;
-            System.out.println("fromType = PF_BGR, sampType = SAMP_420");
         } else if (mat.channels() == 1) {
             fromType = TJ.PF_GRAY;
             sampType = TJ.SAMP_GRAY;
-            System.out.println("fromType = PF_GRAY, sampType = SAMP_GRAY");
         } else {
             fromType = -1;
             sampType = -1;
-            System.out.println("fromType = -1, sampType = -1");
         }
-
 
         try {
             compressor.setSourceImage(buffer, 0, 0, mat.width(), (int) (mat.width() * mat.elemSize()), mat.height(), fromType);

@@ -12,7 +12,10 @@ import java.awt.image.BufferedImage;
  */
 public interface JPEGImageCodec {
     byte[] BufferedImageToJPEGBytes(BufferedImage image);
+
     BufferedImage JPEGBytesToBufferedImage(byte[] bytes);
+
     Mat JPEGBytesToMat(byte[] bytes);
+
     byte[] MatToJPEGBytes(Mat mat);
 }

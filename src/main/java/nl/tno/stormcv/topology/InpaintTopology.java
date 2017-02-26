@@ -1,14 +1,11 @@
 package nl.tno.stormcv.topology;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import nl.tno.stormcv.StormCVConfig;
-import nl.tno.stormcv.bolt.SingleInputBolt;
+import nl.tno.stormcv.bolt.SingleJPEGInputBolt;
+import nl.tno.stormcv.constant.BOLT_HANDLE_TYPE;
 import nl.tno.stormcv.fetcher.ImageFetcher;
-import nl.tno.stormcv.model.Frame;
-import nl.tno.stormcv.operation.*;
+import nl.tno.stormcv.operation.single.DrawFeaturesOp;
+import nl.tno.stormcv.operation.single.InpaintOp;
 import nl.tno.stormcv.spout.CVParticleSpout;
 import org.apache.storm.Config;
 import org.apache.storm.LocalCluster;
@@ -18,6 +15,10 @@ import org.apache.storm.generated.AuthorizationException;
 import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.utils.Utils;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class InpaintTopology {
     public static void main(String[] args) throws InvalidTopologyException {
@@ -33,22 +34,22 @@ public class InpaintTopology {
         Boolean local = true;
         String userDir = System.getProperty("user.dir").replaceAll("\\\\", "/");
         List<String> files = new ArrayList<String>();
-        files.add( "file://"+ userDir +"/resources/data/" );
+        files.add("file://" + userDir + "/resources/data/");
 
         TopologyBuilder builder = new TopologyBuilder();
 
         builder.setSpout("spout", new CVParticleSpout(
-                new ImageFetcher(files).sleepTime(100) ), 8);
+                new ImageFetcher(files).sleepTime(100)), 8);
 
-        builder.setBolt("inpaint", new SingleInputBolt(new InpaintOp()), 8)
+        builder.setBolt("inpaint", new SingleJPEGInputBolt(new InpaintOp(), BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 8)
                 .shuffleGrouping("spout");
-        String outDir = files.get(0)+"/output/";
+        String outDir = files.get(0) + "/output/";
         File tmp = new File(outDir);
         if (!tmp.exists()) {
             tmp.mkdir();
         }
-        builder.setBolt("drawer", new SingleInputBolt(
-                new DrawFeaturesOp().destination(outDir)), 8)
+        builder.setBolt("drawer", new SingleJPEGInputBolt(
+                new DrawFeaturesOp().destination(outDir), BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 8)
                 .shuffleGrouping("inpaint");
 
         String topoName = "InpaintTopo";
@@ -58,7 +59,6 @@ public class InpaintTopology {
                 LocalCluster cluster = new LocalCluster();
                 cluster.submitTopology(topoName, conf,
                         builder.createTopology());
-                // run for one minute and then kill the topology
                 Utils.sleep(3000 * 1000);
                 cluster.shutdown();
             } catch (Exception e) {

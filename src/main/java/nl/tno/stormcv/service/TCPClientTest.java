@@ -2,7 +2,6 @@ package nl.tno.stormcv.service;
 
 import edu.fudan.jliu.message.BaseMessage;
 import nl.tno.stormcv.constant.GlobalConstants;
-import nl.tno.stormcv.constant.ZKConstant;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -23,8 +22,8 @@ public class TCPClientTest {
             String rtmpAddress = GlobalConstants.DefaultRTMPServer;
             String appName = "tcptest";
             BaseMessage streamIdMsg = new BaseMessage(7, rtspUrl,
-                    rtmpAddress+appName, appName);
-            OutputStream os =socket.getOutputStream();
+                    rtmpAddress + appName, appName);
+            OutputStream os = socket.getOutputStream();
             ObjectOutputStream objOs = new ObjectOutputStream(os);
             objOs.writeObject(streamIdMsg);
         } catch (IOException e) {
