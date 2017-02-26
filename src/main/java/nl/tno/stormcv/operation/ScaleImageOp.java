@@ -68,7 +68,7 @@ public class ScaleImageOp implements ISingleInputOperation<Frame>{
 		return result;
 	}
 	
-	private static BufferedImage scale(BufferedImage original, float factor){
+	private static BufferedImage scale(BufferedImage original, float factor) {
 		BufferedImage newImage;
 		if(factor > 1){
 			newImage = new BufferedImage(Math.round(original.getWidth()*factor), Math.round(original.getHeight()*factor), original.getType());

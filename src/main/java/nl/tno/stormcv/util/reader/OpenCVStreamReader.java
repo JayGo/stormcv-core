@@ -38,7 +38,6 @@ import java.util.concurrent.TimeUnit;
 public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable {
 
     private Logger logger = LoggerFactory.getLogger(OpenCVStreamReader.class);
-    private int mVideoStreamIndex = -1;
     private String streamId;
     private int frameSkip;
     private int groupSize;
@@ -47,26 +46,10 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
     private LinkedBlockingQueue<Frame> frameQueue; // queue used to store frames
     private long lastRead = -1; // used to determine if the EOF was reached if Xuggler does not detect it
     private int sleepTime;
-    private boolean useSingleID = false;
-    private int frameMs = -1;
     private JPEGImageCodec codec;
 
     private String streamLocation;
-    private LinkedBlockingQueue<String> videoList = null;
     private String imageType = Frame.JPG_IMAGE;
-
-    public OpenCVStreamReader(LinkedBlockingQueue<String> videoList, String imageType, int frameSkip, int groupSize, int sleepTime, boolean uniqueIdPerFile, LinkedBlockingQueue<Frame> frameQueue) {
-        this.videoList = videoList;
-        this.imageType = imageType;
-        this.frameSkip = Math.max(1, frameSkip);
-        this.groupSize = Math.max(1, groupSize);
-        this.sleepTime = sleepTime;
-        this.frameQueue = frameQueue;
-        this.useSingleID = uniqueIdPerFile;
-        this.streamId = "" + this.hashCode(); // give a default streamId
-        lastRead = System.currentTimeMillis() + 10000;
-        this.codec = TurboJPEGImageCodec.getInstance();
-    }
 
     public OpenCVStreamReader(String streamId, String streamLocation, String imageType, int frameSkip, int groupSize, int sleepTime, LinkedBlockingQueue<Frame> frameQueue) {
         this.streamLocation = streamLocation;
@@ -82,25 +65,27 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
 
     @Override
 	public void run() {
-        startMultiThreadStreamReading(streamLocation);
+        running = true;
+        startStreamReading();
+        //startMultiThreadStreamReading();
     }
 
     public void stop() {
         running = false;
     }
 
-    public void startMultiThreadStreamReading(String location) {
+    public void startMultiThreadStreamReading() {
+        if (streamLocation == null) return;
     	BufferedImagePackQueue mBufferedImagePackQueue = BufferedImagePackQueue.getInstance();
     	ThreadManager.getInstance().startProcessingAndReading();
     	frameNr = 0;
-        while (true) {
+        while (running) {
             try {
     			BufferedImagePack mBufferedImagePack = mBufferedImagePackQueue.pop(frameNr);
     			if(mBufferedImagePack == null) {
     				continue;
     			}
     			BufferedImage bufferedImage = mBufferedImagePack.getImage();
-
 //            	byte[] buffer = ImageUtils.imageToBytes(bufferedImage, imageType);
 //            	byte[] buffer = {1,0,1,0};
                 long timestamp = System.currentTimeMillis();
@@ -117,51 +102,50 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
         }
     }
 
-    public void startStreamReading(String location) {
+    public void startStreamReading() {
+        if (streamLocation == null) return;
     	VideoCapture capture = new VideoCapture();
-        Mat image = new Mat();
+        Mat mat = new Mat();
         frameNr = 0;
-        capture.open(location);
+        capture.open(this.streamLocation);
         int width = (int) capture.get(Highgui.CV_CAP_PROP_FRAME_WIDTH);
         int height = (int) capture.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT);
         double frameRate = capture.get(5);
         logger.info(width + "x" + height + " , frameRate=" + frameRate);
         if (capture.isOpened()) {
-            logger.info("Video is captured at " + location);
+            logger.info("Video is captured at " + streamLocation);
             byte[] imageBytes = null;
-            while (true) {
+            while (running) {
                 try {
-                    capture.read(image);
-                    imageBytes = ImageUtils.matToBytes(image);
+                    capture.read(mat);
+                    imageBytes = this.codec.MatToJPEGBytes(mat);
+                    //imageBytes = ImageUtils.matToBytes(image);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    logger.info("Exception during executing matToBufferedImage " + location);
+                    logger.info("Exception during executing matToBufferedImage " + streamLocation);
                     if (e instanceof CvException) {
-                    	capture.open(location);
+                    	capture.open(streamLocation);
                     	continue;
                     }
                 }
-
                 lastRead = System.currentTimeMillis();
                 if (imageBytes == null) continue;
                 if (frameNr % frameSkip < groupSize) try {
-                    long timestamp = lastRead;
-                    if (frameMs > 0) timestamp = frameNr * frameMs;
-                    Frame newFrame = new Frame(streamId, frameNr, "mat", imageBytes, timestamp, new Rectangle(0, 0, image.width(), image.height()));
+                    Frame newFrame = new Frame(streamId, frameNr, "mat", imageBytes, lastRead, new Rectangle(0, 0, mat.width(), mat.height()));
                     newFrame.getMetadata().put("uri", streamLocation);
                     frameQueue.put(newFrame);
-
                     if (sleepTime > 0) Utils.sleep(sleepTime);
                 } catch (Exception e) {
-                    logger.warn("Unable to process new frame due to: " + e.getMessage(), e);
+                    logger.warn("Unable to process new frame due to: " + e.getMessage());
                 }
                 frameNr++;
+                if (frameNr >= 4) {
+                    break;
+                }
             }
-        } else {
-            logger.info("The location " + location + " can not be opened!");
         }
         capture.release();
-        logger.info("VideoCapture at " + location + " is released");
+        logger.info("VideoCapture at " + streamLocation + " is released");
     }
 }
 

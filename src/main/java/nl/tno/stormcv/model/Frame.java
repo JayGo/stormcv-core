@@ -41,8 +41,8 @@ public class Frame extends CVParticle {
 	private String imageType = JPG_IMAGE;
 	private byte[] imageBytes = null;
 	private Rectangle boundingBox = null;
-	private List<Feature> features = new ArrayList<Feature>();
-    private JPEGImageCodec codec;
+	private List<Feature> features = new ArrayList<>();
+	private JPEGImageCodec codec;
 
 	public Frame(byte [] imageBytes) {
 		this.imageBytes = imageBytes;
@@ -87,6 +87,10 @@ public class Frame extends CVParticle {
 
 	public Rectangle getBoundingBox() {
 		return boundingBox;
+	}
+
+	public JPEGImageCodec getCodec() {
+		return codec;
 	}
 
 //	public BufferedImage getImage(){

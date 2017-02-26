@@ -44,14 +44,17 @@ public class GrayscaleOp implements ISingleInputOperation<Frame> {
 	public List<Frame> execute(CVParticle particle) throws IOException {
 		List<Frame> result = new ArrayList<Frame>();
 		Frame frame = (Frame)particle;
-		Mat in = ImageUtils.bufferedImageToMat(frame.getImage());
+
+		Mat in = frame.getCodec().JPEGBytesToMat(frame.getImageBytes());
+		//Mat in = ImageUtils.bufferedImageToMat(frame.getImage());
 		
 		Mat out = new Mat(in.height(), in.width(), CvType.CV_8UC1);
 		Imgproc.cvtColor(in, out, Imgproc.COLOR_BGR2GRAY);
 
 //		BufferedImage bf = ImageUtils.matToBufferedImage(out);				
 //		frame.setImage(bf);
-		byte[] bufferedImageBytes = ImageUtils.matToBytes(out, frame.getImageType());
+		//byte[] bufferedImageBytes = ImageUtils.matToBytes(out, frame.getImageType());
+		byte[] bufferedImageBytes = frame.getCodec().MatToJPEGBytes(out);
 		frame.setImage(bufferedImageBytes, frame.getImageType());
 		
 //		if (frame.getSequenceNr() < 50) {

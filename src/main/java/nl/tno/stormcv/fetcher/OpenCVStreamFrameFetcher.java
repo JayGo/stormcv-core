@@ -172,7 +172,7 @@ public class OpenCVStreamFrameFetcher implements IFetcher<CVParticle> {
 				return frame;
 			} else {
 				if (frameGroup == null || frameGroup.size() >= batchSize)
-					frameGroup = new ArrayList<Frame>();
+					frameGroup = new ArrayList<>();
 				frameGroup.add(frame);
 				if (frameGroup.size() == batchSize) {
 					return new GroupOfFrames(frameGroup.get(0).getStreamId(),

@@ -58,6 +58,7 @@ public class TurboJPEGImageCodec implements JPEGImageCodec {
         BufferedImage image = null;
         try {
             decompressor.setSourceImage(bytes, bytes.length);
+            System.out.println("decompress:" + decompressor.getWidth() +"x" + decompressor.getHeight());
             image = decompressor.decompress(decompressor.getWidth(), decompressor.getHeight(),
                     BufferedImage.TYPE_INT_RGB, 0);
         } catch (Exception e) {
@@ -74,7 +75,7 @@ public class TurboJPEGImageCodec implements JPEGImageCodec {
             int width = decompressor.getWidth();
             int height = decompressor.getHeight();
             byte[] dstBuffer = decompressor.decompress(width, width * TJ.getPixelSize(TJ.PF_BGR), height, TJ.PF_BGR, 0);
-            mat = new Mat(decompressor.getHeight(), decompressor.getWidth(), CvType.CV_8UC3);
+            mat = new Mat(height, width, CvType.CV_8UC3);
             mat.put(0, 0, dstBuffer);
         } catch (Exception e) {
             e.printStackTrace();
@@ -87,10 +88,27 @@ public class TurboJPEGImageCodec implements JPEGImageCodec {
         long size = mat.total() * mat.channels();
         byte[] buffer = new byte[(int) size];
         mat.get(0,0,buffer);
+        int fromType;
+        int sampType;
+        if (mat.channels() == 3) {
+            fromType = TJ.PF_BGR;
+            sampType = TJ.SAMP_420;
+            System.out.println("fromType = PF_BGR, sampType = SAMP_420");
+        } else if (mat.channels() == 1) {
+            fromType = TJ.PF_GRAY;
+            sampType = TJ.SAMP_GRAY;
+            System.out.println("fromType = PF_GRAY, sampType = SAMP_GRAY");
+        } else {
+            fromType = -1;
+            sampType = -1;
+            System.out.println("fromType = -1, sampType = -1");
+        }
+
+
         try {
-            compressor.setSourceImage(buffer, 0, 0, mat.width(), (int) (mat.width() * mat.elemSize()), mat.height(), TJ.PF_BGR);
-            compressor.setSubsamp(TJ.SAMP_420);
-            compressor.setJPEGQuality(90);
+            compressor.setSourceImage(buffer, 0, 0, mat.width(), (int) (mat.width() * mat.elemSize()), mat.height(), fromType);
+            compressor.setSubsamp(sampType);
+            compressor.setJPEGQuality(GlobalConstants.JPEGCodecQuality);
             buffer = compressor.compress(0);
         } catch (Exception e) {
             e.printStackTrace();
