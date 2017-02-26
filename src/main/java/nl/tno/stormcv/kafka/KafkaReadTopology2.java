@@ -7,10 +7,9 @@ import java.util.List;
 import nl.tno.stormcv.StormCVConfig;
 import nl.tno.stormcv.batcher.SlidingWindowBatcher;
 import nl.tno.stormcv.bolt.BatchInputBolt;
-import nl.tno.stormcv.bolt.SingleH264InputBolt;
 import nl.tno.stormcv.bolt.SingleInputBolt;
 import nl.tno.stormcv.constant.GlobalConstants;
-import nl.tno.stormcv.fetcher.OpenCVStreamFrameFetcher2;
+import nl.tno.stormcv.fetcher.OpenCVStreamFrameFetcher;
 import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.model.serializer.CVParticleSerializer;
 import nl.tno.stormcv.operation.MjpegStreamingOp;
@@ -119,7 +118,7 @@ public class KafkaReadTopology2 {
          * this spout using OpenCVStreamFrameFetcher to fetch the video image
          **/
         builder.setSpout(preOperation, new CVParticleSpout(
-                new OpenCVStreamFrameFetcher2(urls).frameSkip(frameSkip)), 1);
+                new OpenCVStreamFrameFetcher(urls).frameSkip(frameSkip)), 1);
 
 //		builder.setSpout(preOperation, new MatImageSpout(
 //				(new OpenCVStreamFrameFetcher2(urls)).frameSkip(frameSkip)), 1);

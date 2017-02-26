@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import nl.tno.stormcv.model.Frame;
 
 public class RawStreamReader extends Thread {
-	private Logger logger = LoggerFactory.getLogger(StreamReader.class);
+	private Logger logger = LoggerFactory.getLogger(XuggleStreamReader.class);
 
 	private int dataLength;
 	private byte[] buffer;

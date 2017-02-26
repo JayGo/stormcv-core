@@ -6,14 +6,11 @@ import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.video.Video;
 
 import edu.fudan.lwang.codec.Common.CodecType;
 import nl.tno.stormcv.model.Frame;
-import nl.tno.stormcv.util.HashUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.collection.generic.BitOperations.Int;
 
 public class Codec {
 	private static Logger logger = LoggerFactory.getLogger(Codec.class);
@@ -151,7 +148,7 @@ public class Codec {
 				// logger1.info("=================== get data ==================================");
 					long timeStamp = System.currentTimeMillis();
 					
-					Frame frame = new Frame(si.getEncodeQueueId(), frameNr++, Frame.X264_Bytes, encodedData, timeStamp, 
+					Frame frame = new Frame(si.getEncodeQueueId(), frameNr++, Frame.X264_IMAGE, encodedData, timeStamp,
 					new Rectangle(0, 0, si.getFrameWidth(), si.getFrameHeight()));
 					
 					mEncodedFrameQueue.enqueue(frame);

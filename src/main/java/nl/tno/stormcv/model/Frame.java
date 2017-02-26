@@ -34,12 +34,10 @@ public class Frame extends CVParticle {
 	public final static String NO_IMAGE = "none";
 	public final static String JPG_IMAGE = "jpg";
 	public final static String PNG_IMAGE = "png";
-	public final static String GIF_IMAGE = "gif";
-	public final static String RAW_IMAGE = "mat";  //add by jkyan at 2016/07/30
+	public final static String X264_IMAGE = "x264_bytes"; // add by jiu on 2016/12/12
+	public final static String RAW_IMAGE = "mat";
 
-	public final static String X264_Bytes = "x264_bytes"; // add by jiu on 2016/12/12
 
-	
 	private long timeStamp;
 	private String imageType = JPG_IMAGE;
 	private byte[] imageBytes = null;
@@ -47,7 +45,7 @@ public class Frame extends CVParticle {
 	private Rectangle boundingBox;
 	private List<Feature> features = new ArrayList<Feature>();
 	private boolean needGen = false;
-	
+
 
 	public Frame(byte [] imageBytes) {
 		this.imageBytes = imageBytes;
@@ -143,7 +141,7 @@ public class Frame extends CVParticle {
 		this.needGen = true;
         updataImageBytes();
 	}
-		
+
 	private void updataImageBytes() throws IOException {
 		if (needGen) {
 			if (image != null) {

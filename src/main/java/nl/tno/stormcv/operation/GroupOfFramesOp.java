@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import nl.tno.stormcv.batcher.IBatcher;
-import nl.tno.stormcv.fetcher.FileFrameFetcher;
+//import nl.tno.stormcv.fetcher.FileFrameFetcher;
 import nl.tno.stormcv.fetcher.StreamFrameFetcher;
 import nl.tno.stormcv.model.*;
 import nl.tno.stormcv.model.serializer.*;
