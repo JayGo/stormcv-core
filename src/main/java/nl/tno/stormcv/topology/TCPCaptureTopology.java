@@ -1,26 +1,21 @@
 package nl.tno.stormcv.topology;
 
+import nl.tno.stormcv.bolt.SingleH264InputBolt;
 import org.apache.storm.Config;
 
 import edu.fudan.lwang.codec.Common.CodecType;
 import edu.fudan.lwang.codec.SourceInfo;
-import nl.tno.stormcv.bolt.SingleInputBolt;
 import nl.tno.stormcv.operation.CannyEdgeOp;
-import nl.tno.stormcv.operation.CodecTestOperation;
 import nl.tno.stormcv.operation.ColorHistogramOp;
 import nl.tno.stormcv.operation.EmptyOperation;
-import nl.tno.stormcv.operation.EmptyOperation2;
 import nl.tno.stormcv.operation.FGExtranctionOp;
 import nl.tno.stormcv.operation.GrayscaleOp;
 import nl.tno.stormcv.operation.H264RtmpStreamOp;
-import nl.tno.stormcv.operation.SingleRTMPWriterOp;
 import nl.tno.stormcv.spout.TCPCaptureSpout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TCPCaptureTopology extends BaseTopology {
-	
-
 
 	private static final Logger logger = LoggerFactory.getLogger(TCPCaptureTopology.class);
 	private String streamId;
@@ -52,7 +47,6 @@ public class TCPCaptureTopology extends BaseTopology {
 
 	@Override
 	public void setSpout() {
-		// TODO Auto-generated method stub
 		TCPCaptureSpout tcpCaptureSpout = new TCPCaptureSpout(streamId, videoAddr, CodecType.CODEC_TYPE_H264_CPU);
 		builder.setSpout("tcpSpout", tcpCaptureSpout);
 		sourceInfo = tcpCaptureSpout.getSourceInfo();
@@ -64,29 +58,28 @@ public class TCPCaptureTopology extends BaseTopology {
 
 	@Override
 	public void setBolts() {
-		// TODO Auto-generated method stub
 		String source = "tcpSpout";
 		if (effect != null && !effect.isEmpty()) {
 			if (effect.equals("gray")) {
-				builder.setBolt("gray", new SingleInputBolt(new GrayscaleOp()),
+				builder.setBolt("gray", new SingleH264InputBolt(new GrayscaleOp()),
 						4).shuffleGrouping(source);
 				source = "gray";
 			}
 			else if (effect.equals("cannyEdge")) {
 				builder.setBolt("cannyEdge",
-						new SingleInputBolt(new CannyEdgeOp()), 4)
+						new SingleH264InputBolt(new CannyEdgeOp()), 4)
 						.shuffleGrouping(source);
 				source = "cannyEdge";
 			}
 			else if (effect.equals("colorHistogram")) {
 				builder.setBolt("colorHistogram",
-						new SingleInputBolt(new ColorHistogramOp(streamId)), 4)
+						new SingleH264InputBolt(new ColorHistogramOp(streamId)), 4)
 						.shuffleGrouping(source);
 				source = "colorHistogram";
 			}
 			else if (effect.equals("foregroundExtraction")) {
 				builder.setBolt("foregroundExtraction",
-						new SingleInputBolt(new FGExtranctionOp()), 1)
+						new SingleH264InputBolt(new FGExtranctionOp()), 1)
 						.shuffleGrouping(source);
 				source = "foregroundExtraction";
 				conf.setNumWorkers(3);
@@ -100,37 +93,36 @@ public class TCPCaptureTopology extends BaseTopology {
 		logger.info("rtmpAddr: "+rtmpAddr+", streamId: "+streamId);
 		
 		// For codec test
-//		builder.setBolt("codec", new SingleInputBolt(new CodecTestOperation()).setSourceInfo(sourceInfo),
+//		builder.setBolt("codec", new SingleH264InputBolt(new CodecTestOperation()).setSourceInfo(sourceInfo),
 //				1).shuffleGrouping(source);
 //		source = "codec";
 		
 		// For debug
-		builder.setBolt("debug", new SingleInputBolt(new EmptyOperation()).setSourceInfo(sourceInfo),
+		builder.setBolt("debug", new SingleH264InputBolt(new EmptyOperation()).setSourceInfo(sourceInfo),
 				1).shuffleGrouping(source);
 		source = "debug";
 		
 		// For H264 rtmp operation
-		builder.setBolt("streamer", new SingleInputBolt(new H264RtmpStreamOp().
+		builder.setBolt("streamer", new SingleH264InputBolt(new H264RtmpStreamOp().
 				RTMPServer(rtmpAddr).
 				appName(streamId)).setSourceInfo(sourceInfo), 1).shuffleGrouping(source);
 		source = "streamer";
 		
 		// For debug
-//		builder.setBolt("debug2", new SingleInputBolt(new EmptyOperation2()).setSourceInfo(sourceInfo), 
+//		builder.setBolt("debug2", new SingleH264InputBolt(new EmptyOperation2()).setSourceInfo(sourceInfo),
 //				1).shuffleGrouping(source);
 		
 		
 		// for RTMP operation 
 //		builder.setBolt(
 //				"streamer",
-//				new SingleInputBolt(new SingleRTMPWriterOp()
+//				new SingleH264InputBolt(new SingleRTMPWriterOp()
 //						.RTMPServer(rtmpAddr).appName(streamId).frameRate(25)),
 //				1).shuffleGrouping(source);
 	}
 
 	@Override
 	public String getStreamId() {
-		// TODO Auto-generated method stub
 		return streamId;
 	}
 

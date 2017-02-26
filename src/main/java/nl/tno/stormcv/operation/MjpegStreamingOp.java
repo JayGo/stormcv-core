@@ -120,18 +120,19 @@ public class MjpegStreamingOp extends Application implements IBatchOperation<Fra
 	public List<Frame> execute(List<CVParticle> input) {
 		List<Frame> result = new ArrayList<Frame>();
 		
-		for(int i=0; i<input.size(); i++){
+		for(int i=0; i<input.size(); i++) {
 			CVParticle s = input.get(i);
 			
 			if(!(s instanceof Frame)) 
 				continue;
 			Frame frame = (Frame)s;
-//			System.out.println("execute Frame:" + frame.getSequenceNr());
-			if (frame == null) 
+			if (frame == null) {
 				continue;
+			}
 			result.add(frame);
-			if(frame.getImage() == null) 
+			if(frame.getImage() == null) {
 				continue;
+			}
 			//BufferedImage prevImage = images.getIfPresent(frame.getStreamId());
 			images.put(frame.getStreamId(), frame.getImage());
 			/*

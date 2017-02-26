@@ -14,17 +14,15 @@ public abstract class BaseTopology {
 	protected StormCVConfig conf;
 	private LocalCluster cluster;
 
-	private boolean isTopologyRunningAtLocal;
+	protected boolean isTopologyRunningAtLocal;
 
 	public BaseTopology() {
 		conf = new StormCVConfig();
-		// conf.setNumWorkers(1);
-		conf.setMaxSpoutPending(64);
+		conf.setMaxSpoutPending(32);
 		conf.put(Config.WORKER_CHILDOPTS, "-Xmx8192m -Xms4096m -Xmn2048m -XX:PermSize=1024m -XX:MaxPermSize=2048m -XX:MaxDirectMemorySize=512m");
 		conf.put(Config.TOPOLOGY_WORKER_MAX_HEAP_SIZE_MB, 8192);
 		conf.put(Config.WORKER_HEAP_MEMORY_MB, 4096);
 		conf.put(Config.TOPOLOGY_COMPONENT_RESOURCES_ONHEAP_MEMORY_MB, 4096);
-		//conf.put(Config.TOPOLOGY_COMPONENT_RESOURCES_OFFHEAP_MEMORY_MB, 1024);
 
 		conf.put(Config.TOPOLOGY_ACKER_EXECUTORS, 0);
 		conf.put(StormCVConfig.STORMCV_OPENCV_LIB, "linux64_opencv_java248.so");
@@ -58,6 +56,14 @@ public abstract class BaseTopology {
 		setBolts();
 		StormSubmitter.submitTopologyWithProgressBar(getStreamId(), conf,
 				builder.createTopology());
+	}
+
+	public void submitTopology() throws Exception {
+		if (isTopologyRunningAtLocal) {
+			submitTopologyToLocal();
+		} else {
+			submitTopologyToCluster();
+		}
 	}
 
 	public String killTopology() {

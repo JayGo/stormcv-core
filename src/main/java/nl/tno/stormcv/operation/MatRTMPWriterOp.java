@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import nl.tno.stormcv.constant.GlobalConstants;
 import org.apache.storm.task.TopologyContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ public class MatRTMPWriterOp implements IMatOperation<MatImage> {
 	private static final long serialVersionUID = 6453978086650507695L;
 	
 	private Logger logger = LoggerFactory.getLogger(getClass());
-	private String url = ZKConstant.DefaultRTMPServer;
+	private String url = GlobalConstants.DefaultRTMPServer;
 	private String appName = "";
 	private int height = 0;
 	private int width = 0;

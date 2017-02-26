@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import nl.tno.stormcv.constant.GlobalConstants;
 import nl.tno.stormcv.constant.ZKConstant;
 import nl.tno.stormcv.topology.MatReaderTopology;
 import nl.tno.stormcv.util.VideoAddrValidator;
@@ -26,7 +27,7 @@ public class TCPMatServer {
 
 	private List<MatReaderTopology> topologys;
 
-	private String[] rtmpServers = {ZKConstant.DefaultRTMPServer};
+	private String[] rtmpServers = {GlobalConstants.DefaultRTMPServer};
 	private Map<String, Integer> rtmpServerMap;
 
 	// private List<String> msgQueue = new ArrayList<String>();

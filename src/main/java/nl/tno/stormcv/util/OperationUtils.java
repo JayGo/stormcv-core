@@ -1,6 +1,7 @@
 package nl.tno.stormcv.util;
 
 import nl.tno.stormcv.bolt.CVParticleBolt;
+import nl.tno.stormcv.bolt.SingleH264InputBolt;
 import nl.tno.stormcv.bolt.SingleInputBolt;
 import nl.tno.stormcv.operation.CannyEdgeOp;
 import nl.tno.stormcv.operation.ColorHistogramOp;
@@ -16,7 +17,7 @@ public class OperationUtils {
 
 	public static String[] singleOperations = {"scale", "gray", "face_detect", "colorhistogram",
 		"face_extraction", "sift_features", "canny_edge","enhance","draw"};
-	//private String[] batchOperations = {};
+
 	public static CVParticleBolt operationToBolt(String operation) {
 
 		if (operation.equals("gray")) {
@@ -52,8 +53,7 @@ public class OperationUtils {
 			return new SingleInputBolt(
 					new ImageEnhancementOp("enhance"));
 		}
-		
-		
+
 		if (operation.equals("draw")) {
 			return new SingleInputBolt(
 					new DrawFeaturesOp());
@@ -67,15 +67,4 @@ public class OperationUtils {
 		}
 		return false;
 	}
-	
-//	public static String getAppNameFromOp(String op) {
-//		String appName ="";
-//		if(op == "gray") {
-//			appName = "gray_app";
-//		} else if (op == "scale") {
-//			appName = "scale_app";
-//		} else if (op == "colorhistogram") {
-//			appName = "colorhistogram_app";
-//		} else if (op == )
-//	}
 }

@@ -1,6 +1,7 @@
 package nl.tno.stormcv.fetcher;
 
 import nl.tno.stormcv.StormCVConfig;
+import nl.tno.stormcv.constant.GlobalConstants;
 import nl.tno.stormcv.model.CVParticle;
 import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.model.GroupOfFrames;
@@ -50,8 +51,8 @@ public class OpenCVStreamFrameFetcher2 implements IFetcher<CVParticle> {
 	protected int frameSkip = 1;
 	private int groupSize = 1;
 	//protected LinkedBlockingQueue<Frame> frameQueue = new LinkedBlockingQueue<Frame>(ZKConstant.SpoutQueueSize);
-	protected LinkedBlockingQueue<Frame> frameQueue = new LinkedBlockingQueue<Frame>(ZKConstant.SpoutQueueSize);
-	protected LinkedBlockingQueue<MatImage> matQueue = new LinkedBlockingQueue<MatImage>(ZKConstant.SpoutQueueSize);
+	protected LinkedBlockingQueue<Frame> frameQueue = new LinkedBlockingQueue<Frame>(GlobalConstants.SpoutQueueSize);
+	protected LinkedBlockingQueue<MatImage> matQueue = new LinkedBlockingQueue<MatImage>(GlobalConstants.SpoutQueueSize);
 	private LinkedList<MatImage> matCache = new LinkedList<>();
 	protected Map<String, OpenCVStreamReader2> streamReaders;
 	private int sleepTime = 0;

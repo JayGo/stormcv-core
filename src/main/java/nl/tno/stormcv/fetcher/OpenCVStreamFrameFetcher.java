@@ -1,6 +1,7 @@
 package nl.tno.stormcv.fetcher;
 
 import nl.tno.stormcv.StormCVConfig;
+import nl.tno.stormcv.constant.GlobalConstants;
 import nl.tno.stormcv.model.CVParticle;
 import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.model.GroupOfFrames;
@@ -55,7 +56,7 @@ public class OpenCVStreamFrameFetcher implements IFetcher<CVParticle> {
 	protected int frameSkip = 1;
 	private int groupSize = 1;
 	protected LinkedBlockingQueue<Frame> frameQueue = new LinkedBlockingQueue<Frame>(
-			ZKConstant.SpoutQueueSize);
+			GlobalConstants.SpoutQueueSize);
 	protected Map<String, OpenCVStreamReader> streamReaders;
 	private int sleepTime = 0;
 	private String imageType;
@@ -167,7 +168,6 @@ public class OpenCVStreamFrameFetcher implements IFetcher<CVParticle> {
 			this.activate();
 		Frame frame = frameQueue.poll();
 		if (frame != null) {
-//			System.out.println("fetch image: " + frame.getSequenceNr());
 			if (batchSize <= 1) {
 				return frame;
 			} else {

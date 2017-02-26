@@ -164,7 +164,6 @@ public class CVParticleSpout implements IRichSpout {
 
 	@Override
 	public Map<String, Object> getComponentConfiguration() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
