@@ -19,7 +19,7 @@
 //import nl.tno.stormcv.model.serializer.FrameSerializer;
 //import nl.tno.stormcv.model.serializer.CVParticleSerializer;
 //import nl.tno.stormcv.operation.GroupOfFramesOp;
-//import nl.tno.stormcv.util.reader.XuggleStreamReader;
+//import nl.tno.stormcv.util.reader.XugglerStreamReader;
 //import nl.tno.stormcv.util.connector.ConnectorHolder;
 //import nl.tno.stormcv.util.connector.FileConnector;
 //
@@ -56,7 +56,7 @@
 //	private int frameSkip = 1;
 //	private int groupSize = 1;
 //	private List<String> locations;
-//	private XuggleStreamReader xuggleStreamReader;
+//	private XugglerStreamReader xugglerStreamReader;
 //	private LinkedBlockingQueue<Frame> frameQueue = new LinkedBlockingQueue<Frame>(100);
 //	private int sleepTime = 0;
 //	private ConnectorHolder connectorHolder;
@@ -161,7 +161,7 @@
 //
 //	@Override
 //	public void activate() {
-//		if(xuggleStreamReader != null){
+//		if(xugglerStreamReader != null){
 //			this.deactivate();
 //		}
 //
@@ -169,14 +169,14 @@
 //		DownloadThread dt = new DownloadThread(locations, videoList, connectorHolder);
 //		new Thread(dt).start();
 //
-//		xuggleStreamReader = new XuggleStreamReader(videoList, imageType, frameSkip, groupSize, sleepTime, useSingleId,  frameQueue);
-//		new Thread(xuggleStreamReader).start();
+//		//xugglerStreamReader = new XugglerStreamReader(videoList, imageType, frameSkip, groupSize, sleepTime, useSingleId,  frameQueue);
+//		new Thread(xugglerStreamReader).start();
 //	}
 //
 //	@Override
 //	public void deactivate() {
-//		if(xuggleStreamReader != null) xuggleStreamReader.stop();
-//		xuggleStreamReader = null;
+//		if(xugglerStreamReader != null) xugglerStreamReader.stop();
+//		xugglerStreamReader = null;
 //	}
 //
 //	@Override

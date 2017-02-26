@@ -1,17 +1,17 @@
 package nl.tno.stormcv.batcher;
 
+import nl.tno.stormcv.bolt.BatchInputBolt;
+import nl.tno.stormcv.bolt.BatchInputBolt.History;
+import nl.tno.stormcv.model.CVParticle;
+import nl.tno.stormcv.operation.batch.IBatchOperation;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import nl.tno.stormcv.bolt.BatchInputBolt;
-import nl.tno.stormcv.bolt.BatchInputBolt.History;
-import nl.tno.stormcv.model.CVParticle;
-import nl.tno.stormcv.operation.IBatchOperation;
-
 /**
  * Batcher implementations are responsible to partition a provided set of {@link CVParticle} items into zero or more batches
- * of items suitable for batch processing. Batcher's get a List with received CVParticles which they must create batches for and 
+ * of items suitable for batch processing. Batcher's get a List with received CVParticles which they must create batches for and
  * a {@link History} reference used to remove CVParticles from when they are no longer needed (results in an ACK for that particle).
  * The overall process works as follows:
  * <ul>
@@ -23,17 +23,16 @@ import nl.tno.stormcv.operation.IBatchOperation;
  * <li>Each CVParticle is anchored on the received Particle and emitted</li>
  * <li></li>
  * </ul>
- * Implementations typically base their results on the items received (size of the set, some particular ordering etc) but it is also possible to 
- * partition the input based on external criteria like a clock (all items received within one minute) or a specific 'marker' item received. 
- * 
- * @author Corne Versloot
+ * Implementations typically base their results on the items received (size of the set, some particular ordering etc) but it is also possible to
+ * partition the input based on external criteria like a clock (all items received within one minute) or a specific 'marker' item received.
  *
+ * @author Corne Versloot
  */
-public interface IBatcher extends Serializable{
+public interface IBatcher extends Serializable {
 
-	@SuppressWarnings("rawtypes")
-	public void prepare(Map stormConf) throws Exception;
-	
-	public List<List<CVParticle>> partition(History history, List<CVParticle> currentSet);
-	
+    @SuppressWarnings("rawtypes")
+    public void prepare(Map stormConf) throws Exception;
+
+    public List<List<CVParticle>> partition(History history, List<CVParticle> currentSet);
+
 }

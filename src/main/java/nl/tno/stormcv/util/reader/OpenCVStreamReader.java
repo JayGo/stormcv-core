@@ -1,15 +1,12 @@
 package nl.tno.stormcv.util.reader;
 
-import com.xuggle.mediatool.IMediaReader;
 import com.xuggle.mediatool.MediaListenerAdapter;
-import com.xuggle.mediatool.event.IVideoPictureEvent;
-
 import nl.tno.stormcv.capture.BufferedImagePackQueue;
-import nl.tno.stormcv.capture.ThreadManager;
 import nl.tno.stormcv.capture.BufferedImagePackQueue.BufferedImagePack;
+import nl.tno.stormcv.capture.ThreadManager;
+import nl.tno.stormcv.codec.JPEGImageCodec;
+import nl.tno.stormcv.codec.TurboJPEGImageCodec;
 import nl.tno.stormcv.model.Frame;
-
-import nl.tno.stormcv.util.ImageUtils;
 import org.apache.storm.utils.Utils;
 import org.opencv.core.CvException;
 import org.opencv.core.Mat;
@@ -20,19 +17,16 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 /**
  * This class reads a video stream or file, decodes frames and puts those in a queue for further processing.
- * The XuggleStreamReader will automatically throttle itself based on the size of the queue it writes the frames to.
+ * The XuggleRTSPReaderTest will automatically throttle itself based on the size of the queue it writes the frames to.
  * This is done to avoid memory overload if production of frames is higher than the consumption. The actual decoding of
  * frames is done by Xuggler which in turn uses FFMPEG (xuggler jar file is shipped with ffmpeg binaries).
  *
  * @author Corne Versloot
-*/
+ */
 public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable {
 
     private Logger logger = LoggerFactory.getLogger(OpenCVStreamReader.class);
@@ -44,6 +38,7 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
     private LinkedBlockingQueue<Frame> frameQueue; // queue used to store frames
     private long lastRead = -1; // used to determine if the EOF was reached if Xuggler does not detect it
     private int sleepTime;
+    private JPEGImageCodec codec;
 
     private String streamLocation;
     private String imageType = Frame.JPG_IMAGE;
@@ -57,6 +52,7 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
         this.frameQueue = frameQueue;
         this.streamId = streamId;
         lastRead = System.currentTimeMillis() + 10000;
+        this.codec = new TurboJPEGImageCodec();
     }
 
     @Override
@@ -70,7 +66,7 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
         running = false;
     }
 
-    public void startMultiThreadStreamReading() {
+    private void startMultiThreadStreamReading() {
         if (streamLocation == null) return;
         BufferedImagePackQueue mBufferedImagePackQueue = BufferedImagePackQueue.getInstance();
         ThreadManager.getInstance().startProcessingAndReading();
@@ -78,14 +74,14 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
         while (running) {
             try {
                 BufferedImagePack mBufferedImagePack = mBufferedImagePackQueue.pop(frameNr);
-                if(mBufferedImagePack == null) {
+                if (mBufferedImagePack == null) {
                     continue;
                 }
                 BufferedImage bufferedImage = mBufferedImagePack.getImage();
                 long timestamp = System.currentTimeMillis();
-                byte[] bytes = ImageUtils.imageToBytes(bufferedImage, imageType);
+                byte[] bytes = codec.BufferedImageToJPEGBytes(bufferedImage);
                 Frame newFrame = new Frame(streamId, frameNr, imageType, bytes, timestamp, new Rectangle(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight()));
-                newFrame.getMetadata().put("uri", streamLocation);
+                //newFrame.getMetadata().put("uri", streamLocation);
                 frameQueue.put(newFrame);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -94,11 +90,13 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
         }
     }
 
-    public void startStreamReading() {
+    private void startStreamReading() {
         if (streamLocation == null) return;
         VideoCapture capture = new VideoCapture();
         Mat mat = new Mat();
         frameNr = 0;
+        long start = 0, end;
+
         capture.open(this.streamLocation);
         int width = (int) capture.get(Highgui.CV_CAP_PROP_FRAME_WIDTH);
         int height = (int) capture.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT);
@@ -110,8 +108,7 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
             while (running) {
                 try {
                     capture.read(mat);
-                    imageBytes = ImageUtils.matToBytes(mat, imageType);
-                    //imageBytes = ImageUtils.matToBytes(image);
+                    imageBytes = this.codec.MatToJPEGBytes(mat);
                 } catch (Exception e) {
                     e.printStackTrace();
                     logger.info("Exception during executing matToBufferedImage " + streamLocation);
@@ -130,9 +127,15 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
                 } catch (Exception e) {
                     logger.warn("Unable to process new frame due to: " + e.getMessage());
                 }
+
+
+                if (frameNr % 500 == 0) {
+                    start = System.currentTimeMillis();
+                }
                 frameNr++;
-                if (frameNr >= 4) {
-                    break;
+                if (frameNr % 500 == 0) {
+                    end = System.currentTimeMillis();
+                    logger.info("OpenCVRtspReader Rate: {}", (500 / ((end - start) / 1000.0f)));
                 }
             }
         }

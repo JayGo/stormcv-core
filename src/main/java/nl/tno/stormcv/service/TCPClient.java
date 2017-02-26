@@ -1,20 +1,13 @@
 package nl.tno.stormcv.service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.UnknownHostException;
-import java.security.KeyStore.PrivateKeyEntry;
-
 import edu.fudan.jliu.message.BaseMessage;
 import nl.tno.stormcv.util.MathUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
  * send: "start,[videoAddress]" ---> received:
@@ -27,86 +20,82 @@ import org.slf4j.LoggerFactory;
  * "Error,[reason]" <br>
  * send: "endByMaster,[videoAddress]" ---> received "Succeed"
  * <strong>OR</strong> "Error,[reason]"
- * 
- * @author lwang
  *
+ * @author lwang
  */
 public class TCPClient implements Serializable {
 
-	private static final long serialVersionUID = -2854001775235980342L;
-	
-	private static Logger logger = LoggerFactory.getLogger(TCPClient.class);
-	
-	private Socket socket;
-	private String serverIp;
-	private int port;
+    private static final long serialVersionUID = -2854001775235980342L;
 
-	public TCPClient() {
+    private static Logger logger = LoggerFactory.getLogger(TCPClient.class);
 
-	}
+    private Socket socket;
+    private String serverIp;
+    private int port;
 
-	public TCPClient(String serverIp, int port) {
-		try {
-			socket = new Socket(serverIp, port);
-			this.serverIp = serverIp;
-			this.port = port;
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			logger.info(e.getMessage(), e);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			logger.info(e.getMessage(), e);
-		}
-	}
-	
-	public void sendStreamIdMsg(BaseMessage streamIdMsg) {
-		if(null == socket) {
-			try {
-				socket = new Socket(this.serverIp, this.port);
-			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				logger.info(e.getMessage(), e);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				logger.info(e.getMessage(), e);
-			}
-		}
-		
-		try {
-			OutputStream os =socket.getOutputStream();
-			ObjectOutputStream objOs = new ObjectOutputStream(os);
-			objOs.writeObject(streamIdMsg);
-			
+    public TCPClient() {
+
+    }
+
+    public TCPClient(String serverIp, int port) {
+        try {
+            socket = new Socket(serverIp, port);
+            this.serverIp = serverIp;
+            this.port = port;
+        } catch (UnknownHostException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            logger.info(e.getMessage(), e);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            logger.info(e.getMessage(), e);
+        }
+    }
+
+    public void sendStreamIdMsg(BaseMessage streamIdMsg) {
+        if (null == socket) {
+            try {
+                socket = new Socket(this.serverIp, this.port);
+            } catch (UnknownHostException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                logger.info(e.getMessage(), e);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                logger.info(e.getMessage(), e);
+            }
+        }
+
+        try {
+            OutputStream os = socket.getOutputStream();
+            ObjectOutputStream objOs = new ObjectOutputStream(os);
+            objOs.writeObject(streamIdMsg);
+
 //			objOs.flush();
 //			objOs.close();
 //			os.flush();
 //			os.close();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			logger.info(e.getMessage(), e);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			logger.info(e.getMessage(), e);
-		}
-	}
+        } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            logger.info(e.getMessage(), e);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            logger.info(e.getMessage(), e);
+        }
+    }
 
-	/**
-	 * send message to certain server
-	 * 
-	 * @param msg
-	 *            message ready to send to server
-	 * @param serverAddr
-	 *            server ip address
-	 * @param port
-	 *            server port
-	 * @return server replay
-	 */
+    /**
+     * send message to certain server
+     *
+     * @param msg        message ready to send to server
+     * @param serverAddr server ip address
+     * @param port       server port
+     * @return server replay
+     */
 //	public String sendMsg(String msg, String serverAddr, int port) {
 //		String receivedMsg = "";
 //		try {
@@ -140,41 +129,39 @@ public class TCPClient implements Serializable {
 //		}
 //		return receivedMsg;
 //	}
+    public byte[] getBufferedImageBytes(String serverAddr, int port) {
+        try {
+            InputStream in = socket.getInputStream();
 
-	public byte[] getBufferedImageBytes(String serverAddr, int port) {
-		try {
-			InputStream in = socket.getInputStream();
+            // get bufferedimage byte array length first
+            byte[] buffer = new byte[4];
+            int readNum = 0;
+            while (readNum < 4) {
+                int read = in.read(buffer, 0, 4);
+                // logger.info("read result of length info: "+read);
+                if (read < 0)
+                    break;
+                readNum += read;
+            }
+            int length = MathUtil.byteArrayToInt(buffer);
+            // logger.info("Image size: "+length);
 
-			// get bufferedimage byte array length first
-			byte[] buffer = new byte[4];
-			int readNum = 0;
-			while (readNum < 4) {
-				int read = in.read(buffer, 0, 4);
-				// logger.info("read result of length info: "+read);
-				if(read < 0)
-					break;
-				readNum += read;
-			}
-			int length = MathUtil.byteArrayToInt(buffer);
-			// logger.info("Image size: "+length);
-
-			// get bufferedimage bytes
-			buffer = new byte[length];
-			readNum = 0;
-			while (readNum < length) {
-				int read = in.read(buffer, readNum, length - readNum);
-				// logger.info("read result of data info: "+read);
-				if(read < 0) 
-					break;
-				readNum += read;
-			}
-			return buffer;
-		} 
-		catch (Exception e) {
-			e.printStackTrace();
-			logger.info(e.getMessage(), e);
-		} 
-		return null;
-	}
+            // get bufferedimage bytes
+            buffer = new byte[length];
+            readNum = 0;
+            while (readNum < length) {
+                int read = in.read(buffer, readNum, length - readNum);
+                // logger.info("read result of data info: "+read);
+                if (read < 0)
+                    break;
+                readNum += read;
+            }
+            return buffer;
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info(e.getMessage(), e);
+        }
+        return null;
+    }
 
 }

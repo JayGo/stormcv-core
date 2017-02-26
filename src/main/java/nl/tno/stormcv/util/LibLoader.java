@@ -60,6 +60,8 @@ public final class LibLoader {
         try {
             System.load(path + libName);
         } catch (UnsatisfiedLinkError e) {
+            System.out.println("Unable load " + path + libName);
+            e.printStackTrace();
             try {
                 loadSelfJarLib(libName);
             } catch (UnsatisfiedLinkError | IOException e1) {
