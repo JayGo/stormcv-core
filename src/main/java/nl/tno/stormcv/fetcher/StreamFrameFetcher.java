@@ -14,7 +14,7 @@ import nl.tno.stormcv.model.serializer.FrameSerializer;
 import nl.tno.stormcv.model.serializer.CVParticleSerializer;
 import nl.tno.stormcv.model.serializer.GroupOfFramesSerializer;
 import nl.tno.stormcv.operation.GroupOfFramesOp;
-import nl.tno.stormcv.util.reader.StreamReader;
+import nl.tno.stormcv.util.reader.XuggleStreamReader;
 import org.apache.storm.task.TopologyContext;
 
 /**
@@ -45,7 +45,7 @@ public class StreamFrameFetcher implements IFetcher<CVParticle>{
 	protected int frameSkip = 1;
 	private int groupSize = 1;
 	protected LinkedBlockingQueue<Frame> frameQueue = new LinkedBlockingQueue<Frame>(20);
-	protected Map<String, StreamReader> streamReaders;
+	protected Map<String, XuggleStreamReader> streamReaders;
 	private int sleepTime = 0;
 	private String imageType;
 	private int batchSize = 1;
@@ -118,14 +118,14 @@ public class StreamFrameFetcher implements IFetcher<CVParticle>{
 		if(streamReaders != null){
 			this.deactivate();
 		}
-		streamReaders = new HashMap<String, StreamReader>();
+		streamReaders = new HashMap<String, XuggleStreamReader>();
 		for(String location : locations){
 			
 			String streamId = ""+location.hashCode();
 			if(location.contains("/")){
 				streamId = id+"_"+location.substring(location.lastIndexOf("/")+1) + "_" + streamId;
 			}
-			StreamReader reader = new StreamReader(streamId, location, imageType, frameSkip, groupSize, sleepTime, frameQueue);
+			XuggleStreamReader reader = new XuggleStreamReader(streamId, location, imageType, frameSkip, groupSize, sleepTime, frameQueue);
 			streamReaders.put(location, reader);
 			new Thread(reader).start();
 		}
