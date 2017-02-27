@@ -1,6 +1,6 @@
 package edu.fudan.lwang.codec;
 
-import nl.tno.stormcv.model.Frame;
+import edu.fudan.stormcv.model.Frame;
 
 public interface OperationHandler<E> {
     public boolean fillSourceBufferQueue(Frame frame);
