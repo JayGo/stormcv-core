@@ -33,6 +33,9 @@ public final class LibLoader {
     private static final String hgCodecLibName = "libHgCodec.so";
     private static final String defaultHgCodecLibPath = "/usr/local/LwangCodec/lib/";
 
+    private static final String rtmpStreamerLibName = "libH264RtmpStreamer.so";
+    private static final String defaultRtmpStreamerLibPath = "/usr/local/LwangCodec/lib/";
+
     public static boolean loadOpenCVLib() {
         return loadLibrary(defaultOpenCVLibPath, opencvlibName);
     }
@@ -53,6 +56,10 @@ public final class LibLoader {
         return loadLibrary(defaultHgCodecLibPath, hgCodecLibName);
     }
 
+    public static boolean loadRtmpStreamerLib() {
+        return loadLibrary(defaultRtmpStreamerLibPath, rtmpStreamerLibName);
+    }
+
     private static boolean loadLibrary(String path, String libName) {
         if (!path.endsWith("/")) {
             path += "/";
@@ -60,7 +67,7 @@ public final class LibLoader {
         try {
             System.load(path + libName);
         } catch (UnsatisfiedLinkError e) {
-            System.out.println("Unable load " + path + libName);
+            logger.info("Unable load " + path + libName);
             e.printStackTrace();
             try {
                 loadSelfJarLib(libName);

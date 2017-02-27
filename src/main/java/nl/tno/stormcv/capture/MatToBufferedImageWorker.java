@@ -3,12 +3,15 @@ package nl.tno.stormcv.capture;
 import nl.tno.stormcv.capture.MatPackQueue.MatPack;
 import nl.tno.stormcv.codec.JPEGImageCodec;
 import nl.tno.stormcv.codec.TurboJPEGImageCodec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.image.BufferedImage;
 
 
 public class MatToBufferedImageWorker extends Thread {
 
+    private static final Logger logger = LoggerFactory.getLogger(MatToBufferedImageWorker.class);
     private MatPackQueue mMatPackQueue;
     private BufferedImagePackQueue mBufferedImagePackQueue;
     private JPEGImageCodec codec;
@@ -33,7 +36,7 @@ public class MatToBufferedImageWorker extends Thread {
                 while (!mBufferedImagePackQueue.push(mMatPack.getSeq(), mBufferedImage, mMatPack.isLastPack())) {
                     ;
                 }
-                System.out.println("Transform Thread" + Thread.currentThread().getId() + "is exiting");
+                logger.info("Transform Thread" + Thread.currentThread().getId() + "is exiting");
                 break;
             }
             BufferedImage mBufferedImage = this.codec.JPEGBytesToBufferedImage(this.codec.MatToJPEGBytes(mMatPack.getImage()));

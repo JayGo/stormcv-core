@@ -25,13 +25,13 @@ import java.util.List;
  * Time: 2/23/17 - 6:24 AM
  * Description:
  */
-public class GrayScaleTopology extends BaseTopology {
+public class GrayScaleTopologyJPEG extends BaseTopology {
 
     private int frameSkip = 0;
     private List<String> urls;
-    private String streamId = "GrayScaleTopology";
+    private String streamId = "GrayScaleTopologyJPEG";
 
-    public GrayScaleTopology() {
+    public GrayScaleTopologyJPEG() {
         conf.setNumWorkers(1);
         conf.put(StormCVConfig.STORMCV_FRAME_ENCODING, Frame.JPG_IMAGE);
         urls = new ArrayList<String>();
@@ -71,7 +71,7 @@ public class GrayScaleTopology extends BaseTopology {
     }
 
     public static void main(String[] args) {
-        GrayScaleTopology topology = new GrayScaleTopology();
+        GrayScaleTopologyJPEG topology = new GrayScaleTopologyJPEG();
         try {
             topology.submitTopology();
         } catch (Exception e) {

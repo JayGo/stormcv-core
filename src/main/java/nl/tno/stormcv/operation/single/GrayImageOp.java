@@ -43,10 +43,18 @@ public class GrayImageOp implements ISingleInputOperation<Frame> {
 
     @Override
     public List<Frame> execute(CVParticle particle, OperationHandler codecHandler) throws Exception {
+        List<Frame> results = new ArrayList<>();
         Frame frame = (Frame) particle;
+        if (frame.getImageBytes().length <= 0) {
+            return results;
+        }
+        //logger.info("frame {} rectangle:{}, size:{}", frame.getSequenceNr(), frame.getBoundingBox(), frame.getImageBytes().length);
         codecHandler.fillSourceBufferQueue(frame);
         Mat in = (Mat) codecHandler.getDecodedData();
+
+
         if (in != null) {
+            //logger.info("receive a frame: {}x{}, bytesSize: {}", in.width(), in.height(), frame.getImageBytes().length);
             Mat out = new Mat(in.height(), in.width(), CvType.CV_8UC1);
             Imgproc.cvtColor(in, out, Imgproc.COLOR_BGR2GRAY);
             byte[] encodedData = codecHandler.getEncodedData(out);
@@ -54,9 +62,12 @@ public class GrayImageOp implements ISingleInputOperation<Frame> {
                 logger.error("encode data is null!!");
             }
             frame.swapImageBytes(encodedData);
+            results.add(frame);
+        } else {
+            logger.info("cannot decode frame {}", frame.getSequenceNr());
         }
-        List<Frame> results = new ArrayList<>();
-        results.add(frame);
+
+
         return results;
     }
 

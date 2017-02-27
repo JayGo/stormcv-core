@@ -3,6 +3,8 @@ package nl.tno.stormcv.service;
 import nl.tno.stormcv.constant.GlobalConstants;
 import nl.tno.stormcv.topology.MatReaderTopology;
 import nl.tno.stormcv.util.VideoAddrValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -18,6 +20,7 @@ import java.util.Map.Entry;
 //import nl.tno.stormcv.topology.MatReaderTopology;
 
 public class TCPMatServer {
+    private static final Logger logger = LoggerFactory.getLogger(TCPMatServer.class);
     private final int serverMsgPort = 8967;
     private ServerSocket msgServerSocket;
 
@@ -68,14 +71,14 @@ public class TCPMatServer {
                 DataOutputStream out = new DataOutputStream(
                         clientSocket.getOutputStream());
                 // receive until client close connection,indicate by -l return
-                System.out.println("Handling client at " + clientAddress);
+                logger.info("Handling client at " + clientAddress);
 
                 int numRead = in.read(receivedData);
                 String receivedString = new String(receivedData, 0, numRead);
-                System.out.println("Received: " + receivedString);
+                logger.info("Received: " + receivedString);
 
                 String msgCallBack = parseMsg(receivedString);
-                System.out.println("Answer : " + msgCallBack);
+                logger.info("Answer : " + msgCallBack);
                 byte[] data = msgCallBack.getBytes("utf-8");
                 out.write(data);
                 in.close();

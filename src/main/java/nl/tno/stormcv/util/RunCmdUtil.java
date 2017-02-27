@@ -1,9 +1,13 @@
 package nl.tno.stormcv.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 
 public class RunCmdUtil {
+    private static final Logger logger = LoggerFactory.getLogger(RunCmdUtil.class);
     public static int doWaitFor(String cmd) {
 
         if (cmd == null || cmd.isEmpty()) {
@@ -12,7 +16,7 @@ public class RunCmdUtil {
 
         Process process = null;
         try {
-            System.out.println("Command: " + cmd);
+            logger.info("Command: {}", cmd);
             process = Runtime.getRuntime().exec(cmd);
         } catch (IOException e1) {
             // TODO Auto-generated catch block

@@ -36,8 +36,8 @@ public class DrawFeaturesOp implements ISingleInputOperation<Frame> {
     private String writeLocation;
     private ConnectorHolder connectorHolder;
     private boolean drawMetadata = false;
-    private static int count = 0;
-    private static int count1 = 0;
+    private static int successCount = 0;
+    private static int failedCount = 0;
 
     public DrawFeaturesOp destination(String location) {
         this.writeLocation = location;
@@ -126,26 +126,24 @@ public class DrawFeaturesOp implements ISingleInputOperation<Frame> {
         frame.swapImageBytes(codecHandler.getEncodedData(image));
 
         if (writeLocation != null) {
-            //String destination = writeLocation + (writeLocation.endsWith("/") ? ""
-            //	: "/") + sf.getStreamId()+"_"+sf.getSequenceNr()+"_"+Math.random()+".png";
+            String writeImageType = "jpg";
             Long timeStamp = System.currentTimeMillis();
             String destination = writeLocation + (writeLocation.endsWith("/") ? "" : "/")
-                    + frame.getStreamId() + "_" + timeStamp + "." + frame.getImageType();
-            System.out.println("des:" + destination);
+                    + frame.getStreamId() + "_" + timeStamp + "." + writeImageType;
+            logger.info("[drawFeature] destination:{}", destination);
             FileConnector fl = connectorHolder.getConnector(destination);
             if (fl != null) {
                 fl.moveTo(destination);
                 if (fl instanceof LocalFileConnector) {
-                    ImageIO.write(image, "jpg", fl.getAsFile());
-                    System.out.println("write a image");
+                    ImageIO.write(image, writeImageType, fl.getAsFile());
                 } else {
-                    File tmpImage = File.createTempFile("" + destination.hashCode(), ".jpg");
-                    ImageIO.write(image, "jpg", tmpImage);
+                    File tmpImage = File.createTempFile("" + destination.hashCode(), "." + writeImageType);
+                    ImageIO.write(image, writeImageType, tmpImage);
                     boolean flag = fl.copyFile1(tmpImage, true);
-                    if (flag) count++;
-                    else count1++;
-                    logger.info("[" + count + "]" + "[" + count1 + "]"
-                            + "DrawFeaturesOp Blot saved picture in " + destination);
+                    if (flag) successCount++;
+                    else failedCount++;
+                    logger.info("[drawFeature][success:{}][failed:{}]DrawFeaturesOp Blot saved picture in ",
+                            successCount, failedCount, destination);
                 }
             }
         }

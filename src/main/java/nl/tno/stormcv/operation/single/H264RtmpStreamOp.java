@@ -5,6 +5,7 @@ import nl.tno.stormcv.model.CVParticle;
 import nl.tno.stormcv.model.Frame;
 import nl.tno.stormcv.model.serializer.CVParticleSerializer;
 import nl.tno.stormcv.model.serializer.FrameSerializer;
+import nl.tno.stormcv.util.LibLoader;
 import nl.tno.stormcv.util.StreamerHelper;
 import org.apache.storm.task.TopologyContext;
 import org.slf4j.Logger;
@@ -48,7 +49,10 @@ public class H264RtmpStreamOp implements ISingleInputOperation<Frame> {
     }
 
     private void initStreamer() {
-        String rtmpAddr = url + "/" + appName;
+        if (!url.endsWith("/")) {
+            url += "/";
+        }
+        String rtmpAddr = url + appName;
         sh = StreamerHelper.getInstance();
         if (sh.connectToRtmp(rtmpAddr)) {
             logger.info("Conneted to rtmp server: " + rtmpAddr);
@@ -59,14 +63,13 @@ public class H264RtmpStreamOp implements ISingleInputOperation<Frame> {
 
     @Override
     public void prepare(Map stormConf, TopologyContext context) throws Exception {
-        // TODO Auto-generated method stub
+        LibLoader.loadRtmpStreamerLib();
         initStreamer();
     }
 
     @Override
     public void deactivate() {
         // TODO Auto-generated method stub
-
     }
 
     @Override

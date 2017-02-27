@@ -1,10 +1,13 @@
 package nl.tno.stormcv.capture;
 
 import nl.tno.stormcv.capture.BufferedImagePackQueue.BufferedImagePack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class SpoutWorker extends Thread {
 
+    private static final Logger logger = LoggerFactory.getLogger(SpoutWorker.class);
     private BufferedImagePackQueue mBufferedImagePackQueue;
     private int currentSeq;
 
@@ -27,11 +30,11 @@ public class SpoutWorker extends Thread {
             }
             if (mBufferedImagePack.isLastPack()) {
                 long end = System.currentTimeMillis();
-                System.out.println("spout time:" + (end - start));
+                logger.info("spout time:" + (end - start));
                 break;
             }
             currentSeq++;
-            System.out.println("pop image:" + mBufferedImagePack.getSeq());
+            logger.info("pop image:" + mBufferedImagePack.getSeq());
         }
     }
 }

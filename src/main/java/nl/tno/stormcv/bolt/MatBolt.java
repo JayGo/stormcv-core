@@ -17,7 +17,6 @@ import java.util.Map;
 
 public class MatBolt extends BaseRichBolt {
 
-    private static final long serialVersionUID = 5655680880310767907L;
     protected Logger logger = LoggerFactory.getLogger(MatBolt.class);
     protected OutputCollector collector;
     private MatImageSerializer serializer = new MatImageSerializer();
@@ -44,7 +43,7 @@ public class MatBolt extends BaseRichBolt {
         try {
             MatImage image = serializer.fromTuple(input);
 
-            System.out.println("image " + image.getSequence() + " : " + image.getWidth() + "x" + image.getHeight() + " type " + image.getType()
+            logger.debug("image " + image.getSequence() + " : " + image.getWidth() + "x" + image.getHeight() + " type " + image.getType()
                     + " byte size " + image.getMatbytes().length + " with " + image.getMat().cols() + "x" + image.getMat().rows());
 
             if (image != null) {

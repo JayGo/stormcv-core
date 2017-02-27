@@ -50,12 +50,11 @@ public class CaptureWorker extends Thread {
                     currentFrameIndex++;
                     if (currentFrameIndex % 500 == 0) {
                         long end = System.currentTimeMillis();
-                        System.out.println("rate : " + (500 / ((end - start) / 1000.0f)));
-//	                	logger.info("rate : " + (200/((end-start)/1000.0f)));
+                        logger.info("rate : " + (500 / ((end - start) / 1000.0f)));
                     }
                 }
             } catch (Exception e) {
-                System.out.println("Null Pointer Exception during Read");
+                logger.error("Null Pointer Exception during Read");
                 if (e instanceof CvException) {
                     capture.open(rtspUrl);
                 }

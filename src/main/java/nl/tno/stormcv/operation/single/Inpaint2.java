@@ -14,6 +14,8 @@ package nl.tno.stormcv.operation.single;
  */
 
 import nl.tno.stormcv.operation.GradientCalculator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -36,11 +38,11 @@ public class Inpaint2 {
 //		try {
 //			image = ImageIO.read(new FileInputStream("E://Applications//eclipse-jee-mars-1-win32-x86_64//Image-Inapainting-master//src//imageselection//Images//bungee1.png"));
 //			long startMili=System.currentTimeMillis();
-//			System.out.println("start:ʼ "+startMili);
+//			logger.info("start:ʼ "+startMili);
 //			inpainter.init(image, image, true);
 //			long endMili=System.currentTimeMillis();
-//			System.out.println("end:"+endMili);
-//			System.out.println("total:"+(endMili-startMili)+"s");
+//			logger.info("end:"+endMili);
+//			logger.info("total:"+(endMili-startMili)+"s");
 //		} catch (FileNotFoundException e) {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
@@ -50,6 +52,7 @@ public class Inpaint2 {
 //		}  
 //	}
 
+    private static final Logger logger = LoggerFactory.getLogger(Inpaint2.class);
     BufferedImage origImg; // BufferedImage Object to represent updated image at every step
     Image fillImg; // Image Object to represent Image with target region marked
     BufferedImage img; // BufferedImage Object to represent original Image
@@ -117,7 +120,7 @@ public class Inpaint2 {
             while (((double) (w * 2 + 1) * (double) (w * 2 + 1) / (iw * ih)) < 0.001) {
                 w += 1;
             }
-            System.out.println(iw + " " + ih);
+            logger.info(iw + " " + ih);
             /**
              * Grab the pixels of Original Image.
              */
@@ -146,7 +149,7 @@ public class Inpaint2 {
             }
 
         } catch (InterruptedException e1) {
-            System.out.println("Error " + e1);
+            logger.info("Error " + e1);
         }
 
         /**
@@ -233,8 +236,8 @@ public class Inpaint2 {
             }
         }
 
-        // System.out.println("Col = " + continuousCol);
-        // System.out.println("Col = " + continuousRow);
+        // logger.info("Col = " + continuousCol);
+        // logger.info("Col = " + continuousRow);
 
         Boolean flag = true; // Flag to represent the completion of the inpainting process
 
@@ -375,7 +378,7 @@ public class Inpaint2 {
             int[] best1 = {0, 0, 0, 0};
             countInpiant++;
             long startMili = System.currentTimeMillis();
-            System.out.println("start:ʼ " + startMili);
+            logger.info("start:ʼ " + startMili);
 
 			/*int[] best = bestExemplar(Hp, toFillTrans, initialSourceRegion,pixelmap,best1, ih,1);
 			if (best[0] == 0 && best[1] == 0 && best[2] == 0 && best[3] == 0) {
@@ -384,12 +387,12 @@ public class Inpaint2 {
             //int[] best = bestExemplar(Hp, toFillTrans, initialSourceRegion, quickInpaint);
             int[] best = bestExemplar2(Hp, toFillTrans, initialSourceRegion, quickInpaint);
             long endMili = System.currentTimeMillis();
-            System.out.println("start:" + endMili);
-            System.out.println("end:" + (endMili - startMili) + "s");
+            logger.info("start:" + endMili);
+            logger.info("end:" + (endMili - startMili) + "s");
             int nRows = best[3] - best[2] + 1;
             int nCols = best[1] - best[0] + 1;
-            System.out.println("best[0]:" + best[0] + "; best[1]:" + best[1] + "; best[2]:" + best[2] + "; best[3]:" + best[3]);
-            System.out.println(countInpiant);
+            logger.info("best[0]:" + best[0] + "; best[1]:" + best[1] + "; best[2]:" + best[2] + "; best[3]:" + best[3]);
+            logger.info("countInpiant:{}", countInpiant);
 
             /**
              * Find the patch represented by best.
@@ -478,7 +481,7 @@ public class Inpaint2 {
         }
         Thread.yield();
 //		 try {
-//			 System.out.println(countInpiant);
+//			 logger.info(countInpiant);
 //			ImageIO.write(origImg, "png", new File("bungee2.png"));
 //		} catch (IOException e) {
 //			// TODO Auto-generated catch block

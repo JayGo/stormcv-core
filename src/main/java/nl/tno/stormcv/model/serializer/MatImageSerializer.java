@@ -9,6 +9,8 @@ import nl.tno.stormcv.model.MatImage;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -17,8 +19,7 @@ import java.util.List;
 
 public class MatImageSerializer extends Serializer<MatImage> implements Serializable {
 
-    private static final long serialVersionUID = -8024801517963688060L;
-
+    private static final Logger logger = LoggerFactory.getLogger(MatImageSerializer.class);
     public static final String STREAMID = "streamID";
     public static final String SEQUENCENR = "sequenceNR";
     public static final String TYPE = "type";
@@ -43,7 +44,7 @@ public class MatImageSerializer extends Serializer<MatImage> implements Serializ
     /**
      * Converts a Type Object to a Values tuple which can be emitted by storm
      *
-     * @param object
+     * @param
      * @return
      * @throws IOException
      */
@@ -119,10 +120,10 @@ public class MatImageSerializer extends Serializer<MatImage> implements Serializ
         byte[] buffer = type.getMatbytes();
         if (buffer != null) {
             output.writeInt(buffer.length);
-            System.out.println("write __seq:" + type.getSequence() + "   length:" + buffer.length);
+            logger.debug("write __seq:" + type.getSequence() + "   length:" + buffer.length);
             output.writeBytes(buffer);
         } else {
-            System.out.println("mat bytes is null");
+            logger.debug("mat bytes is null");
             output.writeInt(0);
         }
         output.flush();

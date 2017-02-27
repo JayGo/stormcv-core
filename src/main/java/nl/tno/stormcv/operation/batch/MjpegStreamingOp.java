@@ -138,7 +138,6 @@ public class MjpegStreamingOp extends Application implements IBatchOperation<Fra
         for (String id : images.asMap().keySet()) {
             result += "/streaming/picture/" + id + ".jpeg\r\n";
         }
-        System.out.println("\r\n");
         for (String id : images.asMap().keySet()) {
             result += "/streaming/mjpeg/" + id + ".mjpeg\r\n";
         }
