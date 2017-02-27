@@ -1,7 +1,7 @@
 package edu.fudan.lwang.codec;
 
 import edu.fudan.lwang.codec.Common.CodecType;
-import nl.tno.stormcv.util.LibLoader;
+import edu.fudan.stormcv.util.LibLoader;
 
 public class CodecTest {
     public static void main(String[] args) {

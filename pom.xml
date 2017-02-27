@@ -1,12 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>nl.tno</groupId>
+    <groupId>edu.fudan</groupId>
     <artifactId>stormcv</artifactId>
     <version>0.8</version>
     <name>StormCV</name>
     <description>A Storm contribution to ease the development of computer vision topologies</description>
-    <url>https://github.com/sensorstorm/StormCV</url>
     <packaging>jar</packaging>
     <licenses>
         <license>
@@ -31,6 +30,26 @@
             <name>Maarten Kruithof</name>
             <organization>TNO</organization>
             <organizationUrl>http://www.tno.nl</organizationUrl>
+        </developer>
+        <developer>
+            <name>Lei Wang</name>
+            <organization>FUDAN</organization>
+            <organizationUrl>http://fudan.edu.cn</organizationUrl>
+        </developer>
+        <developer>
+            <name>Jie Liu</name>
+            <organization>FUDAN</organization>
+            <organizationUrl>http://fudan.edu.cn</organizationUrl>
+        </developer>
+        <developer>
+            <name>Xin Tu</name>
+            <organization>FUDAN</organization>
+            <organizationUrl>http://fudan.edu.cn</organizationUrl>
+        </developer>
+        <developer>
+            <name>Jiankang Yan</name>
+            <organization>FUDAN</organization>
+            <organizationUrl>http://fudan.edu.cn</organizationUrl>
         </developer>
     </developers>
 
@@ -260,7 +279,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>nl.tno.stormcv.Main</mainClass>
+                            <mainClass>edu.fudan.stormcv.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -274,7 +293,7 @@
                     </descriptorRefs>
                     <archive>
                         <manifest>
-                            <mainClass>nl.tno.stormcv.Main</mainClass>
+                            <mainClass>edu.fudan.stormcv.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

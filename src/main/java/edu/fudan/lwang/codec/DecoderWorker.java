@@ -1,7 +1,7 @@
 package edu.fudan.lwang.codec;
 
 import edu.fudan.lwang.codec.Common.CodecType;
-import nl.tno.stormcv.util.TimeElasper;
+import edu.fudan.stormcv.util.TimeElasper;
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.slf4j.Logger;

@@ -1,7 +1,7 @@
 package edu.fudan.lwang.codec;
 
 import edu.fudan.lwang.codec.Common.CodecType;
-import nl.tno.stormcv.model.Frame;
+import edu.fudan.stormcv.model.Frame;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
