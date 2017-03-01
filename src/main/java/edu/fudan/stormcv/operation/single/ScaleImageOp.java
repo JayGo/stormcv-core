@@ -6,6 +6,9 @@ import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.model.serializer.FrameSerializer;
 import org.apache.storm.task.TopologyContext;
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +31,7 @@ public class ScaleImageOp implements ISingleInputOperation<Frame> {
 
     private static final Logger logger = LoggerFactory.getLogger(ScaleImageOp.class);
     private float factor;
+    private boolean useMat = false;
 
     /**
      * Creates a ScaleOperation that will scale images usint the provided factor. Using
@@ -37,6 +41,11 @@ public class ScaleImageOp implements ISingleInputOperation<Frame> {
      */
     public ScaleImageOp(float factor) {
         this.factor = factor;
+    }
+
+    public ScaleImageOp useMat(boolean useMat) {
+        this.useMat = useMat;
+        return this;
     }
 
     @Override
@@ -87,11 +96,21 @@ public class ScaleImageOp implements ISingleInputOperation<Frame> {
     public List<Frame> execute(CVParticle particle, OperationHandler codecHandler) throws Exception {
         Frame frame = (Frame) particle;
         codecHandler.fillSourceBufferQueue(frame);
-        BufferedImage image = (BufferedImage) codecHandler.getDecodedData();
-        if (image != null) {
-            if (factor != 1.0) image = ScaleImageOp.scale(image, factor);
-            byte[] imageBytes = codecHandler.getEncodedData(image);
-            frame.swapImageBytes(imageBytes);
+        if (this.useMat) {
+            Mat in = (Mat) codecHandler.getDecodedData();
+            if (in != null) {
+                Mat resize = new Mat();
+                Imgproc.resize(in, resize, new Size(in.width() * factor, in.height() * factor));
+                frame.swapImageBytes(codecHandler.getEncodedData(resize));
+//                frame.setImageBytes(codecHandler.getEncodedData(resize), (int)(in.width() * factor), (int)(in.height() * factor));
+            }
+        } else {
+            BufferedImage image = (BufferedImage) codecHandler.getDecodedData();
+            if (image != null) {
+                if (factor != 1.0) image = ScaleImageOp.scale(image, factor);
+                byte[] imageBytes = codecHandler.getEncodedData(image);
+                frame.swapImageBytes(imageBytes);
+            }
         }
         List<Frame> results = new ArrayList<>();
         results.add(frame);
