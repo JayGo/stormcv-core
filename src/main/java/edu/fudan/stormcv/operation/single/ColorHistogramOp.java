@@ -2,20 +2,20 @@ package edu.fudan.stormcv.operation.single;
 
 import edu.fudan.lwang.codec.OperationHandler;
 import edu.fudan.stormcv.model.CVParticle;
+import edu.fudan.stormcv.model.Descriptor;
 import edu.fudan.stormcv.model.Feature;
+import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.model.serializer.FeatureSerializer;
 import edu.fudan.stormcv.model.serializer.FrameSerializer;
 import edu.fudan.stormcv.operation.OpenCVOp;
-import edu.fudan.stormcv.model.Descriptor;
-import edu.fudan.stormcv.model.Frame;
 import org.apache.storm.task.TopologyContext;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.core.MatOfFloat;
-import org.opencv.core.MatOfInt;
+import org.opencv.core.*;
+import org.opencv.core.Point;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -32,15 +32,23 @@ import java.util.Map;
 
 public class ColorHistogramOp extends OpenCVOp<CVParticle> implements
         ISingleInputOperation<CVParticle> {
+
+    private static final Logger logger = LoggerFactory.getLogger(ColorHistogramOp.class);
     private String stream;
     private int[] chansj = new int[]{0, 1, 2};
     private int[] histsizej = new int[]{255, 255, 255};
     private float[] rangesj = new float[]{0, 256, 0, 256, 0, 256};
     private Boolean outputFrame = true;
     private CVParticleSerializer serializer = new FeatureSerializer();
+    private boolean useMat = false;
 
     public ColorHistogramOp(String stream) {
         this.stream = stream;
+    }
+
+    public ColorHistogramOp useMat(boolean useMat) {
+        this.useMat = useMat;
+        return this;
     }
 
     public ColorHistogramOp outputFrame(Boolean outFrame) {
@@ -100,59 +108,117 @@ public class ColorHistogramOp extends OpenCVOp<CVParticle> implements
     public List<CVParticle> execute(CVParticle particle, OperationHandler codecHandler) throws Exception {
         Frame frame = (Frame) particle;
         codecHandler.fillSourceBufferQueue(frame);
-        BufferedImage bufferedImage = (BufferedImage) codecHandler.getDecodedData();
 
-        MatOfByte mob = new MatOfByte(frame.getImageBytes());
-        Mat matImage = Highgui.imdecode(mob, Highgui.CV_LOAD_IMAGE_COLOR);
-        Mat hist = new Mat();
-        MatOfInt chans;
-        MatOfInt histsize;
-        MatOfFloat ranges;
-        List<Mat> images = new ArrayList<>();
-        ArrayList<CVParticle> result = new ArrayList<CVParticle>();
-        ArrayList<Descriptor> hist_descriptors = new ArrayList<Descriptor>();
+        List<CVParticle> result = new ArrayList<>();
+        List<Descriptor> hist_descriptors = null;
+        String streamId = particle.getStreamId();
+        long sequenceNr = particle.getSequenceNr();
 
-        Rectangle box = new Rectangle(0, 0, (int) matImage.size().width,
-                (int) matImage.size().height);
-        images.add(matImage);
+        if (useMat) {
+            Mat matImage = (Mat) codecHandler.getDecodedData();
 
-        for (int i = 0; i < chansj.length; i++) {
-            chans = new MatOfInt(chansj[i]);
-            histsize = new MatOfInt(histsizej[i]);
-            ranges = new MatOfFloat(rangesj[i * 2], rangesj[i * 2 + 1]);
-            Imgproc.calcHist(images, chans, new Mat(), hist, histsize, ranges);
+            if (matImage == null) return result;
+            Mat hist = new Mat();
+            MatOfInt chans;
+            MatOfInt histsize;
+            MatOfFloat ranges;
+            List<Mat> images = new ArrayList<>();
 
-            float[] tmp = new float[1];
-            int rows = (int) hist.size().height;
-            float[] values = new float[rows];
-            int c = 0;
-            float uh = matImage.height() / chansj.length;
-            float uw = matImage.width() / rows;
-            float maxHight = 0;
-            for (int r = 0; r < rows; r++) // loop over rows/columns
-            {
-                hist.get(r, c, tmp);
-                values[r] = tmp[0];
-                if (tmp[0] > maxHight)
-                    maxHight = tmp[0];
+            Rectangle box = new Rectangle(0, 0, (int) matImage.size().width,
+                    (int) matImage.size().height);
+            images.add(matImage);
+
+            hist_descriptors = new ArrayList<>();
+
+            for (int i = 0; i < chansj.length; i++) {
+                chans = new MatOfInt(chansj[i]);
+                histsize = new MatOfInt(histsizej[i]);
+                ranges = new MatOfFloat(rangesj[i * 2], rangesj[i * 2 + 1]);
+                Imgproc.calcHist(images, chans, new Mat(), hist, histsize, ranges);
+
+                float[] tmp = new float[1];
+                int rows = (int) hist.size().height;
+                float[] values = new float[rows];
+                int c = 0;
+                float uh = matImage.height() / chansj.length;
+                float uw = matImage.width() / rows;
+                float maxHight = 0;
+                for (int r = 0; r < rows; r++) // loop over rows/columns
+                {
+                    hist.get(r, c, tmp);
+                    values[r] = tmp[0];
+                    if (tmp[0] > maxHight)
+                        maxHight = tmp[0];
+                }
+
+                for (int r = 0; r < rows; ++r) {
+                    Scalar scalar = new Scalar((i == 2 ? r : 0), (i == 1 ? r : 0), (i == 0 ? r : 0));
+                    int x0 = (int) (r * uw);
+                    int y0 = (int) ((i + 1) * uh - values[r] / maxHight
+                            * uh);
+                    int x1 = x0 + (int) uw;
+                    int y1 = y0 + (int) (values[r] / maxHight * uh);
+
+                    Core.rectangle(matImage, new Point(x0, y0), new Point(x1, y1), scalar);
+                }
+                hist_descriptors.add(new Descriptor(streamId, sequenceNr, box, 0, values));
             }
-            // draw colorhistogm on the frame image
-            Graphics2D graphics = bufferedImage.createGraphics();
-            for (int r = 0; r < rows; ++r) {
-                Color color = new Color((i == 0 ? r : 0), (i == 1 ? r : 0),
-                        (i == 2 ? r : 0));
-                graphics.setColor(color);
-                graphics.drawRect((int) (r * uw),
-                        (int) ((i + 1) * uh - values[r] / maxHight
-                                * uh), (int) uw,
-                        (int) (values[r] / maxHight * uh));
+            frame.swapImageBytes(codecHandler.getEncodedData(matImage));
+        } else {
+            BufferedImage bufferedImage = (BufferedImage) codecHandler.getDecodedData();
+
+            MatOfByte mob = new MatOfByte(frame.getImageBytes());
+            Mat matImage = Highgui.imdecode(mob, Highgui.CV_LOAD_IMAGE_COLOR);
+
+            Mat hist = new Mat();
+            MatOfInt chans;
+            MatOfInt histsize;
+            MatOfFloat ranges;
+            List<Mat> images = new ArrayList<>();
+
+            Rectangle box = new Rectangle(0, 0, (int) matImage.size().width,
+                    (int) matImage.size().height);
+            images.add(matImage);
+
+            hist_descriptors = new ArrayList<>();
+
+            for (int i = 0; i < chansj.length; i++) {
+                chans = new MatOfInt(chansj[i]);
+                histsize = new MatOfInt(histsizej[i]);
+                ranges = new MatOfFloat(rangesj[i * 2], rangesj[i * 2 + 1]);
+                Imgproc.calcHist(images, chans, new Mat(), hist, histsize, ranges);
+
+                float[] tmp = new float[1];
+                int rows = (int) hist.size().height;
+                float[] values = new float[rows];
+                int c = 0;
+                float uh = matImage.height() / chansj.length;
+                float uw = matImage.width() / rows;
+                float maxHight = 0;
+                for (int r = 0; r < rows; r++) // loop over rows/columns
+                {
+                    hist.get(r, c, tmp);
+                    values[r] = tmp[0];
+                    if (tmp[0] > maxHight)
+                        maxHight = tmp[0];
+                }
+
+
+                Graphics2D graphics = bufferedImage.createGraphics();
+                for (int r = 0; r < rows; ++r) {
+                    Color color = new Color((i == 0 ? r : 0), (i == 1 ? r : 0),
+                            (i == 2 ? r : 0));
+                    graphics.setColor(color);
+                    graphics.drawRect((int) (r * uw),
+                            (int) ((i + 1) * uh - values[r] / maxHight
+                                    * uh), (int) uw,
+                            (int) (values[r] / maxHight * uh));
+                }
+                hist_descriptors.add(new Descriptor(streamId, sequenceNr, box, 0, values));
             }
-            hist_descriptors.add(new Descriptor(particle.getStreamId(), particle
-                    .getSequenceNr(), box, 0, values));
+            frame.swapImageBytes(codecHandler.getEncodedData(bufferedImage));
         }
 
-        frame.swapImageBytes(codecHandler.getEncodedData(bufferedImage));
-        //sf.setImage(sfimage);
         Feature feature = new Feature(particle.getStreamId(),
                 particle.getSequenceNr(), stream, 0, hist_descriptors, null);
 
@@ -166,5 +232,55 @@ public class ColorHistogramOp extends OpenCVOp<CVParticle> implements
             }
         }
         return result;
+    }
+
+    private List<Descriptor> getColorhistogramDescriptor(Mat matImage, String streamId, long sequenceNr) {
+        Mat hist = new Mat();
+        MatOfInt chans;
+        MatOfInt histsize;
+        MatOfFloat ranges;
+        List<Mat> images = new ArrayList<>();
+
+        Rectangle box = new Rectangle(0, 0, (int) matImage.size().width,
+                (int) matImage.size().height);
+        images.add(matImage);
+
+        List<Descriptor> hist_descriptors = new ArrayList<>();
+
+        for (int i = 0; i < chansj.length; i++) {
+            chans = new MatOfInt(chansj[i]);
+            histsize = new MatOfInt(histsizej[i]);
+            ranges = new MatOfFloat(rangesj[i * 2], rangesj[i * 2 + 1]);
+            Imgproc.calcHist(images, chans, new Mat(), hist, histsize, ranges);
+
+            float[] tmp = new float[1];
+            int rows = (int) hist.size().height;
+            float[] values = new float[rows];
+            int c = 0;
+
+            float maxHight = 0;
+            for (int r = 0; r < rows; r++) // loop over rows/columns
+            {
+                hist.get(r, c, tmp);
+                values[r] = tmp[0];
+                if (tmp[0] > maxHight)
+                    maxHight = tmp[0];
+            }
+
+
+//            Graphics2D graphics = bufferedImage.createGraphics();
+//            for (int r = 0; r < rows; ++r) {
+//                Color color = new Color((i == 0 ? r : 0), (i == 1 ? r : 0),
+//                        (i == 2 ? r : 0));
+//                graphics.setColor(color);
+//                graphics.drawRect((int) (r * uw),
+//                        (int) ((i + 1) * uh - values[r] / maxHight
+//                                * uh), (int) uw,
+//                        (int) (values[r] / maxHight * uh));
+//            }
+            hist_descriptors.add(new Descriptor(streamId, sequenceNr, box, 0, values));
+        }
+
+        return hist_descriptors;
     }
 }

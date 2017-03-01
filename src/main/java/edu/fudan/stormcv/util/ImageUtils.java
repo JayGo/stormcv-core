@@ -1,5 +1,7 @@
 package edu.fudan.stormcv.util;
 
+import org.opencv.core.Scalar;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -20,6 +22,16 @@ public class ImageUtils {
 
     public static Color[] colors = new Color[]{Color.RED, Color.BLUE,
             Color.GREEN, Color.PINK, Color.YELLOW, Color.CYAN, Color.MAGENTA};
+
+    public static Scalar[] scalars = new Scalar[]{
+            new Scalar(Color.RED.getBlue(), Color.RED.getGreen(), Color.RED.getRed()),
+            new Scalar(Color.BLUE.getBlue(), Color.BLUE.getGreen(), Color.BLUE.getRed()),
+            new Scalar(Color.GREEN.getBlue(), Color.GREEN.getGreen(), Color.GREEN.getRed()),
+            new Scalar(Color.PINK.getBlue(), Color.PINK.getGreen(), Color.PINK.getRed()),
+            new Scalar(Color.YELLOW.getBlue(), Color.YELLOW.getGreen(), Color.YELLOW.getRed()),
+            new Scalar(Color.CYAN.getBlue(), Color.CYAN.getGreen(), Color.CYAN.getRed()),
+            new Scalar(Color.MAGENTA.getBlue(), Color.MAGENTA.getGreen(), Color.MAGENTA.getRed()),
+    };
 
     public static BufferedImage bytesToImage(byte[] buf) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(buf);

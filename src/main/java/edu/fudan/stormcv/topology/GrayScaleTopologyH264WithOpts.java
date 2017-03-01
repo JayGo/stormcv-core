@@ -4,24 +4,25 @@ import edu.fudan.lwang.codec.Common.CodecType;
 import edu.fudan.lwang.codec.SourceInfo;
 import edu.fudan.stormcv.batcher.SlidingWindowBatcher;
 import edu.fudan.stormcv.bolt.BatchH264InputBolt;
-import edu.fudan.stormcv.bolt.BatchJPEGInputBolt;
 import edu.fudan.stormcv.bolt.SingleH264InputBolt;
-import edu.fudan.stormcv.bolt.SingleJPEGInputBolt;
-import edu.fudan.stormcv.constant.BOLT_HANDLE_TYPE;
 import edu.fudan.stormcv.constant.BOLT_OPERTION_TYPE;
 import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.operation.batch.MjpegStreamingOp;
-import edu.fudan.stormcv.operation.single.*;
+import edu.fudan.stormcv.operation.single.ColorHistogramOp;
+import edu.fudan.stormcv.operation.single.GrayImageOp;
+import edu.fudan.stormcv.operation.single.H264RtmpStreamOp;
+import edu.fudan.stormcv.operation.single.HaarCascadeOp;
 import edu.fudan.stormcv.spout.TCPCaptureSpout;
 import edu.fudan.stormcv.util.LibLoader;
+import org.apache.commons.cli.*;
 import org.apache.storm.tuple.Fields;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GrayScaleTopologyH264 extends BaseTopology {
+public class GrayScaleTopologyH264WithOpts extends BaseTopology {
 
-    private static final Logger logger = LoggerFactory.getLogger(GrayScaleTopologyH264.class);
+    private static final Logger logger = LoggerFactory.getLogger(GrayScaleTopologyH264WithOpts.class);
     private String streamId = "GrayScaleTopologyH264";
     private String videoAddr;
     private String rtmpAddr = GlobalConstants.DefaultRTMPServer;
@@ -29,14 +30,20 @@ public class GrayScaleTopologyH264 extends BaseTopology {
     private int frameSkip = 0;
     private BOLT_OPERTION_TYPE type;
 
+
     private boolean sendRtmp = true;
     private boolean view720p = true;
+    private CommandLineParser parser;
+    private Options options;
+    private int workerNum = 2;
 
     public static void main(String[] args) {
         LibLoader.loadOpenCVLib();
         LibLoader.loadRtmpStreamerLib();
 
-        GrayScaleTopologyH264 topology = new GrayScaleTopologyH264(BOLT_OPERTION_TYPE.COLORHISTOGRAM);
+        GrayScaleTopologyH264WithOpts topology = new GrayScaleTopologyH264WithOpts(BOLT_OPERTION_TYPE.COLORHISTOGRAM);
+        topology.parseCommandArgs(args);
+
         try {
             topology.submitTopology();
         } catch (Exception e) {
@@ -44,8 +51,8 @@ public class GrayScaleTopologyH264 extends BaseTopology {
         }
     }
 
-    public GrayScaleTopologyH264(BOLT_OPERTION_TYPE type) {
-        conf.setNumWorkers(2);
+    public GrayScaleTopologyH264WithOpts(BOLT_OPERTION_TYPE type) {
+        conf.setNumWorkers(workerNum);
         this.type = type;
         isTopologyRunningAtLocal = true;
 
@@ -62,9 +69,13 @@ public class GrayScaleTopologyH264 extends BaseTopology {
                 videoAddr = GlobalConstants.PseudoRtspAddress;
             }
         }
+
+        this.parser = new DefaultParser();
+        this.options = new Options();
+        initOptions();
     }
 
-    public GrayScaleTopologyH264(String streamId, String rtmpAddr, String videoAddr) {
+    public GrayScaleTopologyH264WithOpts(String streamId, String rtmpAddr, String videoAddr) {
         this.streamId = streamId;
         this.rtmpAddr = rtmpAddr;
         this.videoAddr = videoAddr;
@@ -140,6 +151,46 @@ public class GrayScaleTopologyH264 extends BaseTopology {
             default: {
                 break;
             }
+        }
+    }
+
+    private void initOptions() {
+        options.addOption("cl", "cluster", false, "cluster mode");
+        Option workerNumOption = Option.builder("w")
+                .hasArgs()
+                .desc("workerNum")
+                .build();
+        options.addOption(workerNumOption);
+        options.addOption("rtmp", "rtmp", false, "send stream to rtmp");
+        options.addOption("720p", "720p", false, "process 720p video");
+    }
+
+    private void parseCommandArgs(String[] args) {
+        CommandLine commandLine = null;
+        try {
+            commandLine = this.parser.parse(options, args);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        if (commandLine.hasOption("cl")) {
+            isTopologyRunningAtLocal = false;
+        }
+
+        if (commandLine.hasOption("rtmp")) {
+            sendRtmp = true;
+        }
+
+        if (commandLine.hasOption("720p")) {
+            view720p = true;
+            if (this.type == BOLT_OPERTION_TYPE.FACEDETECT) {
+                videoAddr = GlobalConstants.Pseudo720pFaceRtspAddress;
+            } else {
+                videoAddr = GlobalConstants.Pseudo720pRtspAddress;
+            }
+        }
+        if (commandLine.hasOption("w")) {
+            this.workerNum =  Integer.valueOf(commandLine.getOptionValue("w"));
         }
     }
 
