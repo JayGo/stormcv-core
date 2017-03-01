@@ -80,11 +80,11 @@ public class DecoderWorker extends Thread {
                 timeElasper.push((int) (end - start));
 
                 if (frameNr == 100) {
-                    logger.info("Top " + frameNr + "'s time average cost: " + timeElasper.getKAve(100));
+                    logger.info("Top {}'s time average cost: {}ms", frameNr, timeElasper.getKAve(100));
                 }
 
                 if (frameNr == 2000) {
-                    logger.info("Top " + frameNr + "'s time average cost: " + timeElasper.getKAve(2000));
+                    logger.info("Top {}'s time average cost: {}ms", frameNr, timeElasper.getKAve(2000));
                 }
 
                 // logger.info("decode results: "+results[0]+", "+results[1]);
@@ -92,6 +92,8 @@ public class DecoderWorker extends Thread {
                     frameNr++;
                     // logger.info("The yuvMat size: "+ yuvMat.width() +"x"+yuvMat.height());
                 }
+
+                //System.out.println("YUV mat is null ? " + ((yuvMat == null) ? "yes" : "no"));
 
                 // The yuvMat is complete
                 mDecoderCallback.onDataDecoded(yuvMat, results);

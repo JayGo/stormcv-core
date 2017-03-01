@@ -1,6 +1,6 @@
 package edu.fudan.stormcv.batcher;
 
-import edu.fudan.stormcv.bolt.BatchInputBolt;
+import edu.fudan.stormcv.bolt.History;
 import edu.fudan.stormcv.model.CVParticle;
 
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class DiscreteWindowBatcher implements IBatcher {
     }
 
     @Override
-    public List<List<CVParticle>> partition(BatchInputBolt.History history, List<CVParticle> currentSet) {
+    public List<List<CVParticle>> partition(History history, List<CVParticle> currentSet) {
         List<List<CVParticle>> result = new ArrayList<List<CVParticle>>();
         if (currentSet.size() < windowSize) return result;
 

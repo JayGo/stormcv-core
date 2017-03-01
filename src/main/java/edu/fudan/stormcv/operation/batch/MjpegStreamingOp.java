@@ -5,7 +5,9 @@ import com.google.common.cache.CacheBuilder;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.jersey.api.core.ApplicationAdapter;
 import com.sun.net.httpserver.HttpServer;
+import edu.fudan.lwang.codec.OperationHandler;
 import edu.fudan.stormcv.codec.JPEGImageCodec;
+import edu.fudan.stormcv.codec.OpenCVJPEGImageCodec;
 import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.model.Frame;
@@ -13,6 +15,7 @@ import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.model.serializer.FrameSerializer;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.utils.Utils;
+import org.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,8 +55,14 @@ public class MjpegStreamingOp extends Application implements IBatchOperation<Fra
     private Logger logger = LoggerFactory.getLogger(getClass());
     protected HttpServer server;
     protected int port = 8558;
-    private int frameRate = 60;
+    private int frameRate = 24;
     private JPEGImageCodec codec = null;
+    private boolean useMat = false;
+
+    public MjpegStreamingOp useMat(boolean useMat) {
+        this.useMat = useMat;
+        return this;
+    }
 
     protected static Cache<String, BufferedImage> getImages() {
         if (images == null) {
@@ -89,8 +98,7 @@ public class MjpegStreamingOp extends Application implements IBatchOperation<Fra
     public void prepare(Map stormConf, TopologyContext context) throws Exception {
         images = MjpegStreamingOp.getImages();
         this.codec = new TurboJPEGImageCodec();
-
-        ApplicationAdapter connector = new ApplicationAdapter(new MjpegStreamingOp());
+        ApplicationAdapter connector = new ApplicationAdapter(new MjpegStreamingOp().useMat(this.useMat));
         server = HttpServerFactory.create("http://localhost:" + port + "/", connector);
         server.start();
     }
@@ -107,10 +115,42 @@ public class MjpegStreamingOp extends Application implements IBatchOperation<Fra
         return new FrameSerializer();
     }
 
-    @Override
-    public List<Frame> execute(List<CVParticle> input) {
-        List<Frame> result = new ArrayList<Frame>();
+//    @Override
+//    public List<Frame> execute(List<CVParticle> input) {
+//        List<Frame> result = new ArrayList<Frame>();
+//
+//        for (int i = 0; i < input.size(); i++) {
+//            CVParticle s = input.get(i);
+//
+//            if (!(s instanceof Frame))
+//                continue;
+//            Frame frame = (Frame) s;
+//            if (frame == null) {
+//                continue;
+//            }
+//            result.add(frame);
+//
+//            BufferedImage image = codec.JPEGBytesToBufferedImage(frame.getImageBytes());
+//            images.put(frame.getStreamId(), image);
+//
+//            break;
+//        }
+//        return result;
+//    }
 
+    @Override
+    public List<Frame> execute(List<CVParticle> input) throws Exception {
+        return null;
+    }
+
+    @Override
+    public String getContext() {
+        return this.getClass().getSimpleName();
+    }
+
+    @Override
+    public List<Frame> execute(List<CVParticle> input, OperationHandler operationHandler) throws Exception {
+        List<Frame> result = new ArrayList<>();
         for (int i = 0; i < input.size(); i++) {
             CVParticle s = input.get(i);
 
@@ -121,10 +161,22 @@ public class MjpegStreamingOp extends Application implements IBatchOperation<Fra
                 continue;
             }
             result.add(frame);
+            operationHandler.fillSourceBufferQueue(frame);
 
-            BufferedImage image = codec.JPEGBytesToBufferedImage(frame.getImageBytes());
-            images.put(frame.getStreamId(), image);
-
+            if (useMat) {
+                Mat in = (Mat) operationHandler.getDecodedData();
+                if (in != null) {
+                    BufferedImage image = OpenCVJPEGImageCodec.getInstance().matToBufferedImage(in);
+                    if (image != null) {
+                        images.put(frame.getStreamId(), image);
+                    }
+                }
+            } else {
+                BufferedImage image = (BufferedImage) operationHandler.getDecodedData();
+                images.put(frame.getStreamId(), image);
+            }
+//            BufferedImage image = codec.JPEGBytesToBufferedImage(frame.getImageBytes());
+//            images.put(frame.getStreamId(), image);
             break;
         }
         return result;

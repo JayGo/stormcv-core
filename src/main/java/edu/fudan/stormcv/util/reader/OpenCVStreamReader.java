@@ -106,6 +106,7 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
             while (running) {
                 try {
                     capture.read(mat);
+                    if (mat == null || mat.width() != width || mat.height() != height) continue;
                     imageBytes = this.codec.MatToJPEGBytes(mat);
                 } catch (Exception e) {
                     e.printStackTrace();

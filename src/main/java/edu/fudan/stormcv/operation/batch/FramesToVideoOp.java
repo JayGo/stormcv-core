@@ -1,6 +1,7 @@
 package edu.fudan.stormcv.operation.batch;
 
 import com.xuggle.xuggler.ICodec;
+import edu.fudan.lwang.codec.OperationHandler;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.model.GroupOfFrames;
 import edu.fudan.stormcv.model.VideoChunk;
@@ -194,4 +195,13 @@ public class FramesToVideoOp implements IBatchOperation<CVParticle> {
         }
     }
 
+    @Override
+    public List<CVParticle> execute(List<CVParticle> input, OperationHandler operationHandler) throws Exception {
+        return null;
+    }
+
+    @Override
+    public String getContext() {
+        return this.getClass().getSimpleName();
+    }
 }

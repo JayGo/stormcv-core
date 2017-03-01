@@ -2,7 +2,7 @@ package edu.fudan.stormcv.topology;
 
 import edu.fudan.stormcv.StormCVConfig;
 import edu.fudan.stormcv.batcher.SlidingWindowBatcher;
-import edu.fudan.stormcv.bolt.BatchInputBolt;
+import edu.fudan.stormcv.bolt.BatchJPEGInputBolt;
 import edu.fudan.stormcv.bolt.SingleJPEGInputBolt;
 import edu.fudan.stormcv.constant.BOLT_HANDLE_TYPE;
 import edu.fudan.stormcv.constant.GlobalConstants;
@@ -36,13 +36,14 @@ public class GrayScaleTopologyJPEGWithOpts extends BaseTopology {
     private Options options;
     private int workerNum = 2;
     private boolean sendRtmp = false;
+    private boolean view720p = false;
 
 
     public GrayScaleTopologyJPEGWithOpts() {
         conf.setNumWorkers(this.workerNum);
         conf.put(StormCVConfig.STORMCV_FRAME_ENCODING, Frame.JPG_IMAGE);
         urls = new ArrayList<String>();
-        urls.add(GlobalConstants.PseudoRtspAddress);
+        //urls.add(GlobalConstants.PseudoRtspAddress);
         isTopologyRunningAtLocal = true;
         this.parser = new DefaultParser();
         this.options = new Options();
@@ -51,6 +52,11 @@ public class GrayScaleTopologyJPEGWithOpts extends BaseTopology {
 
     @Override
     public void setSpout() {
+        if (view720p) {
+            urls.add(GlobalConstants.Pseudo720pRtspAddress);
+        } else {
+            urls.add(GlobalConstants.PseudoRtspAddress);
+        }
         builder.setSpout("spout", new CVParticleSpout(new OpenCVStreamFrameFetcher(
                 urls).frameSkip(frameSkip)), 1);
     }
@@ -64,8 +70,9 @@ public class GrayScaleTopologyJPEGWithOpts extends BaseTopology {
         if (!sendRtmp) {
             builder.setBolt(
                     "streamer",
-                    new BatchInputBolt(new SlidingWindowBatcher(2, frameSkip)
-                            .maxSize(6), new MjpegStreamingOp().port(8558).framerate(24))
+                    new BatchJPEGInputBolt(new SlidingWindowBatcher(2, frameSkip)
+                            .maxSize(6), new MjpegStreamingOp().useMat(false).port(8558).framerate(24),
+                            BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE)
                             .groupBy(new Fields(CVParticleSerializer.STREAMID)), 1)
                     .localOrShuffleGrouping("gray");
         } else {
@@ -97,6 +104,7 @@ public class GrayScaleTopologyJPEGWithOpts extends BaseTopology {
                 .build();
         options.addOption(workerNumOption);
         options.addOption("rtmp", "rtmp", false, "send stream to rtmp");
+        options.addOption("720p", "720p", false, "process 720p video");
     }
 
     private void parseCommandArgs(String[] args) {
@@ -114,8 +122,13 @@ public class GrayScaleTopologyJPEGWithOpts extends BaseTopology {
         if (commandLine.hasOption("rtmp")) {
             sendRtmp = true;
         }
+
+        if (commandLine.hasOption("720p")) {
+            view720p = true;
+        }
         if (commandLine.hasOption("w")) {
             this.workerNum =  Integer.valueOf(commandLine.getOptionValue("w"));
         }
+
     }
 }

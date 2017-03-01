@@ -42,6 +42,10 @@ public class TurboJPEGImageCodec implements JPEGImageCodec {
     @Override
     public byte[] BufferedImageToJPEGBytes(BufferedImage image) {
         byte[] buffer = null;
+//        int subSamp = TJ.SAMP_420;
+//        if (image.getType() == BufferedImage.TYPE_BYTE_GRAY) {
+//            subSamp = TJ.SAMP_GRAY;
+//        }
         try {
             compressor.setSourceImage(image, 0, 0, image.getWidth(), image.getHeight());
             compressor.setSubsamp(TJ.SAMP_420);
@@ -56,8 +60,12 @@ public class TurboJPEGImageCodec implements JPEGImageCodec {
     @Override
     public BufferedImage JPEGBytesToBufferedImage(byte[] bytes) {
         BufferedImage image = null;
+//        int bufferedImageType = BufferedImage.TYPE_3BYTE_BGR;
         try {
             decompressor.setSourceImage(bytes, bytes.length);
+//            if (decompressor.getSubsamp() == TJ.SAMP_GRAY) {
+//                bufferedImageType = BufferedImage.TYPE_BYTE_GRAY;
+//            }
             //System.out.println("decompress:" + decompressor.getWidth() +"x" + decompressor.getHeight());
             image = decompressor.decompress(decompressor.getWidth(), decompressor.getHeight(),
                     BufferedImage.TYPE_3BYTE_BGR, 0);
@@ -70,10 +78,14 @@ public class TurboJPEGImageCodec implements JPEGImageCodec {
     @Override
     public Mat JPEGBytesToMat(byte[] bytes) {
         Mat mat = null;
+//        int pixelSize = TJ.PF_BGR;
         try {
             decompressor.setSourceImage(bytes, bytes.length);
             int width = decompressor.getWidth();
             int height = decompressor.getHeight();
+//            if (decompressor.getSubsamp() == TJ.SAMP_GRAY) {
+//                pixelSize = TJ.PF_GRAY;
+//            }
             byte[] dstBuffer = decompressor.decompress(width, width * TJ.getPixelSize(TJ.PF_BGR), height, TJ.PF_BGR, 0);
             mat = new Mat(height, width, CvType.CV_8UC3);
             mat.put(0, 0, dstBuffer);

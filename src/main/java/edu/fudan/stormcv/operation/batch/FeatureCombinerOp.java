@@ -1,5 +1,6 @@
 package edu.fudan.stormcv.operation.batch;
 
+import edu.fudan.lwang.codec.OperationHandler;
 import edu.fudan.stormcv.batcher.SequenceNrBatcher;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.model.Descriptor;
@@ -74,6 +75,16 @@ public class FeatureCombinerOp implements IBatchOperation<Frame> {
         result.add(frame);
         return result;
 
+    }
+
+    @Override
+    public List<Frame> execute(List<CVParticle> input, OperationHandler operationHandler) throws Exception {
+        return null;
+    }
+
+    @Override
+    public String getContext() {
+        return this.getClass().getSimpleName();
     }
 
 }

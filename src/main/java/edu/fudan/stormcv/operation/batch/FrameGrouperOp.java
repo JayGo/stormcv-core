@@ -1,5 +1,6 @@
 package edu.fudan.stormcv.operation.batch;
 
+import edu.fudan.lwang.codec.OperationHandler;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.model.serializer.GroupOfFramesSerializer;
@@ -51,5 +52,14 @@ public class FrameGrouperOp implements IBatchOperation<GroupOfFrames> {
         return result;
     }
 
+    @Override
+    public List<GroupOfFrames> execute(List<CVParticle> input, OperationHandler operationHandler) throws Exception {
+        return null;
+    }
+
+    @Override
+    public String getContext() {
+        return this.getClass().getSimpleName();
+    }
 
 }

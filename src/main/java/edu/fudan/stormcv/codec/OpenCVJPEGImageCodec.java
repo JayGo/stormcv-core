@@ -75,7 +75,7 @@ public class OpenCVJPEGImageCodec implements JPEGImageCodec {
         return out;
     }
 
-    private static BufferedImage matToBufferedImage(Mat in) {
+    public static BufferedImage matToBufferedImage(Mat in) {
         MatOfByte byteMat = new MatOfByte();
         Highgui.imencode(".jpg", in, byteMat);
         byte[] bytes = byteMat.toArray();
