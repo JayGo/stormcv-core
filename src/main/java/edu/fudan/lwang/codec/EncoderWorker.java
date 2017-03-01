@@ -159,6 +159,7 @@ public class EncoderWorker extends Thread {
                 if (capture != null) logger.info("capture is opened for: " + videoAddr);
                 while (!Thread.interrupted() && (capture != null && capture.read(frame))) {
                     if (!frame.empty()) {
+                        //System.out.println("channel: "+frame.channels() + " depth: " + frame.depth() + " elementSize:" + frame.elemSize());
                         processEncoding();
                     }
                 }

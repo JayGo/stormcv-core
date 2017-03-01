@@ -8,12 +8,13 @@ public class BufferQueue {
 
     private static final Logger logger = LoggerFactory.getLogger(BufferQueue.class);
 
-    public final static int DEFAULT_MAX_SIZE = 16 * 1024 * 1024 - 1;
+    public final static int DEFAULT_MAX_SIZE = 32 * 1024 * 1024 - 1;
     private String queueId;
     private byte[] buffer;
     private int head;
     private int tail;
     private int maxQueueSize;
+    private int count = 0;
 
     public BufferQueue(String queueId) {
         this(queueId, DEFAULT_MAX_SIZE);
@@ -85,8 +86,13 @@ public class BufferQueue {
         if (bufferLength + currentLength >= maxQueueSize) {
             //log here
             logger.info("fillBuffer failed!");
+            logger.info("currentLength: {}, bufferLength:{} maxQueueSize:{}", currentLength, bufferLength, maxQueueSize);
             return false;
         }
+
+//        if (currentLength > (maxQueueSize / 2)) {
+//            logger.info("currentLength:{}, frameNr:{}", currentLength, count);
+//        }
 
 
         if (tail < head) {
@@ -105,6 +111,7 @@ public class BufferQueue {
         if (isMoveIndex) {
             tail = (tail + bufferLength) % maxQueueSize;
         }
+        count++;
 
         return true;
     }

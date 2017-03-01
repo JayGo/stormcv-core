@@ -1,5 +1,7 @@
 package edu.fudan.lwang.codec;
 
+import edu.fudan.stormcv.model.Frame;
+import org.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +37,11 @@ public class Queue<E> {
         this.limit = limit;
     }
 
+//    public int getSize() {
+//        return size;
+//    }
     public int getSize() {
-        return size;
+        return queue.size();
     }
 
     public String getQueueId() {
@@ -48,21 +53,37 @@ public class Queue<E> {
     }
 
     public void enqueue(E input) {
-        // logger.info("Queue size: "+size + ", BlockingQueue size: "+queue.size());
-        if (size == limit) {
-            try {
-                if (queue.take() != null) {
-                    logger.info("drop count: " + ++dropCount);
-                    --size;
+        //assert (size == queue.size());
+//        logger.info(queueId + "Queue size: "+size + ", BlockingQueue size: "+queue.size());
+//        logger.info(queueId + " BlockingQueue size: "+queue.size());
+        //if (size == limit) {
+        if (queue.size() == limit) {
+                try {
+                    if (queue.take() != null) {
+                        if(input instanceof Mat) {
+                            logger.info("{} queue drop Mat count: {}", queueId, dropCount);
+                        }
+
+                        if(input instanceof Frame) {
+                            logger.info("{} queue drop Frame count: {}", queueId, dropCount);
+                        }
+                        //--size;
+//                        if (size < 0) {
+//                            logger.warn("{} enqueue error: size={}, queue_size={}", queueId, size, queue.size());
+//                        }
+                    }
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
                 }
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
             }
-        }
+
 
         if (queue.offer(input)) {
-            ++size;
+            //++size;
+//            if (size != queue.size()) {
+//                logger.error("{} enqueue error: size={}, queue_size={}", queueId, size, queue.size());
+//            }
         }
     }
 
@@ -71,10 +92,13 @@ public class Queue<E> {
         result = queue.poll();
 
         if (result != null) {
-            --size;
+//            --size;
+//            if (size < 0) {
+//                logger.warn("{} dequeue error: size={}, queue_size={}", queueId, size, queue.size());
+//            }
             dropCount = 0;
         } else {
-            // logger.info("The queue has no element!");
+             //logger.info("{} queue size {} : The queue has no element!", queueId, size);
         }
         return result;
     }
@@ -82,4 +106,6 @@ public class Queue<E> {
     public void clearAll() {
         queue.clear();
     }
+
+    protected String tellQueue() {return "";}
 }

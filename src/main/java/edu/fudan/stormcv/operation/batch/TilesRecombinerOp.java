@@ -1,5 +1,6 @@
 package edu.fudan.stormcv.operation.batch;
 
+import edu.fudan.lwang.codec.OperationHandler;
 import edu.fudan.stormcv.StormCVConfig;
 import edu.fudan.stormcv.codec.JPEGImageCodec;
 import edu.fudan.stormcv.model.CVParticle;
@@ -120,6 +121,11 @@ public class TilesRecombinerOp implements IBatchOperation<CVParticle> {
         return result;
     }
 
+    @Override
+    public List<CVParticle> execute(List<CVParticle> input, OperationHandler operationHandler) throws Exception {
+        return null;
+    }
+
     /**
      * Merges the new feature into the set with existing features
      *
@@ -175,4 +181,8 @@ public class TilesRecombinerOp implements IBatchOperation<CVParticle> {
         }
     }
 
+    @Override
+    public String getContext() {
+        return this.getClass().getSimpleName();
+    }
 }

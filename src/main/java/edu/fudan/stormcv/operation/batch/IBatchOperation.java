@@ -1,5 +1,6 @@
 package edu.fudan.stormcv.operation.batch;
 
+import edu.fudan.lwang.codec.OperationHandler;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.operation.IOperation;
 import edu.fudan.stormcv.operation.single.ISingleInputOperation;
@@ -14,7 +15,7 @@ import java.util.List;
  * @author Corne Versloot
  */
 public interface IBatchOperation<Output extends CVParticle> extends IOperation<Output> {
-
-    public List<Output> execute(List<CVParticle> input) throws Exception;
-
+    List<Output> execute(List<CVParticle> input) throws Exception;
+    String getContext();
+    List<Output> execute(List<CVParticle> input, OperationHandler operationHandler) throws Exception;
 }

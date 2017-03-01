@@ -52,9 +52,8 @@ public class GrayImageOp implements ISingleInputOperation<Frame> {
         codecHandler.fillSourceBufferQueue(frame);
         Mat in = (Mat) codecHandler.getDecodedData();
 
-
         if (in != null) {
-            //logger.info("receive a frame: {}x{}, bytesSize: {}", in.width(), in.height(), frame.getImageBytes().length);
+            //logger.info("receive a frame {} : {}x{}, bytesSize: {}", frame.getSequenceNr(), in.width(), in.height(), frame.getImageBytes().length);
             Mat out = new Mat(in.height(), in.width(), CvType.CV_8UC1);
             Imgproc.cvtColor(in, out, Imgproc.COLOR_BGR2GRAY);
             byte[] encodedData = codecHandler.getEncodedData(out);
@@ -63,11 +62,10 @@ public class GrayImageOp implements ISingleInputOperation<Frame> {
             }
             frame.swapImageBytes(encodedData);
             results.add(frame);
-        } else {
-            logger.info("cannot decode frame {}", frame.getSequenceNr());
         }
-
-
+// else {
+//            logger.info("cannot decode frame {}", frame.getSequenceNr());
+//        }
         return results;
     }
 

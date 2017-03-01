@@ -3,6 +3,7 @@ package edu.fudan.stormcv.operation.batch;
 import com.xuggle.xuggler.*;
 import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
+import edu.fudan.lwang.codec.OperationHandler;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.codec.JPEGImageCodec;
 import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
@@ -201,5 +202,15 @@ public class RTMPWriterOp implements IBatchOperation<Frame> {
             }
         }
         return result;
+    }
+
+    @Override
+    public List<Frame> execute(List<CVParticle> input, OperationHandler operationHandler) throws Exception {
+        return null;
+    }
+
+    @Override
+    public String getContext() {
+        return this.getClass().getSimpleName();
     }
 }

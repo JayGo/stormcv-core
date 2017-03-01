@@ -33,6 +33,8 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
     private IContainer container = null;
     private Boolean isCoderInit = false;
     private double frameRate = 0.0;
+    private int bitRate = 512000;
+    private IPacket packet;
 
     private IContainerFormat containerFormat;
 
@@ -48,6 +50,11 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
 
     public SingleRTMPWriterOp frameRate(double frameRate) {
         this.frameRate = frameRate;
+        return this;
+    }
+
+    public SingleRTMPWriterOp bitRate(int bitRate) {
+        this.bitRate = bitRate;
         return this;
     }
 
@@ -81,7 +88,7 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
         containerFormat.setOutputFormat("flv", url + appName, null);
         // set the buffer length xuggle will suggest to ffmpeg for reading
         // inputs
-        container.setInputBufferLength(0);
+        //container.setInputBufferLength(0);
         int retVal = container.open(url + appName, IContainer.Type.WRITE,
                 containerFormat);
         if (retVal < 0) {
@@ -109,8 +116,8 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
         IStream stream = container.addNewStream(codec);
         coder = stream.getStreamCoder();
         if (codec != null) {
-            coder.setNumPicturesInGroupOfPictures(30);
-            coder.setBitRate(256000);
+            coder.setNumPicturesInGroupOfPictures(12);
+            coder.setBitRate(bitRate);
             coder.setCodec(codec);
             coder.setPixelType(IPixelFormat.Type.YUV420P);
         } else {
@@ -118,8 +125,10 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
                     "[ERROR]rtmp stream coder is null. cannot write rtmp stream.");
         }
         isCoderInit = false;
-        ConverterFactory.registerConverter(new Type("LWANG-GRAY-8", GrayConverter.class,
-                IPixelFormat.Type.GRAY8, 10));
+//        ConverterFactory.registerConverter(new Type("LWANG-GRAY-8", GrayConverter.class,
+//                IPixelFormat.Type.GRAY8, 10));
+
+        this.packet = IPacket.make();
     }
 
     @Override
@@ -156,10 +165,13 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
             } else {
                 coder.setHeight(height);
                 coder.setWidth(width);
+                if (image.getType() == BufferedImage.TYPE_3BYTE_BGR) {
+                    coder.setChannels(3);
+                }
             }
 
             coder.setFlag(IStreamCoder.Flags.FLAG_QSCALE, true);
-            coder.setGlobalQuality(0);
+            //coder.setGlobalQuality(0);
             IRational rationalFrameRate = IRational.make(frameRate);
             coder.setFrameRate(rationalFrameRate);
             coder.setTimeBase(IRational.make(
@@ -175,9 +187,10 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
             logger.info("coder init finished!");
         }
 
-        BufferedImage convertedImage = new BufferedImage(image.getWidth(),
-                image.getHeight(), image.getType());
-        convertedImage.getGraphics().drawImage(image, 0, 0, null);
+//        BufferedImage convertedImage = new BufferedImage(image.getWidth(),
+//                image.getHeight(), image.getType());
+//        convertedImage.getGraphics().drawImage(image, 0, 0, null);
+        BufferedImage convertedImage = image;
 
         IConverter converter = ConverterFactory.createConverter(convertedImage,
                 IPixelFormat.Type.YUV420P);
@@ -187,8 +200,8 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
         if (frame.getSequenceNr() == 0) {
             outFrame.setKeyFrame(true);
         }
-        IPacket packet = IPacket.make();
-        outFrame.setQuality(0);
+//        IPacket packet = IPacket.make();
+//        outFrame.setQuality(0);
         if (coder.encodeVideo(packet, outFrame, 0) < 0) {
             logger.error("encode falied");
         }
@@ -196,10 +209,12 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
 
         if (packet.isComplete()) {
             if (container.writePacket(packet) < 0) {
-                container.open(url + appName, IContainer.Type.WRITE,
-                        containerFormat);
+//                container.open(url + appName, IContainer.Type.WRITE,
+//                        containerFormat);
+                logger.warn("write frame {} to packet failed!", frame.getSequenceNr());
             }
         }
+        packet.reset();
         return result;
     }
 }

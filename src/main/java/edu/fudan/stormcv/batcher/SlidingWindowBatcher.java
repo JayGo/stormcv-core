@@ -1,6 +1,6 @@
 package edu.fudan.stormcv.batcher;
 
-import edu.fudan.stormcv.bolt.BatchInputBolt.History;
+import edu.fudan.stormcv.bolt.History;
 import edu.fudan.stormcv.model.CVParticle;
 
 import java.util.ArrayList;

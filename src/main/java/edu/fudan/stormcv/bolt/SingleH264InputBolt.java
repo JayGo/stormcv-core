@@ -45,6 +45,9 @@ public class SingleH264InputBolt extends CVParticleBolt {
     private SourceInfo mSourceInfo;
 
     private ISingleInputOperation<? extends CVParticle> operation;
+    private long startTime;
+    private long endTime;
+    private int count;
 
 
     /**
@@ -152,6 +155,9 @@ public class SingleH264InputBolt extends CVParticleBolt {
 
     @Override
     List<? extends CVParticle> execute(CVParticle input) throws Exception {
+        if (this.count == 0) {
+            this.startTime = System.currentTimeMillis();
+        }
         // fill buffer with input.imageBytes first.
         List<? extends CVParticle> results = operation.execute(input, new OperationHandler<Mat>() {
             Logger logger1 = LoggerFactory.getLogger(OperationHandler.class);
@@ -194,14 +200,21 @@ public class SingleH264InputBolt extends CVParticleBolt {
             }
         });
 
-        // copy metadata from input to output if configured to do so
-        for (CVParticle s : results) {
-            for (String key : input.getMetadata().keySet()) {
-                if (!s.getMetadata().containsKey(key)) {
-                    s.getMetadata().put(key, input.getMetadata().get(key));
-                }
-            }
+        this.count++;
+        if (this.count == 500) {
+            endTime = System.currentTimeMillis();
+            logger.info("{} Rate: {}", operation.getContext(), (500 / ((endTime - startTime) / 1000.0f)));
+            this.count = 0;
         }
+
+        // copy metadata from input to output if configured to do so
+//        for (CVParticle s : results) {
+//            for (String key : input.getMetadata().keySet()) {
+//                if (!s.getMetadata().containsKey(key)) {
+//                    s.getMetadata().put(key, input.getMetadata().get(key));
+//                }
+//            }
+//        }
         return results;
     }
 }

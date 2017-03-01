@@ -77,8 +77,7 @@ public class DrawFeaturesOp implements ISingleInputOperation<Frame> {
 
     @Override
     public String getContext() {
-        // TODO Auto-generated method stub
-        return null;
+        return this.getClass().getSimpleName();
     }
 
     @Override
