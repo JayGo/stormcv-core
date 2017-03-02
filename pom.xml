@@ -85,7 +85,7 @@
             <groupId>org.apache.storm</groupId>
             <artifactId>storm-core</artifactId>
             <version>${storm-core.version}</version>
-            <scope>provided</scope>
+             <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>log4j</groupId>

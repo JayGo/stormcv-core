@@ -21,6 +21,10 @@ import org.apache.storm.tuple.Fields;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.xuggle.xuggler.Global;
+
+import clojure.stacktrace__init;
+
 public class TopologyH264 extends BaseTopology {
 
     private static final Logger logger = LoggerFactory.getLogger(TopologyH264.class);
@@ -36,12 +40,25 @@ public class TopologyH264 extends BaseTopology {
     
     private boolean isEffect = false;
     private String effect;
+    
+//    public static void main(String args[]) {
+//        LibLoader.loadOpenCVLib();
+//        LibLoader.loadRtmpStreamerLib();
+//    	TopologyH264 mTopologyH264 = new TopologyH264("test1", GlobalConstants.DefaultRTMPServer, GlobalConstants.PseudoFaceRtspAddress, "colorHistogram");
+//    	try {
+//			mTopologyH264.submitTopology();
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//    }
 
     public TopologyH264(String streamId, String rtmpAddr, String videoAddr) {
         this.streamId = streamId;
         this.rtmpAddr = rtmpAddr;
         this.videoAddr = videoAddr;
         this.type = BOLT_OPERTION_TYPE.UNSUPPORT;
+        isTopologyRunningAtLocal = true;
         conf.setNumWorkers(2);
     }
     
@@ -56,7 +73,7 @@ public class TopologyH264 extends BaseTopology {
         this.rtmpAddr = msg.getRtmpAddr();
         this.videoAddr = msg.getAddr();
         this.type = BOLT_OPERTION_TYPE.UNSUPPORT;
-        
+        isTopologyRunningAtLocal = true;
     	if(msg instanceof EffectMessage) {
     		isEffect = true;
     		EffectMessage emsg = (EffectMessage) msg;
@@ -144,7 +161,7 @@ public class TopologyH264 extends BaseTopology {
             }
             case RTMPSTREAMER: {
                 builder.setBolt(BOLT_OPERTION_TYPE.RTMPSTREAMER.toString(),
-                        new SingleH264InputBolt(new H264RtmpStreamOp().RTMPServer(rtmpAddr).appName("grayscale")
+                        new SingleH264InputBolt(new H264RtmpStreamOp().RTMPServer(rtmpAddr).appName(streamId)
                                 .frameRate(23.98)).setSourceInfo(sourceInfo), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;

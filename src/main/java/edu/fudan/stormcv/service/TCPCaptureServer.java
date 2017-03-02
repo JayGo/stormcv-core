@@ -120,8 +120,8 @@ public class TCPCaptureServer {
             try {
                 oos = new ObjectOutputStream(socket.getOutputStream());
                 oos.writeObject(msg);
-                oos.flush();
-                oos.close();
+//                oos.flush();
+//                oos.close();
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -162,7 +162,7 @@ public class TCPCaptureServer {
 
             topologys.add(mTopologyH264);
             try {
-            	mTopologyH264.submitTopology();
+            	mTopologyH264.submitTopologyToCluster();
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
