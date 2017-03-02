@@ -7,8 +7,8 @@ package edu.fudan.stormcv.constant;
  * Description:
  */
 public enum BOLT_OPERTION_TYPE {
-    GRAY("gray"), FACEDETECT("faceDecect"), COLORHISTOGRAM("colorHistogram"),
-    SCALE("scale"), RTMPSTREAMER("rtmpStreamer"), MJPEGSTREAMER("mjpegStreamer");
+    GRAY("gray"), FACEDETECT("faceDetect"), COLORHISTOGRAM("colorHistogram"),
+    SCALE("scale"), RTMPSTREAMER("rtmpStreamer"), MJPEGSTREAMER("mjpegStreamer"), UNSUPPORT("unsupport");
 
     private String operationName = "";
 
