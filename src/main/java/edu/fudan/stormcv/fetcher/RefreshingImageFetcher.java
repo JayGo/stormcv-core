@@ -106,6 +106,11 @@ public class RefreshingImageFetcher implements IFetcher<Frame> {
         return frameQueue.poll();
     }
 
+    @Override
+    public void onSignal(byte[] bytes) {
+
+    }
+
     private class ImageReader implements Runnable {
 
         private Logger logger = LoggerFactory.getLogger(getClass());

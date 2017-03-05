@@ -157,4 +157,9 @@ public class XugglerStreamFrameFetcher implements IFetcher<CVParticle> {
         }
         return null;
     }
+
+    @Override
+    public void onSignal(byte[] bytes) {
+
+    }
 }

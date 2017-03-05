@@ -74,7 +74,6 @@ public abstract class CVParticleSerializer<Type extends CVParticle> extends Seri
         return new Fields(fields);
     }
 
-
     @SuppressWarnings("unchecked")
     @Override
     public Type read(Kryo kryo, Input input, Class<Type> clas) {

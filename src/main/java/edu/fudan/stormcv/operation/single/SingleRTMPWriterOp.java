@@ -2,15 +2,13 @@ package edu.fudan.stormcv.operation.single;
 
 import com.xuggle.xuggler.*;
 import com.xuggle.xuggler.video.ConverterFactory;
-import com.xuggle.xuggler.video.ConverterFactory.Type;
 import com.xuggle.xuggler.video.IConverter;
 import edu.fudan.lwang.codec.OperationHandler;
-import edu.fudan.lwang.converter.GrayConverter;
 import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
-import edu.fudan.stormcv.model.serializer.FrameSerializer;
 import edu.fudan.stormcv.model.Frame;
+import edu.fudan.stormcv.model.serializer.FrameSerializer;
 import org.apache.storm.task.TopologyContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +32,7 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
     private Boolean isCoderInit = false;
     private double frameRate = 0.0;
     private int bitRate = 512000;
-    private IPacket packet;
+    //private IPacket packet;
 
     private IContainerFormat containerFormat;
 
@@ -88,7 +86,7 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
         containerFormat.setOutputFormat("flv", url + appName, null);
         // set the buffer length xuggle will suggest to ffmpeg for reading
         // inputs
-        //container.setInputBufferLength(0);
+        container.setInputBufferLength(0);
         int retVal = container.open(url + appName, IContainer.Type.WRITE,
                 containerFormat);
         if (retVal < 0) {
@@ -97,8 +95,8 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
             logger.info("hava opened server " + url + appName + " for write!");
         }
 
-        // ICodec codec = ICodec.findEncodingCodec(ICodec.ID.CODEC_ID_H264);
-        ICodec codec = ICodec.findEncodingCodec(ICodec.ID.CODEC_ID_FLV1);
+        ICodec codec = ICodec.findEncodingCodec(ICodec.ID.CODEC_ID_H264);
+        //ICodec codec = ICodec.findEncodingCodec(ICodec.ID.CODEC_ID_FLV1);
 
         if (false || codec == null) {
             // logger.warn("cannot find h264 encoding codec!");
@@ -128,7 +126,7 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
 //        ConverterFactory.registerConverter(new Type("LWANG-GRAY-8", GrayConverter.class,
 //                IPixelFormat.Type.GRAY8, 10));
 
-        this.packet = IPacket.make();
+        //this.packet = IPacket.make();
     }
 
     @Override
@@ -171,7 +169,7 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
             }
 
             coder.setFlag(IStreamCoder.Flags.FLAG_QSCALE, true);
-            //coder.setGlobalQuality(0);
+            coder.setGlobalQuality(0);
             IRational rationalFrameRate = IRational.make(frameRate);
             coder.setFrameRate(rationalFrameRate);
             coder.setTimeBase(IRational.make(
@@ -200,8 +198,8 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
         if (frame.getSequenceNr() == 0) {
             outFrame.setKeyFrame(true);
         }
-//        IPacket packet = IPacket.make();
-//        outFrame.setQuality(0);
+        IPacket packet = IPacket.make();
+        outFrame.setQuality(0);
         if (coder.encodeVideo(packet, outFrame, 0) < 0) {
             logger.error("encode falied");
         }
@@ -214,7 +212,7 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
                 logger.warn("write frame {} to packet failed!", frame.getSequenceNr());
             }
         }
-        packet.reset();
+        //packet.reset();
         return result;
     }
 }
