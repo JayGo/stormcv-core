@@ -2,6 +2,7 @@ package edu.fudan.stormcv.service;
 
 import edu.fudan.jliu.message.BaseMessage;
 import edu.fudan.jliu.message.EffectMessage;
+import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.constant.RequestCode;
 import edu.fudan.stormcv.constant.ResultCode;
 import edu.fudan.stormcv.topology.TCPCaptureTopology;
@@ -132,7 +133,7 @@ public class TCPCaptureServer {
             BaseMessage result = new BaseMessage(ResultCode.NO_SERVER_AVAILABLE);
             switch (msg.getCode()) {
                 case RequestCode.START_STORM: {
-                    result = startTopology(msg);
+                    result = pushRawStream(msg);
                     break;
                 }
 
@@ -154,20 +155,46 @@ public class TCPCaptureServer {
 
             return result;
         }
+        
+        private BaseMessage pushRawStream(BaseMessage msg) {
+        	BaseMessage result = new BaseMessage(ResultCode.UNKNOWN_ERROR);
+        	String srcRtspAddr = msg.getAddr();
+        	if(!srcRtspAddr.startsWith("rtsp://")) {
+        		logger.error("illegal rtsp name!");
+        		return result;
+        	}
+        	String dstRtmpAddr = GlobalConstants.DefaultRTMPServer+msg.getStreamId();
+        	String streamPushCommand = "ffmpeg -i "+ srcRtspAddr +  " -qscale 0 -f flv -r 25 -an " + dstRtmpAddr;
+        	try {
+				Process p = Runtime.getRuntime().exec(streamPushCommand);
+				System.out.println("ffmpeg push process ID: "+p.toString());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				logger.error("exception in exec ffmpeg push command!");
+				return result;
+			}
+        	result.setAddr(msg.getAddr());
+        	result.setStreamId(msg.getStreamId());
+        	result.setCode(ResultCode.RESULT_OK);
+        	result.setRtmpAddr(GlobalConstants.DefaultRTMPServer);
+        	return result;
+        }
 
         private BaseMessage startTopology(BaseMessage msg) {
             BaseMessage result = new BaseMessage(ResultCode.UNKNOWN_ERROR);
-
+            msg.setRtmpAddr(GlobalConstants.DefaultRTMPServer);
             TopologyH264 mTopologyH264 = new TopologyH264(msg);
 
             topologys.add(mTopologyH264);
             try {
-            	mTopologyH264.submitTopologyToCluster();
+            	mTopologyH264.submitTopology();
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
                 return result;
             }
+            result.setRtmpAddr(GlobalConstants.DefaultRTMPServer);
             result.setCode(ResultCode.RESULT_OK);
             return result;
         }

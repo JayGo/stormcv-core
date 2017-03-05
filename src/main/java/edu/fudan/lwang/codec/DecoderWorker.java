@@ -79,14 +79,18 @@ public class DecoderWorker extends Thread {
                 long end = System.currentTimeMillis();
                 timeElasper.push((int) (end - start));
 
-                if (frameNr == 100) {
-                    logger.info("Top {}'s time average cost: {}ms", frameNr, timeElasper.getKAve(100));
+//                if (frameNr == 100) {
+//                    logger.info("Top {}'s time average cost: {}ms", frameNr, timeElasper.getKAve(100));
+//                }
+//
+//                if (frameNr == 2000) {
+//                    logger.info("Top {}'s time average cost: {}ms", frameNr, timeElasper.getKAve(2000));
+//                }
+                
+                if(frameNr%100==0) {
+                	logger.info("Top {}'s time average cost: {}ms", frameNr, timeElasper.getKAve(frameNr));
                 }
-
-                if (frameNr == 2000) {
-                    logger.info("Top {}'s time average cost: {}ms", frameNr, timeElasper.getKAve(2000));
-                }
-
+                
                 // logger.info("decode results: "+results[0]+", "+results[1]);
                 if (results[0] != 0) {
                     frameNr++;

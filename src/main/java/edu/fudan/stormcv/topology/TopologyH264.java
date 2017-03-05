@@ -82,11 +82,7 @@ public class TopologyH264 extends BaseTopology {
     	conf.setNumWorkers(2);
 	}
     
-//    public static void main(String args[]) {
-//    	System.out.println(findEffectType("gray"));
-//    	System.out.println(findEffectType("colorHistogram"));
-//    	System.out.println(findEffectType("faceDetect"));
-//    }
+
     
     private BOLT_OPERTION_TYPE findEffectType(String effect) {
     	if(effect.equals(BOLT_OPERTION_TYPE.GRAY.toString())) {
