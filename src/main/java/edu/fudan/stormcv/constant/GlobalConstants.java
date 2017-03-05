@@ -23,4 +23,12 @@ public class GlobalConstants {
     public static int JPEGCodecQuality = 80;
 
     public static final String HaarCacascadeXMLFileName = "lbpcascade_frontalface.xml";
+
+    public static String ZKHostLocal = "localhost:2000";
+    public static String ZKHostCluster141 = "10.134.142.141:2181";
+
+    public static String TestImageInputDir = "file:///home/nfs/images/720p/";
+    public static String TestImageOuputDir = "file:///home/nfs/images/720p/output/";
+
+    public static String ImageRequestZKRoot = "imageRequest";
 }

@@ -1,19 +1,21 @@
 package edu.fudan.stormcv.operation.single;
 
 import edu.fudan.lwang.codec.OperationHandler;
-import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
-import edu.fudan.stormcv.util.connector.ConnectorHolder;
-import edu.fudan.stormcv.util.connector.FileConnector;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.model.Descriptor;
 import edu.fudan.stormcv.model.Feature;
 import edu.fudan.stormcv.model.Frame;
+import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.model.serializer.FrameSerializer;
 import edu.fudan.stormcv.util.ImageUtils;
+import edu.fudan.stormcv.util.connector.ConnectorHolder;
+import edu.fudan.stormcv.util.connector.FileConnector;
 import edu.fudan.stormcv.util.connector.LocalFileConnector;
 import org.apache.storm.task.TopologyContext;
-import org.opencv.core.*;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.highgui.Highgui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +23,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -95,20 +98,23 @@ public class DrawFeaturesOp implements ISingleInputOperation<Frame> {
         codecHandler.fillSourceBufferQueue(frame);
 
         if (useMat) {
-            Mat image = (Mat) codecHandler.getDecodedData();
-            if (image != null) {
+            Mat matImage = (Mat) codecHandler.getDecodedData();
+            if (matImage != null) {
                 int colorIndex = 0;
                 for (Feature feature : frame.getFeatures()) {
-                    Core.putText(image, feature.getName(), new Point(10,10), FONT_HERSHEY_SIMPLEX, 1.0, ImageUtils.scalars[0]);
+                    Core.putText(matImage, feature.getName(), new Point(10,10), FONT_HERSHEY_SIMPLEX, 1.0, ImageUtils.scalars[0]);
                     for (Descriptor descr : feature.getSparseDescriptors()) {
                         Rectangle box = descr.getBoundingBox().getBounds();
-                        Core.rectangle(image, new Point(box.x, box.y), new Point(box.x+box.getWidth(), box.y+box.getHeight()),
+                        Core.rectangle(matImage, new Point(box.x, box.y), new Point(box.x+box.getWidth(), box.y+box.getHeight()),
                                 ImageUtils.scalars[colorIndex % ImageUtils.scalars.length]);
                         colorIndex++;
                     }
                 }
             }
-            frame.swapImageBytes(codecHandler.getEncodedData(image));
+            frame.swapImageBytes(codecHandler.getEncodedData(matImage));
+            if (writeLocation != null) {
+                writePicture("jpg", matImage, frame);
+            }
         } else {
             BufferedImage image = (BufferedImage) codecHandler.getDecodedData();
             if (image == null) return result;
@@ -140,31 +146,48 @@ public class DrawFeaturesOp implements ISingleInputOperation<Frame> {
                 y += 12;
             }
             frame.swapImageBytes(codecHandler.getEncodedData(image));
+            if (writeLocation != null) {
+                writePicture("jpg", image, frame);
+            }
         }
 
-//        if (writeLocation != null) {
-//            String writeImageType = "jpg";
-//            Long timeStamp = System.currentTimeMillis();
-//            String destination = writeLocation + (writeLocation.endsWith("/") ? "" : "/")
-//                    + frame.getStreamId() + "_" + timeStamp + "." + writeImageType;
-//            logger.info("[drawFeature] destination:{}", destination);
-//            FileConnector fl = connectorHolder.getConnector(destination);
-//            if (fl != null) {
-//                fl.moveTo(destination);
-//                if (fl instanceof LocalFileConnector) {
-//                    ImageIO.write(image, writeImageType, fl.getAsFile());
-//                } else {
-//                    File tmpImage = File.createTempFile("" + destination.hashCode(), "." + writeImageType);
-//                    ImageIO.write(image, writeImageType, tmpImage);
-//                    boolean flag = fl.copyFile1(tmpImage, true);
-//                    if (flag) successCount++;
-//                    else failedCount++;
-//                    logger.info("[drawFeature][success:{}][failed:{}]DrawFeaturesOp Blot saved picture in ",
-//                            successCount, failedCount, destination);
-//                }
-//            }
-//        }
         return result;
+    }
+
+    private void writePicture(String writeImageType, Object image, Frame frame) throws IOException {
+        Long timeStamp = System.currentTimeMillis();
+        String destination = writeLocation + (writeLocation.endsWith("/") ? "" : "/")
+                + frame.getStreamId() + "_" + timeStamp + "." + writeImageType;
+        logger.info("[drawFeature] destination:{}", destination);
+        FileConnector fl = connectorHolder.getConnector(destination);
+
+        if (fl != null) {
+            fl.moveTo(destination);
+            if (fl instanceof LocalFileConnector) {
+                if (useMat) {
+                    Mat matImage = (Mat) image;
+                    Highgui.imwrite(destination, matImage);
+                } else {
+                    BufferedImage bufferedImage = (BufferedImage) image;
+                    ImageIO.write(bufferedImage, writeImageType, fl.getAsFile());
+                }
+            } else {
+                File tmpImage = File.createTempFile("" + destination.hashCode(), "." + writeImageType);
+                if (useMat) {
+                    Mat matImage = (Mat) image;
+                    Highgui.imwrite(tmpImage.getAbsolutePath(), matImage);
+                } else {
+                    BufferedImage bufferedImage = (BufferedImage) image;
+                    ImageIO.write(bufferedImage, writeImageType, tmpImage);
+                }
+
+                boolean flag = fl.copyFile(tmpImage, true);
+                if (flag) successCount++;
+                else failedCount++;
+                logger.info("[drawFeature][success:{}][failed:{}]DrawFeaturesOp Blot saved picture in ",
+                        successCount, failedCount, destination);
+            }
+        }
     }
 
 

@@ -7,6 +7,8 @@ import edu.fudan.stormcv.util.OpertionHandlerFactory;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +25,8 @@ public class SingleJPEGInputBolt extends CVParticleBolt {
     private long startTime;
     private long endTime;
     private int count;
+    private int taskIndex;
+    private String workerSlot;
 
     /**
      * Constructs a SingleInputOperation
@@ -44,6 +48,17 @@ public class SingleJPEGInputBolt extends CVParticleBolt {
         } catch (Exception e) {
             logger.error("Unale to prepare Operation ", e);
         }
+        this.taskIndex = context.getThisTaskIndex();
+
+        String hostname = null;
+        try {
+            InetAddress inetAddress = InetAddress.getLocalHost();
+            hostname = inetAddress.getHostName();
+
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        this.workerSlot = hostname + "-" + context.getThisWorkerPort();
     }
 
     @Override
@@ -64,13 +79,17 @@ public class SingleJPEGInputBolt extends CVParticleBolt {
             logger.info("{} Rate: {}", operation.getContext(), (500 / ((endTime - startTime) / 1000.0f)));
             this.count = 0;
         }
-//        for (CVParticle s : result) {
-//            for (String key : input.getMetadata().keySet()) {
-//                if (!s.getMetadata().containsKey(key)) {
-//                    s.getMetadata().put(key, input.getMetadata().get(key));
-//                }
-//            }
-//        }
+
+        for (CVParticle s : result) {
+            for (String key : input.getMetadata().keySet()) {
+                if (!s.getMetadata().containsKey(key)) {
+                    s.getMetadata().put(key, input.getMetadata().get(key));
+                }
+            }
+            //put worker slot and task information
+            s.getMetadata().put("workerSlot", this.workerSlot);
+            s.getMetadata().put("boltTaskIndex", this.taskIndex);
+        }
         return result;
     }
 }

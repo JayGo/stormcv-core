@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static edu.fudan.stormcv.StormCVConfig.FTP_PASSWORD;
+import static edu.fudan.stormcv.StormCVConfig.FTP_USERNAME;
+
 /**
  * A {@link FileConnector} implementation used to access FTP sites. The FTP_USERNAME and FTP_PASSWORD fields must be
  * set in  the {@link StormCVConfig} to provide credentials for the ftp site. If no credentials are provided the connector
@@ -28,18 +31,6 @@ import java.util.Map;
  * @author Corne Versloot
  */
 public class FtpConnector implements FileConnector {
-
-    /**
-     * Configuration key used to set the FTP username in {@link StormCVConfig}
-     */
-    public static final String FTP_USERNAME = "jkyan";
-
-    /**
-     * Configuration key used to set the FTP password in {@link StormCVConfig}
-     */
-    public static final String FTP_PASSWORD = "jkyan";
-
-    private static final long serialVersionUID = -1109423617428808041L;
     private Logger logger = LoggerFactory.getLogger(getClass());
     public static final String SCHEMA = "ftp";
     private String[] extensions;
@@ -49,6 +40,7 @@ public class FtpConnector implements FileConnector {
     private FTPClient client;
 
     public FtpConnector() {
+
     }
 
     public FtpConnector(String name, String pass) {
@@ -84,23 +76,21 @@ public class FtpConnector implements FileConnector {
     }
 
     @Override
-    public void copyFile(File localFile, boolean delete) throws IOException {
-        checkAndConnect();
-        client.storeFile(location.getPath().substring(location.getPath().lastIndexOf('/') + 1), new FileInputStream(localFile));
-        if (delete) localFile.delete();
-    }
-
-    @Override
-    public boolean copyFile1(File localFile, boolean delete) throws IOException {
+    public boolean copyFile(File localFile, boolean delete) throws IOException {
         checkAndConnect();
         Boolean flag = client.storeFile(location.getPath()
                         .substring(location.getPath().lastIndexOf('/') + 1),
                 new FileInputStream(localFile));
-        if (flag) logger.info("File " + location.getPath()
-                .substring(location.getPath().lastIndexOf('/') + 1) + " upload succefully!");
-        else logger.info("File " + location.getPath()
-                .substring(location.getPath().lastIndexOf('/') + 1) + " upload failed!");
-        if (delete) localFile.delete();
+        if (flag) {
+            logger.info("File " + location.getPath()
+                    .substring(location.getPath().lastIndexOf('/') + 1) + " upload succefully!");
+        } else {
+            logger.info("File " + location.getPath()
+                    .substring(location.getPath().lastIndexOf('/') + 1) + " upload failed!");
+        }
+        if (delete) {
+            localFile.delete();
+        }
         return flag;
     }
 

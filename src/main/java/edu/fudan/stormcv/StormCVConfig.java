@@ -10,7 +10,7 @@ import java.util.ArrayList;
 /**
  * Defines the configuration parameters used by StormCV. It is possible to put other configuration in the StormCVConfig as well
  * (similar to Storm's Config). This class can also be used to register connectors which enable the platform to interact with remote files.
- * The following connectors are registered by default: {@link LocalFileConnector}, {@link ClasspathConnector}, {@link S3Connector} and {@link FtpConnector}.
+ * The following connectors are registered by default: {@link LocalFileConnector} and {@link FtpConnector}.
  * All references to locations and files require a prefix which is used to select the right {@link FileConnector} to be used:
  * <ul>
  * <li>file:// - is used to point to the local filesystem (typically used in local modes for testing)</li>
@@ -89,14 +89,15 @@ public class StormCVConfig extends Config {
         registerSerialization(Frame.class, FrameSerializer.class);
         registerSerialization(Descriptor.class, DescriptorSerializer.class);
         registerSerialization(Feature.class, FeatureSerializer.class);
+        registerSerialization(ImageHandle.class, ImageHandleSerializer.class);
         //registerSerialization(MatImage.class, MatImageSerializer.class);
 
         // register FileConnectors
         ArrayList<String> connectorList = new ArrayList<String>();
         connectorList.add(LocalFileConnector.class.getName());
-        connectorList.add(S3Connector.class.getName());
+//        connectorList.add(S3Connector.class.getName());
         connectorList.add(FtpConnector.class.getName());
-        connectorList.add(ClasspathConnector.class.getName());
+//        connectorList.add(ClasspathConnector.class.getName());
         put(StormCVConfig.STORMCV_CONNECTORS, connectorList);
     }
 

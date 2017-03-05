@@ -1,12 +1,12 @@
 package edu.fudan.stormcv.fetcher;
 
+import edu.fudan.stormcv.model.serializer.FrameSerializer;
 import edu.fudan.stormcv.util.connector.ConnectorHolder;
 import edu.fudan.stormcv.StormCVConfig;
 import edu.fudan.stormcv.codec.JPEGImageCodec;
 import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
 import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
-import edu.fudan.stormcv.model.serializer.FrameSerializer;
 import edu.fudan.stormcv.util.connector.FileConnector;
 import edu.fudan.stormcv.util.connector.LocalFileConnector;
 import org.apache.storm.task.TopologyContext;
@@ -35,7 +35,6 @@ import java.util.Map;
 
 public class ImageFetcher implements IFetcher<Frame> {
 
-    private static final long serialVersionUID = -7649344867160068896L;
     private Logger logger = LoggerFactory.getLogger(getClass());
     private FrameSerializer serializer = new FrameSerializer();
     private List<String> locations;
@@ -167,6 +166,11 @@ public class ImageFetcher implements IFetcher<Frame> {
         }
         Utils.sleep(sleepTime);
         return frame;
+    }
+
+    @Override
+    public void onSignal(byte[] bytes) {
+
     }
 
     /**

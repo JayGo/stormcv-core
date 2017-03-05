@@ -2,6 +2,7 @@ package edu.fudan.stormcv.spout;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import edu.fudan.storm.signals.spout.BaseSignalSpout;
 import edu.fudan.stormcv.StormCVConfig;
 import edu.fudan.stormcv.fetcher.IFetcher;
 import edu.fudan.stormcv.model.CVParticle;
@@ -11,10 +12,13 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichSpout;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Values;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -30,11 +34,9 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Corne Versloot
  */
-public class CVParticleSpout implements IRichSpout {
+public class CVParticleSignalSpout extends BaseSignalSpout {
 
-    private static final long serialVersionUID = 2828206148753936815L;
-
-    private Logger logger = LoggerFactory.getLogger(CVParticleSpout.class);
+    private Logger logger = LoggerFactory.getLogger(CVParticleSignalSpout.class);
     private Cache<Object, Object> tupleCache; // a cache holding emitted tuples
     // so they can be replayed on
     // failure
@@ -42,7 +44,8 @@ public class CVParticleSpout implements IRichSpout {
     private boolean faultTolerant = false;
     private IFetcher<? extends CVParticle> fetcher;
 
-    public CVParticleSpout(IFetcher<? extends CVParticle> fetcher) {
+    public CVParticleSignalSpout(String zkName, IFetcher<? extends CVParticle> fetcher) {
+        super(zkName);
         this.fetcher = fetcher;
     }
 
@@ -55,7 +58,7 @@ public class CVParticleSpout implements IRichSpout {
      * @param faultTolerant
      * @return
      */
-    public CVParticleSpout setFaultTolerant(boolean faultTolerant) {
+    public CVParticleSignalSpout setFaultTolerant(boolean faultTolerant) {
         this.faultTolerant = faultTolerant;
         return this;
     }
@@ -78,6 +81,7 @@ public class CVParticleSpout implements IRichSpout {
     @Override
     public void open(Map conf, TopologyContext context,
                      SpoutOutputCollector collector) {
+        super.open(conf, context, collector);
         this.collector = collector;
         if (conf.containsKey(StormCVConfig.STORMCV_SPOUT_FAULTTOLERANT)) {
             faultTolerant = (Boolean) conf
@@ -101,6 +105,26 @@ public class CVParticleSpout implements IRichSpout {
         }
 
         LibLoader.loadOpenCVLib();
+
+//       logger.info("[jkyan]zkHosts:{}", zkHosts(conf));
+    }
+
+    private static String zkHosts(Map conf) {
+        int zkPort = Utils.getInt(conf.get("storm.zookeeper.port")).intValue();
+        List zkServers = (List)conf.get("storm.zookeeper.servers");
+        Iterator it = zkServers.iterator();
+        StringBuffer sb = new StringBuffer();
+
+        while(it.hasNext()) {
+            sb.append((String)it.next());
+            sb.append(":");
+            sb.append(zkPort);
+            if(it.hasNext()) {
+                sb.append(",");
+            }
+        }
+        System.out.println(sb.toString());
+        return sb.toString();
     }
 
     @Override
@@ -166,4 +190,8 @@ public class CVParticleSpout implements IRichSpout {
         return null;
     }
 
+    @Override
+    public void onSignal(byte[] bytes) {
+        fetcher.onSignal(bytes);
+    }
 }

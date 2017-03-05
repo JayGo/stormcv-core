@@ -180,4 +180,9 @@ public class OpenCVStreamFrameFetcher implements IFetcher<CVParticle> {
         }
         return null;
     }
+
+    @Override
+    public void onSignal(byte[] bytes) {
+
+    }
 }

@@ -1,5 +1,6 @@
 package edu.fudan.stormcv.util.writer;
 
+import com.amazonaws.services.simpleworkflow.model.Run;
 import com.xuggle.xuggler.*;
 import com.xuggle.xuggler.IPixelFormat.Type;
 import com.xuggle.xuggler.video.ConverterFactory;
@@ -14,8 +15,12 @@ import org.slf4j.LoggerFactory;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
+import java.util.Timer;
+
+import static org.apache.storm.utils.Utils.sleep;
 
 /**
  * Utility class used to write frames to a video file and used by the StreamWriterOperation to store streams.
@@ -43,7 +48,7 @@ public class XugglerStreamWriter {
     private int bitrate = -1;
     private int frameTime;
     private IContainer writer;
-    private int frameRate;
+    private double frameRate = -1;
     private String[] ffmpegParams;
     private JPEGImageCodec jpegImageCodec;
 
@@ -57,8 +62,8 @@ public class XugglerStreamWriter {
      * @param nrFramesVideo indicates how many frames must be written before a video is closed
      * @throws IOException
      */
-    public XugglerStreamWriter(String location, String extension, FileConnector connector, ICodec.ID codec, float speed, long nrFramesVideo, int bitrate, String... flags) throws IOException {
-        this(codec, speed, nrFramesVideo, extension, bitrate, flags);
+    public XugglerStreamWriter(String location, String extension, FileConnector connector, ICodec.ID codec, float speed, double frameRate, long nrFramesVideo, int bitrate, String... flags) throws IOException {
+        this(codec, speed, frameRate, nrFramesVideo, extension, bitrate, flags);
         this.location = location;
         if (!this.location.endsWith("/")) this.location += "/";
         this.connector = connector;
@@ -73,8 +78,9 @@ public class XugglerStreamWriter {
      * @param nrFramesVideo
      * @throws IOException
      */
-    public XugglerStreamWriter(ICodec.ID codec, float speed, long nrFramesVideo, String container, int bitrate, String... flags) throws IOException {
+    public XugglerStreamWriter(ICodec.ID codec, float speed,  double frameRate, long nrFramesVideo, String container, int bitrate, String... flags) throws IOException {
         this.codec = codec;
+        this.frameRate = frameRate;
         this.speed = speed;
         this.bitrate = bitrate;
         this.ffmpegParams = flags;
@@ -104,13 +110,14 @@ public class XugglerStreamWriter {
         IStream videoStream = writer.addNewStream(videoCodec);
         coder = videoStream.getStreamCoder();
 
-        IRational fr = IRational.make(frameRate, 1);
+        IRational fr = IRational.make(frameRate);
+        //System.out.println("frameRate:" + frameRate);
 
         coder.setWidth(width);
         coder.setHeight(height);
         coder.setFrameRate(fr);
         coder.setTimeBase(IRational.make(fr.getDenominator(), fr.getNumerator()));
-        coder.setNumPicturesInGroupOfPictures(frameRate);
+        coder.setNumPicturesInGroupOfPictures((int) frameRate);
         if (bitrate > 0) coder.setBitRate(bitrate);
         //coder.setBitRateTolerance(100000);
         coder.setPixelType(Type.YUV420P);
@@ -140,10 +147,14 @@ public class XugglerStreamWriter {
      */
     public byte[] addFrames(List<Frame> frames) throws IOException {
         if (writer == null) {
-            frameRate = (int) (frames.get(1).getTimestamp() - frames.get(0).getTimestamp());
-            frameRate = 1000 / frameRate;
+            if (frameRate < 0) {
+                frameRate = (int) (frames.get(1).getTimestamp() - frames.get(0).getTimestamp());
+                frameRate = 1000 / frameRate;
+            }
             frameRate *= speed;
+
             BufferedImage frame = this.jpegImageCodec.JPEGBytesToBufferedImage(frames.get(0).getImageBytes());
+
             currentFile = new File(tmpDir, frames.get(0).getStreamId() + "_" + fileCount + "." + this.container);
             logger.info("Writing TMP video to: " + currentFile);
             makeWriter(currentFile.getAbsolutePath(), frame.getWidth(), frame.getHeight());
@@ -163,6 +174,11 @@ public class XugglerStreamWriter {
                 fis.close();
                 if (!currentFile.delete()) currentFile.deleteOnExit();
                 return bytes;
+            }
+        } else {
+            /*the nrFramesVideo produced by OpenCV is not actual so start this thread to monitor by jkyan*/
+            if (nrFramesVideo - frameCount < 150) {
+                new Thread(new ListenerThread(this)).start();
             }
         }
         return null;
@@ -188,7 +204,7 @@ public class XugglerStreamWriter {
             }
         }
         this.frameTime += 1000000f / frameRate;
-        frameCount++;
+        frameCount ++;
     }
 
     public void close() {
@@ -219,80 +235,29 @@ public class XugglerStreamWriter {
         }
     }
 
+    private long getFrameCount() {
+        return frameCount;
+    }
 
-    /**
-     * Adds the set of frames to the file created by this XugglerStreamWriter. The characteristics of the stream
-     * (WxH and frame rate) are inferred automatically from the first set of frames provided which must be
-     * at least two subsequent frames.
-     * @param frames the set of frames to be added to the file
-     * @throws IOException
-     *//*
-    public byte[] addFrames(List<Frame> frames) throws IOException{
-		if(writer == null){
-			start = System.currentTimeMillis();
-			tbf = (long)Math.ceil( (frames.get(frames.size()-1).getTimestamp() - frames.get(0).getTimestamp())/(frames.size()-1));
-			tbf = (long)(tbf / speed);
-			int width = frames.get(0).getImage().getWidth();
-			int height = frames.get(0).getImage().getHeight();
-			currentFile = new File(tmpDir, frames.get(0).getStreamId()+"_"+fileCount+"."+this.container);
-			logger.info("Writing TMP video to: "+currentFile);
-			writer = ToolFactory.makeWriter(currentFile.getAbsolutePath());
-			writer.addVideoStream  (0, 0, codec, IRational.make(1000f/tbf), width, height);
-			nextFrameTime = 0;
-		}
+    private long getNrFramesVideo() {
+        return nrFramesVideo;
+    }
 
-		for(Frame frame : frames){
-			BufferedImage image = frame.getImage();
-			addFrameToVideo(image);
-		}
-		if(frameCount >= nrFramesVideo){
-			System.err.println(frameCount+" in "+(System.currentTimeMillis() - start)/1000+" sec");
-			this.close();
-			if(location == null){
-				FileInputStream fis = new FileInputStream(currentFile);
-				byte[] bytes = new byte[(int)currentFile.length()];
-				fis.read(bytes);
-				fis.close();
-				if(!currentFile.delete()) currentFile.deleteOnExit();
-				return bytes;
-			}
-		}
-		return null;
-	}
-
-	private void addFrameToVideo(BufferedImage image){
-		// Xuggler requires 3byte rgb encoded images so check and convert if needed
-		if(image.getType() != BufferedImage.TYPE_3BYTE_BGR){
-			BufferedImage imageBGR = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
-			new ColorConvertOp(null).filter(image, imageBGR);
-			image = imageBGR;
-		}
-		writer.encodeVideo(0, image, nextFrameTime, TimeUnit.MILLISECONDS);
-		nextFrameTime += tbf;
-		frameCount++;
-	}
-	*/
-    /**
-     * Closes the video file and makes it playable. This method must be called by the owner or
-     * the file will never be closed and probably not playable
-     */
-	/*
-	public void close(){
-		if(writer != null ) {
-			frameCount = 0;
-			fileCount++;
-			writer.flush();
-			writer.close();
-			if(location != null) try {
-				connector.moveTo(location+currentFile.getName());
-				logger.info("Moving video to final location: "+location+currentFile.getName());
-				connector.copyFile(currentFile, true);
-			} catch (IOException e) {
-				logger.error("Unable to move file to final destinaiton: location", e);
-			}
-			writer = null;
-		}
-	}
-	*/
-
+	private class ListenerThread implements Runnable {
+        XugglerStreamWriter writer;
+        ListenerThread(XugglerStreamWriter writer) {
+            this.writer = writer;
+        }
+        @Override
+        public void run() {
+            while (writer.getFrameCount() < writer.getNrFramesVideo()) {
+                long current = writer.getFrameCount();
+                sleep(10000);
+                if (writer.getFrameCount() != current) {
+                    writer.close();
+                    break;
+                }
+            }
+        }
+    }
 }

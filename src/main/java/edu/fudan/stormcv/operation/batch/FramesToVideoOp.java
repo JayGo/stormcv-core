@@ -53,6 +53,7 @@ public class FramesToVideoOp implements IBatchOperation<CVParticle> {
     private int bitrate = -1;
     private String[] ffmpegParams;
     private ICodec.ID codec = ICodec.ID.CODEC_ID_H264;
+    private double frameRate = 23.98;
 
     /**
      * Constructs a writer that will put files in the provided location (must be a directory!). Each video
@@ -90,6 +91,11 @@ public class FramesToVideoOp implements IBatchOperation<CVParticle> {
      */
     public FramesToVideoOp speed(float speed) {
         this.speed = speed;
+        return this;
+    }
+
+    public FramesToVideoOp frameRate(double frameRate) {
+        this.frameRate = frameRate;
         return this;
     }
 
@@ -142,7 +148,7 @@ public class FramesToVideoOp implements IBatchOperation<CVParticle> {
     @Override
     public void prepare(Map stormConf, TopologyContext context) throws Exception {
         this.connectorHolder = new ConnectorHolder(stormConf);
-        writers = new ConcurrentHashMap<String, XugglerStreamWriter>();
+        writers = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -172,10 +178,10 @@ public class FramesToVideoOp implements IBatchOperation<CVParticle> {
                 if (fl != null) {
                     fl = fl.deepCopy();
                     fl.moveTo(location);
-                    writers.put(streamId, new XugglerStreamWriter(location, container, fl, this.codec, speed, framesPerVideo, bitrate, ffmpegParams));
+                    writers.put(streamId, new XugglerStreamWriter(location, container, fl, this.codec, speed, frameRate, framesPerVideo, bitrate, ffmpegParams));
                 }
             } else {
-                writers.put(streamId, new XugglerStreamWriter(this.codec, speed, framesPerVideo, container, bitrate, ffmpegParams));
+                writers.put(streamId, new XugglerStreamWriter(this.codec, speed, frameRate, framesPerVideo, container, bitrate, ffmpegParams));
             }
         }
 
@@ -197,7 +203,40 @@ public class FramesToVideoOp implements IBatchOperation<CVParticle> {
 
     @Override
     public List<CVParticle> execute(List<CVParticle> input, OperationHandler operationHandler) throws Exception {
-        return null;
+        List<CVParticle> result = new ArrayList<CVParticle>();
+        if (input == null || input.size() == 0) return result;
+
+        String streamId = input.get(0).getStreamId();
+        if (!writers.containsKey(streamId)) {
+            if (location != null) {
+                FileConnector fl = connectorHolder.getConnector(location);
+                if (fl != null) {
+                    fl = fl.deepCopy();
+                    fl.moveTo(location);
+                    writers.put(streamId, new XugglerStreamWriter(location, container, fl, this.codec, speed, frameRate, framesPerVideo, bitrate, ffmpegParams));
+                }
+            } else {
+                writers.put(streamId, new XugglerStreamWriter(this.codec, speed, frameRate, framesPerVideo, container, bitrate, ffmpegParams));
+            }
+        }
+
+        List<Frame> frames = new ArrayList<>(input.size());
+
+        for (CVParticle particle : input) {
+            frames.add((Frame) particle);
+        }
+
+        if (location == null) {
+            byte[] bytes = writers.get(streamId).addFrames(frames);
+            if (bytes != null) {
+                VideoChunk video = new VideoChunk(streamId, input.get(0).getSequenceNr(), framesPerVideo, bytes, container);
+                result.add(video);
+            }
+            return result;
+        } else {
+            writers.get(streamId).addFrames(frames);
+            return input;
+        }
     }
 
     @Override

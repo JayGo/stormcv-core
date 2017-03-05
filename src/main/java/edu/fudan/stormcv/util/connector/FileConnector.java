@@ -53,10 +53,7 @@ public interface FileConnector extends Serializable {
      * @param delete    indicates if the localFile must be deleted after a successful copy
      * @throws IOException
      */
-    public void copyFile(File localFile, boolean delete) throws IOException;
-
-    //for ftp test
-    public boolean copyFile1(File localFile, boolean delete) throws IOException;
+    public boolean copyFile(File localFile, boolean delete) throws IOException;
 
     /**
      * List all 'files' within the current location which match the provided extensions.
