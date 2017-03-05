@@ -186,4 +186,9 @@ public class RawStreamFrameFetcher implements IFetcher<CVParticle> {
         }
         return null;
     }
+
+    @Override
+    public void onSignal(byte[] bytes) {
+
+    }
 }

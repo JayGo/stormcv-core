@@ -28,4 +28,5 @@ public interface IFetcher<Output extends CVParticle> extends Serializable {
 
     public Output fetchData();
 
+    public void onSignal(byte[] bytes);
 }

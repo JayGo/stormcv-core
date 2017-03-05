@@ -20,8 +20,6 @@ import java.util.Map;
  */
 public class LocalFileConnector implements FileConnector {
 
-    private static final long serialVersionUID = -7467881860874428816L;
-
     private static final String PREFIX = "file";
     private File localLocation;
     private ExtensionFilter filter = new ExtensionFilter();
@@ -43,7 +41,7 @@ public class LocalFileConnector implements FileConnector {
 
     @Override
     public List<String> list() {
-        List<String> listing = new ArrayList<String>();
+        List<String> listing = new ArrayList<>();
         if (!localLocation.isDirectory()) {
             if (filter.accept(localLocation, localLocation.getName())) {
                 listing.add(localLocation.toURI().toString());
@@ -71,26 +69,27 @@ public class LocalFileConnector implements FileConnector {
     }
 
     @Override
-    public void copyFile(File localFile, boolean delete) throws IOException {
+    public boolean copyFile(File localFile, boolean delete) throws IOException {
         Files.copy(localFile.toPath(), localLocation.toPath(), StandardCopyOption.REPLACE_EXISTING);
         if (delete) localFile.delete();
+        return true;
     }
 
     @Override
     public FileConnector deepCopy() {
         FileConnector fl = new LocalFileConnector();
-        if (this.localLocation != null)
+        if (this.localLocation != null) {
             try {
                 fl.moveTo(PREFIX + "://" + localLocation.getAbsolutePath());
             } catch (IOException e) {
                 // TODO
             }
+        }
         return fl;
     }
 
     private class ExtensionFilter implements Serializable, FilenameFilter {
 
-        private static final long serialVersionUID = 7715776887129530584L;
         private String[] extensions;
 
         @Override
@@ -105,12 +104,6 @@ public class LocalFileConnector implements FileConnector {
         public void setExtensions(String[] extensions) {
             this.extensions = extensions;
         }
-    }
-
-    @Override
-    public boolean copyFile1(File localFile, boolean delete) throws IOException {
-        // TODO Auto-generated method stub
-        return true;
     }
 
 }

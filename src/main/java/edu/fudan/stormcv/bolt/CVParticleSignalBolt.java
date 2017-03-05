@@ -1,6 +1,7 @@
 package edu.fudan.stormcv.bolt;
 
 import clojure.lang.PersistentArrayMap;
+import edu.fudan.storm.signals.bolt.BaseSignalBolt;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import org.apache.storm.Config;
@@ -24,13 +25,17 @@ import java.util.Map;
  *
  * @author Corne Versloot
  */
-public abstract class CVParticleBolt extends BaseRichBolt {
+public abstract class CVParticleSignalBolt extends BaseSignalBolt {
 
-    protected Logger logger = LoggerFactory.getLogger(CVParticleBolt.class);
+    protected Logger logger = LoggerFactory.getLogger(CVParticleSignalBolt.class);
     protected HashMap<String, CVParticleSerializer<? extends CVParticle>> serializers = new HashMap<String, CVParticleSerializer<? extends CVParticle>>();
     protected OutputCollector collector;
     protected String boltName;
     protected long idleTimestamp = -1;
+
+    public CVParticleSignalBolt(String name) {
+        super(name);
+    }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
