@@ -16,7 +16,8 @@ public enum BOLT_OPERTION_TYPE {
     /*Basic Video Write Mathod*/
     RTMPSTREAMER(101, "rtmpStreamer"),
     MJPEGSTREAMER(102, "mjpegStreamer"),
-    VIDEOFILEGEN(111, "videoFileGen");
+    VIDEOFILEGEN(111, "videoFileGen"),
+	UNSUPPORT(999, "unsupport");
 
     private String operationName = "";
     private int code;
