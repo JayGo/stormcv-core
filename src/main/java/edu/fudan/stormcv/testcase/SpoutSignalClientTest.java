@@ -2,8 +2,10 @@ package edu.fudan.stormcv.testcase;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
+import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.model.ImageRequest;
 import edu.fudan.stormcv.model.serializer.ImageRequestSerializer;
+import edu.fudan.stormcv.spout.SpoutSignalClient;
 import org.apache.commons.cli.*;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -18,46 +20,15 @@ import org.slf4j.LoggerFactory;
  * Time: 3/3/17 - 8:19 AM
  * Description:
  */
-public class SpoutSignalTestClient {
-    private static final Logger LOG = LoggerFactory.getLogger(SpoutSignalTestClient.class);
+public class SpoutSignalClientTest {
+    private static final Logger logger = LoggerFactory.getLogger(SpoutSignalClientTest.class);
 
-    private CuratorFramework client = null;
-    private String name;
-
-    public SpoutSignalTestClient(String zkConnectString, String name) {
-        this.name = name;
-        this.client = CuratorFrameworkFactory.builder().namespace("storm-signals").connectString(zkConnectString)
-                .retryPolicy(new RetryOneTime(500)).build();
-        LOG.debug("created Curator client");
-    }
-
-    public void start() {
-        this.client.start();
-    }
-
-    public void close() {
-        this.client.close();
-    }
-
-    public void send(byte[] signal) throws Exception {
-        Stat stat = this.client.checkExists().forPath(this.name);
-        if (stat == null) {
-            String path = this.client.create().creatingParentsIfNeeded().forPath(this.name);
-            LOG.info("Created: " + path);
-        }
-        this.client.setData().forPath(this.name, signal);
-    }
-
-    /**
-     * @param args
-     */
     public static void main(String[] args) throws Exception {
-
-        String zkHost = "localhost:2000";
-        String streamId = "720p";
-        String inputLocation = "file:///home/nfs/images/720p/";
-        String outputLocation = "file:///home/nfs/images/720p/output/";
-        int type = 1;
+        String zkHost = GlobalConstants.ZKHostLocal;
+        String streamId = "720p-3";
+        String inputLocation = GlobalConstants.TestImageInputDir;
+        String outputLocation = GlobalConstants.TestImageOuputDir;
+        int type = 3;
 
         CommandLineParser parser = new DefaultParser();
         Options options = new Options();
@@ -110,19 +81,11 @@ public class SpoutSignalTestClient {
             type =  Integer.valueOf(commandLine.getOptionValue("t"));
         }
 
-        SpoutSignalTestClient sc = new SpoutSignalTestClient(zkHost, "/request");
+        SpoutSignalClient sc = new SpoutSignalClient(zkHost, GlobalConstants.ImageRequestZKRoot);
         sc.start();
         try {
-            System.out.println("start send the image process request");
-            ImageRequestSerializer serializer = new ImageRequestSerializer();
-            Kryo kryo = new Kryo();
             ImageRequest request = new ImageRequest(streamId, inputLocation, outputLocation, type);
-            System.out.println("send request: " + request);
-            Output output = new Output(4096, 409600);
-            serializer.write(kryo, output, request);
-            byte[] bytes = output.toBytes();
-            sc.send(bytes);
-            System.out.println("send the signal success!");
+            sc.sendImageRequest(request);
         } finally {
             sc.close();
         }

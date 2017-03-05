@@ -5,6 +5,7 @@ import edu.fudan.stormcv.bolt.SingleJPEGInputBolt;
 import edu.fudan.stormcv.bolt.StatCollectorBolt;
 import edu.fudan.stormcv.constant.BOLT_HANDLE_TYPE;
 import edu.fudan.stormcv.constant.BOLT_OPERTION_TYPE;
+import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.fetcher.ImageUrlFetcher;
 import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.operation.single.ImageFetchAndOperation;
@@ -40,7 +41,7 @@ public class ImageFetchTopologyJPEG extends BaseTopology {
 
     @Override
     public void setSpout() {
-        builder.setSpout("spout", new CVParticleSignalSpout("request", new ImageUrlFetcher("cat", readLocations, writeLocations,
+        builder.setSpout("spout", new CVParticleSignalSpout(GlobalConstants.ImageRequestZKRoot, new ImageUrlFetcher("cat", readLocations, writeLocations,
                 BOLT_OPERTION_TYPE.COLORHISTOGRAM).batchSize(32)), 1);
     }
 
