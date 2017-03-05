@@ -9,14 +9,15 @@ package edu.fudan.stormcv.constant;
 public enum BOLT_OPERTION_TYPE {
     /*Basic Image Operation*/
     GRAY(1, "gray"),
-    FACEDETECT(2, "faceDecect"),
+    FACEDETECT(2, "faceDetect"),
     COLORHISTOGRAM(3, "colorHistogram"),
     SCALE(4, "scale"),
 
     /*Basic Video Write Mathod*/
     RTMPSTREAMER(101, "rtmpStreamer"),
     MJPEGSTREAMER(102, "mjpegStreamer"),
-    VIDEOFILEGEN(111, "videoFileGen");
+    VIDEOFILEGEN(111, "videoFileGen"),
+	UNSUPPORT(999, "unsupport");
 
     private String operationName = "";
     private int code;

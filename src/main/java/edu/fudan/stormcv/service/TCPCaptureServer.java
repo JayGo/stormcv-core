@@ -2,9 +2,12 @@ package edu.fudan.stormcv.service;
 
 import edu.fudan.jliu.message.BaseMessage;
 import edu.fudan.jliu.message.EffectMessage;
+import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.constant.RequestCode;
 import edu.fudan.stormcv.constant.ResultCode;
 import edu.fudan.stormcv.topology.TCPCaptureTopology;
+import edu.fudan.stormcv.topology.TopologyH264;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,17 +31,17 @@ public class TCPCaptureServer {
 
     private static Logger logger = LoggerFactory.getLogger(TCPCaptureServer.class);
 
-    private final int serverMsgPort = 9000;
+    private final int serverMsgPort = 8999;
     private ServerSocket msgServerSocket;
 
     private static TCPCaptureServer mTCPCaptureServer;
 
-    private List<TCPCaptureTopology> topologys;
+    private List<TopologyH264> topologys;
 
     public TCPCaptureServer() {
         try {
             msgServerSocket = new ServerSocket(serverMsgPort);
-            topologys = new ArrayList<TCPCaptureTopology>();
+            topologys = new ArrayList<TopologyH264>();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -118,8 +121,8 @@ public class TCPCaptureServer {
             try {
                 oos = new ObjectOutputStream(socket.getOutputStream());
                 oos.writeObject(msg);
-                oos.flush();
-                oos.close();
+//                oos.flush();
+//                oos.close();
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -130,12 +133,12 @@ public class TCPCaptureServer {
             BaseMessage result = new BaseMessage(ResultCode.NO_SERVER_AVAILABLE);
             switch (msg.getCode()) {
                 case RequestCode.START_STORM: {
-                    result = startCaptureTopology(msg);
+                    result = pushRawStream(msg);
                     break;
                 }
 
                 case RequestCode.START_EFFECT_STORM: {
-                    result = startCaptureTopology((EffectMessage) msg);
+                    result = startTopology((EffectMessage) msg);
                     break;
                 }
 
@@ -152,31 +155,46 @@ public class TCPCaptureServer {
 
             return result;
         }
+        
+        private BaseMessage pushRawStream(BaseMessage msg) {
+        	BaseMessage result = new BaseMessage(ResultCode.UNKNOWN_ERROR);
+        	String srcRtspAddr = msg.getAddr();
+        	if(!srcRtspAddr.startsWith("rtsp://")) {
+        		logger.error("illegal rtsp name!");
+        		return result;
+        	}
+        	String dstRtmpAddr = GlobalConstants.DefaultRTMPServer+msg.getStreamId();
+        	String streamPushCommand = "ffmpeg -i "+ srcRtspAddr +  " -qscale 0 -f flv -r 25 -an " + dstRtmpAddr;
+        	try {
+				Process p = Runtime.getRuntime().exec(streamPushCommand);
+				System.out.println("ffmpeg push process ID: "+p.toString());
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				logger.error("exception in exec ffmpeg push command!");
+				return result;
+			}
+        	result.setAddr(msg.getAddr());
+        	result.setStreamId(msg.getStreamId());
+        	result.setCode(ResultCode.RESULT_OK);
+        	result.setRtmpAddr(GlobalConstants.DefaultRTMPServer);
+        	return result;
+        }
 
-        private BaseMessage startCaptureTopology(BaseMessage msg) {
+        private BaseMessage startTopology(BaseMessage msg) {
             BaseMessage result = new BaseMessage(ResultCode.UNKNOWN_ERROR);
-            boolean isEffectMessage = msg instanceof EffectMessage;
-            String videoAddr = msg.getAddr();
-            String streamId = msg.getStreamId();
-            String rtmpAddr = msg.getRtmpAddr();
+            msg.setRtmpAddr(GlobalConstants.DefaultRTMPServer);
+            TopologyH264 mTopologyH264 = new TopologyH264(msg);
 
-            TCPCaptureTopology mTCPCaptureTopology = null;
-
-            if (!isEffectMessage) {
-                mTCPCaptureTopology = new TCPCaptureTopology(streamId, rtmpAddr, videoAddr);
-            } else {
-                String effect = ((EffectMessage) msg).getEffectType();
-                mTCPCaptureTopology = new TCPCaptureTopology(streamId, rtmpAddr, videoAddr, effect);
-            }
-
-            topologys.add(mTCPCaptureTopology);
+            topologys.add(mTopologyH264);
             try {
-                mTCPCaptureTopology.submitTopologyToCluster();
+            	mTopologyH264.submitTopology();
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
                 return result;
             }
+            result.setRtmpAddr(GlobalConstants.DefaultRTMPServer);
             result.setCode(ResultCode.RESULT_OK);
             return result;
         }
@@ -186,11 +204,11 @@ public class TCPCaptureServer {
             String streamId = msg.getStreamId();
             String killResultStr = "";
             for (int i = 0; i < topologys.size(); i++) {
-                TCPCaptureTopology mTCPCaptureTopology = topologys.get(i);
-                if (mTCPCaptureTopology.getStreamId().equals(streamId)) {
-                    killResultStr += mTCPCaptureTopology.killTopology();
+            	TopologyH264 mTopologyH264 = topologys.get(i);
+                if (mTopologyH264.getStreamId().equals(streamId)) {
+                    killResultStr += mTopologyH264.killTopology();
                     if (!killResultStr.contains("Error")) {
-                        topologys.remove(mTCPCaptureTopology);
+                        topologys.remove(mTopologyH264);
                     } else {
                         return result;
                     }
