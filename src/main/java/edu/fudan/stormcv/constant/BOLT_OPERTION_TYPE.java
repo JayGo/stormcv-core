@@ -35,6 +35,15 @@ public enum BOLT_OPERTION_TYPE {
         }
         return null;
     }
+    
+    public static BOLT_OPERTION_TYPE getOpTypeByString(String effectType) {
+        for (BOLT_OPERTION_TYPE type : BOLT_OPERTION_TYPE.values()) {
+            if (type.toString().equals(effectType)) {
+                return type;
+            }
+        }
+    	return UNSUPPORT;
+    }
 
     public int getCode() {
         return this.code;

@@ -2,14 +2,19 @@ package edu.fudan.stormcv.service;
 
 import edu.fudan.jliu.message.BaseMessage;
 import edu.fudan.jliu.message.EffectMessage;
+import edu.fudan.stormcv.constant.BOLT_OPERTION_TYPE;
 import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.constant.RequestCode;
 import edu.fudan.stormcv.constant.ResultCode;
+import edu.fudan.stormcv.model.ImageRequest;
+import edu.fudan.stormcv.spout.SpoutSignalClient;
 import edu.fudan.stormcv.topology.TCPCaptureTopology;
 import edu.fudan.stormcv.topology.TopologyH264;
 
+import org.apache.storm.shade.com.codahale.metrics.MetricRegistryListener.Base;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -141,12 +146,18 @@ public class TCPCaptureServer {
                     result = startTopology((EffectMessage) msg);
                     break;
                 }
+                
+                case RequestCode.PIC_PROCESS: {
+                	result = processPicture((EffectMessage) msg);
+                	break;
+                }
 
                 case RequestCode.END_STORM:
                 case RequestCode.END_EFFECT_STORM: {
                     result = stopCaptureTopology(msg);
                     break;
                 }
+                
 
                 default: {
                     logger.error("Unknow message!");
@@ -155,6 +166,30 @@ public class TCPCaptureServer {
 
             return result;
         }
+        
+        private BaseMessage processPicture(EffectMessage fmsg) {
+        	BaseMessage result = new BaseMessage(ResultCode.UNKNOWN_ERROR);
+        	
+        	int processType = BOLT_OPERTION_TYPE.getOpTypeByString(fmsg.getEffectType()).getCode();
+        	String streamId = fmsg.getStreamId();
+        	String srcPath = fmsg.getAddr();
+        	String dstPath = fmsg.getRtmpAddr();
+        	
+        	String zkHost = GlobalConstants.ZKHostLocal;
+        	ImageRequest request = new ImageRequest(streamId, srcPath, dstPath, processType);
+            SpoutSignalClient sc = new SpoutSignalClient(zkHost, GlobalConstants.ImageRequestZKRoot);
+            sc.start();
+            
+            try {
+            	sc.sendImageRequest(request);
+            } finally {
+            	sc.close();
+            }
+            
+            result.setCode(ResultCode.RESULT_OK);
+        	return result;
+        }
+        
         
         private BaseMessage pushRawStream(BaseMessage msg) {
         	BaseMessage result = new BaseMessage(ResultCode.UNKNOWN_ERROR);
