@@ -101,14 +101,14 @@ public class ScaleImageOp implements ISingleInputOperation<Frame> {
             if (in != null) {
                 Mat resize = new Mat();
                 Imgproc.resize(in, resize, new Size(in.width() * factor, in.height() * factor));
-                frame.swapImageBytes(codecHandler.getEncodedData(resize));
+                frame.swapImageBytes(codecHandler.getEncodedData(resize, frame.getImageType()));
 //                frame.setImageBytes(codecHandler.getEncodedData(resize), (int)(in.width() * factor), (int)(in.height() * factor));
             }
         } else {
             BufferedImage image = (BufferedImage) codecHandler.getDecodedData();
             if (image != null) {
                 if (factor != 1.0) image = ScaleImageOp.scale(image, factor);
-                byte[] imageBytes = codecHandler.getEncodedData(image);
+                byte[] imageBytes = codecHandler.getEncodedData(image, frame.getImageType());
                 frame.swapImageBytes(imageBytes);
             }
         }

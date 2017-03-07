@@ -3,8 +3,10 @@ package edu.fudan.stormcv.util.reader;
 import com.xuggle.mediatool.MediaListenerAdapter;
 import edu.fudan.stormcv.capture.BufferedImagePackQueue;
 import edu.fudan.stormcv.capture.ThreadManager;
-import edu.fudan.stormcv.codec.JPEGImageCodec;
-import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
+import edu.fudan.stormcv.codec.ImageCodec;
+import edu.fudan.stormcv.codec.TurboImageCodec;
+import edu.fudan.stormcv.model.*;
+import edu.fudan.stormcv.model.Frame;
 import org.apache.storm.utils.Utils;
 import org.opencv.core.CvException;
 import org.opencv.core.Mat;
@@ -36,10 +38,10 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
     private LinkedBlockingQueue<edu.fudan.stormcv.model.Frame> frameQueue; // queue used to store frames
     private long lastRead = -1; // used to determine if the EOF was reached if Xuggler does not detect it
     private int sleepTime;
-    private JPEGImageCodec codec;
+    private ImageCodec codec;
 
     private String streamLocation;
-    private String imageType = edu.fudan.stormcv.model.Frame.JPG_IMAGE;
+    private String imageType = Frame.JPG_IMAGE;
 
     public OpenCVStreamReader(String streamId, String streamLocation, String imageType, int frameSkip, int groupSize, int sleepTime, LinkedBlockingQueue<edu.fudan.stormcv.model.Frame> frameQueue) {
         this.streamLocation = streamLocation;
@@ -50,7 +52,7 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
         this.frameQueue = frameQueue;
         this.streamId = streamId;
         lastRead = System.currentTimeMillis() + 10000;
-        this.codec = new TurboJPEGImageCodec();
+        this.codec = new TurboImageCodec();
     }
 
     @Override
@@ -77,7 +79,7 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
                 }
                 BufferedImage bufferedImage = mBufferedImagePack.getImage();
                 long timestamp = System.currentTimeMillis();
-                byte[] bytes = codec.BufferedImageToJPEGBytes(bufferedImage);
+                byte[] bytes = codec.BufferedImageToBytes(bufferedImage, imageType);
                 edu.fudan.stormcv.model.Frame newFrame = new edu.fudan.stormcv.model.Frame(streamId, frameNr, imageType, bytes, timestamp, new Rectangle(0, 0, bufferedImage.getWidth(), bufferedImage.getHeight()));
                 //newFrame.getMetadata().put("uri", streamLocation);
                 frameQueue.put(newFrame);
@@ -107,7 +109,7 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
                 try {
                     capture.read(mat);
                     if (mat == null || mat.width() != width || mat.height() != height) continue;
-                    imageBytes = this.codec.MatToJPEGBytes(mat);
+                    imageBytes = this.codec.MatToBytes(mat, imageType);
                 } catch (Exception e) {
                     e.printStackTrace();
                     logger.info("Exception during executing matToBufferedImage " + streamLocation);
@@ -119,7 +121,7 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
                 lastRead = System.currentTimeMillis();
                 if (imageBytes == null) continue;
                 if (frameNr % frameSkip < groupSize) try {
-                    edu.fudan.stormcv.model.Frame newFrame = new edu.fudan.stormcv.model.Frame(streamId, frameNr, "mat", imageBytes, lastRead, new Rectangle(0, 0, mat.width(), mat.height()));
+                    Frame newFrame = new Frame(streamId, frameNr, imageType, imageBytes, lastRead, new Rectangle(0, 0, mat.width(), mat.height()));
                     newFrame.getMetadata().put("uri", streamLocation);
                     frameQueue.put(newFrame);
                     if (sleepTime > 0) Utils.sleep(sleepTime);

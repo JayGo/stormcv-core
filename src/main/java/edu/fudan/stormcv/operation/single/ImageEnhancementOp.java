@@ -124,7 +124,7 @@ public class ImageEnhancementOp extends OpenCVOp<CVParticle> implements ISingleI
 
         Mat output = doEnhancement(input);
 
-        frame.swapImageBytes(codecHandler.getEncodedData(output));
+        frame.swapImageBytes(codecHandler.getEncodedData(output, frame.getImageType()));
 
         results.add(frame);
 

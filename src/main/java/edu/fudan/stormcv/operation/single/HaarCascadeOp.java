@@ -169,9 +169,9 @@ public class HaarCascadeOp extends OpenCVOp<CVParticle> implements ISingleInputO
             }
             //logger.info("finish the facedetect of frame{}, time = {}ms", frame.getSequenceNr(), (System.currentTimeMillis() - startTime));
             if (this.useMat) {
-                frame.swapImageBytes(codecHandler.getEncodedData(image));
+                frame.swapImageBytes(codecHandler.getEncodedData(image, frame.getImageType()));
             } else {
-                frame.swapImageBytes(codecHandler.getEncodedData(frameImage));
+                frame.swapImageBytes(codecHandler.getEncodedData(frameImage, frame.getImageType()));
             }
             Feature feature = new Feature(particle.getStreamId(), particle.getSequenceNr(), name, 0, descriptors, null);
             if (outputFrame) {

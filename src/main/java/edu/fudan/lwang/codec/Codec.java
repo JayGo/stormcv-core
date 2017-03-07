@@ -1,6 +1,7 @@
 package edu.fudan.lwang.codec;
 
 import edu.fudan.lwang.codec.Common.CodecType;
+import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.model.Frame;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;

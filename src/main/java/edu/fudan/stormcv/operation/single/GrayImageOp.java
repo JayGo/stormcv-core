@@ -56,7 +56,7 @@ public class GrayImageOp implements ISingleInputOperation<Frame> {
             //logger.info("receive a frame {} : {}x{}, bytesSize: {}", frame.getSequenceNr(), in.width(), in.height(), frame.getImageBytes().length);
             Mat out = new Mat(in.height(), in.width(), CvType.CV_8UC1);
             Imgproc.cvtColor(in, out, Imgproc.COLOR_BGR2GRAY);
-            byte[] encodedData = codecHandler.getEncodedData(out);
+            byte[] encodedData = codecHandler.getEncodedData(out, frame.getImageType());
             if (encodedData == null) {
                 logger.error("encode data is null!!");
             }

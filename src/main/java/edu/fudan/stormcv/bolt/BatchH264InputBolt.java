@@ -270,7 +270,7 @@ public class BatchH264InputBolt extends CVParticleBolt implements RemovalListene
                         }
 
                         @Override
-                        public byte[] getEncodedData(Mat proccessedResult) {
+                        public byte[] getEncodedData(Mat proccessedResult, String imageType) {
                             mResultMatQueue.enqueue(proccessedResult);
                             Frame encodedFrame = null;
                             while ((encodedFrame = mEncodedFrameQueue.dequeue()) == null) {

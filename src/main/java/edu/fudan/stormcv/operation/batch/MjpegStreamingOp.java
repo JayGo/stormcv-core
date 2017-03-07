@@ -6,9 +6,9 @@ import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.jersey.api.core.ApplicationAdapter;
 import com.sun.net.httpserver.HttpServer;
 import edu.fudan.lwang.codec.OperationHandler;
-import edu.fudan.stormcv.codec.JPEGImageCodec;
-import edu.fudan.stormcv.codec.OpenCVJPEGImageCodec;
-import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
+import edu.fudan.stormcv.codec.ImageCodec;
+import edu.fudan.stormcv.codec.OpenCVImageCodec;
+import edu.fudan.stormcv.codec.TurboImageCodec;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
@@ -56,7 +56,7 @@ public class MjpegStreamingOp extends Application implements IBatchOperation<Fra
     protected HttpServer server;
     protected int port = 8558;
     private int frameRate = 24;
-    private JPEGImageCodec codec = null;
+    private ImageCodec codec = null;
     private boolean useMat = false;
 
     public MjpegStreamingOp useMat(boolean useMat) {
@@ -97,7 +97,7 @@ public class MjpegStreamingOp extends Application implements IBatchOperation<Fra
     @Override
     public void prepare(Map stormConf, TopologyContext context) throws Exception {
         images = MjpegStreamingOp.getImages();
-        this.codec = new TurboJPEGImageCodec();
+        this.codec = new TurboImageCodec();
         ApplicationAdapter connector = new ApplicationAdapter(new MjpegStreamingOp().useMat(this.useMat));
         server = HttpServerFactory.create("http://localhost:" + port + "/", connector);
         server.start();
@@ -166,7 +166,7 @@ public class MjpegStreamingOp extends Application implements IBatchOperation<Fra
             if (useMat) {
                 Mat in = (Mat) operationHandler.getDecodedData();
                 if (in != null) {
-                    BufferedImage image = OpenCVJPEGImageCodec.getInstance().matToBufferedImage(in);
+                    BufferedImage image = OpenCVImageCodec.getInstance().MatToBufferedImage(in, frame.getImageType());
                     if (image != null) {
                         images.put(frame.getStreamId(), image);
                     }

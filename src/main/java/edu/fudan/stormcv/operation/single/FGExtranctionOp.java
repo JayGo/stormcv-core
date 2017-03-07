@@ -71,7 +71,7 @@ public class FGExtranctionOp implements ISingleInputOperation<Frame> {
         if (out == null) {
             return result;
         }
-        byte[] encodedBytes = codecHandler.getEncodedData(out);
+        byte[] encodedBytes = codecHandler.getEncodedData(out, frame.getImageType());
         frame.swapImageBytes(encodedBytes);
         result.add(frame);
         return result;
