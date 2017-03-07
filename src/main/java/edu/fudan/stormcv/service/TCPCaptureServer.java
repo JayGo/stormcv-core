@@ -172,8 +172,9 @@ public class TCPCaptureServer {
         	
         	int processType = BOLT_OPERTION_TYPE.getOpTypeByString(fmsg.getEffectType()).getCode();
         	String streamId = fmsg.getStreamId();
-        	String srcPath = fmsg.getAddr();
-        	String dstPath = fmsg.getRtmpAddr();
+        	
+        	String srcPath = !fmsg.getAddr().startsWith("file://") ? "file://"+fmsg.getAddr() : fmsg.getAddr();
+        	String dstPath = !fmsg.getRtmpAddr().startsWith("file://") ? "file://"+fmsg.getRtmpAddr() : fmsg.getRtmpAddr();
         	
         	String zkHost = GlobalConstants.ZKHostLocal;
         	ImageRequest request = new ImageRequest(streamId, srcPath, dstPath, processType);
