@@ -1,5 +1,6 @@
 package edu.fudan.stormcv.model;
 
+import edu.fudan.stormcv.constant.GlobalConstants;
 import org.apache.storm.tuple.Tuple;
 
 import java.awt.*;
@@ -27,10 +28,11 @@ public class Frame extends CVParticle {
 
     public final static String NO_IMAGE = "no";
     public final static String JPG_IMAGE = "jpg";
+    public final static String PNG_IMAGE = "png";
     public final static String X264_IMAGE = "x264"; // add by jiu on 2016/12/12
 
     private long timeStamp;
-    private String imageType = JPG_IMAGE;
+    private String imageType = Frame.JPG_IMAGE;
     private byte[] imageBytes = null;
     private Rectangle boundingBox = null;
     private List<Feature> features = new ArrayList<>();

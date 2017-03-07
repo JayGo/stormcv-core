@@ -17,7 +17,10 @@ public enum BOLT_OPERTION_TYPE {
     RTMPSTREAMER(101, "rtmpStreamer"),
     MJPEGSTREAMER(102, "mjpegStreamer"),
     VIDEOFILEGEN(111, "videoFileGen"),
-	UNSUPPORT(999, "unsupport");
+	UNSUPPORT(999, "unsupport"),
+
+    /*for custom operation*/
+    CUSTOM(1111, "custom");
 
     private String operationName = "";
     private int code;

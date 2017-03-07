@@ -32,7 +32,7 @@ public class GrayScaleTopologyJPEG extends BaseTopology {
     private BOLT_OPERTION_TYPE type;
 
     private boolean view720p = false;
-    private boolean sendRtmp = false;
+    private boolean sendRtmp = true;
 
     public static void main(String[] args) {
         GrayScaleTopologyJPEG topology = new GrayScaleTopologyJPEG(BOLT_OPERTION_TYPE.SCALE);
@@ -46,6 +46,7 @@ public class GrayScaleTopologyJPEG extends BaseTopology {
     public GrayScaleTopologyJPEG(BOLT_OPERTION_TYPE type) {
         conf.setNumWorkers(2);
         conf.put(StormCVConfig.STORMCV_FRAME_ENCODING, Frame.JPG_IMAGE);
+
         urls = new ArrayList<String>();
         this.type = type;
         if (view720p) {

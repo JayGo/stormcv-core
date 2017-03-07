@@ -6,8 +6,8 @@ import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.mediatool.event.IVideoPictureEvent;
 import com.xuggle.xuggler.*;
 import com.xuggle.xuggler.demos.VideoImage;
-import edu.fudan.stormcv.codec.JPEGImageCodec;
-import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
+import edu.fudan.stormcv.codec.ImageCodec;
+import edu.fudan.stormcv.codec.TurboImageCodec;
 import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.model.Frame;
 import org.apache.storm.utils.Utils;
@@ -58,7 +58,7 @@ public class XuggleRTSPReaderTest {
         private boolean running = false;
         private String streamLocation;
         private int streamIndex;
-        private JPEGImageCodec codec;
+        private ImageCodec codec;
         private LinkedBlockingQueue<Frame> frameQueue; // queue used to store frames
         private boolean showVideo;
         private VideoImage videoImage;
@@ -72,7 +72,7 @@ public class XuggleRTSPReaderTest {
             this.running = true;
             this.streamIndex = -1;
             this.frameNr = 0;
-            this.codec = new TurboJPEGImageCodec();
+            this.codec = new TurboImageCodec();
         }
 
         public XuggleRTSPReader(String streamId, String streamLocation, int frameSkip, boolean showVideo) {
@@ -83,7 +83,7 @@ public class XuggleRTSPReaderTest {
             this.running = true;
             this.streamIndex = -1;
             this.frameNr = 0;
-            this.codec = new TurboJPEGImageCodec();
+            this.codec = new TurboImageCodec();
             this.videoImage = new VideoImage();
         }
 
@@ -195,12 +195,12 @@ public class XuggleRTSPReaderTest {
         }
 
         private void processFrame(BufferedImage image) {
-            String imageType = "jpg";
+            String imageType = Frame.JPG_IMAGE;
             if (frameNr == 0 || frameSkip == 0 || (frameSkip != 0 && frameNr % frameSkip != 0)) {
                 if (showVideo || frameQueue == null) {
                     videoImage.setImage(image);
                 } else {
-                    byte[] buffer = this.codec.BufferedImageToJPEGBytes(image);
+                    byte[] buffer = this.codec.BufferedImageToBytes(image, imageType);
                     long timestamp = System.currentTimeMillis();
                     Frame newFrame = new Frame(streamId, frameNr, imageType, buffer, timestamp, new Rectangle(0, 0, image.getWidth(), image.getHeight()));
                     try {

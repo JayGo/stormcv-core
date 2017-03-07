@@ -163,7 +163,7 @@ public class ColorHistogramOp extends OpenCVOp<CVParticle> implements
                 }
                 hist_descriptors.add(new Descriptor(streamId, sequenceNr, box, 0, values));
             }
-            frame.swapImageBytes(codecHandler.getEncodedData(matImage));
+            frame.swapImageBytes(codecHandler.getEncodedData(matImage, frame.getImageType()));
         } else {
             BufferedImage bufferedImage = (BufferedImage) codecHandler.getDecodedData();
 
@@ -216,7 +216,7 @@ public class ColorHistogramOp extends OpenCVOp<CVParticle> implements
                 }
                 hist_descriptors.add(new Descriptor(streamId, sequenceNr, box, 0, values));
             }
-            frame.swapImageBytes(codecHandler.getEncodedData(bufferedImage));
+            frame.swapImageBytes(codecHandler.getEncodedData(bufferedImage, frame.getImageType()));
         }
 
         Feature feature = new Feature(particle.getStreamId(),

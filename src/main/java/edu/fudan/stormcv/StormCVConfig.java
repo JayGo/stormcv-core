@@ -1,5 +1,6 @@
 package edu.fudan.stormcv;
 
+import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.model.*;
 import edu.fudan.stormcv.model.serializer.*;
 import edu.fudan.stormcv.util.connector.*;
