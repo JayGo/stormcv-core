@@ -140,7 +140,7 @@ public class SingleH264InputBolt extends CVParticleBolt {
         try {
             LibLoader.loadOpenCVLib();
             LibLoader.loadH264CodecLib();
-            LibLoader.loadHgCodecLib();
+            // LibLoader.loadHgCodecLib();
             operation.prepare(stormConf, context);
             init();
         } catch (Exception e) {

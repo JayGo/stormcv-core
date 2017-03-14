@@ -11,7 +11,8 @@ public class Main {
 
     public static void main(String args[]) {
         LibLoader.loadOpenCVLib();
-        LibLoader.loadHgCodecLib();
+//        LibLoader.loadHgCodecLib();
+        LibLoader.loadH264CodecLib();
 
         TCPCaptureServer mTCPCaptureServer = TCPCaptureServer.getInstance();
         mTCPCaptureServer.startListeningMsg();
