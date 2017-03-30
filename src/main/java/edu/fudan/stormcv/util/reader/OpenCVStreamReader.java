@@ -5,6 +5,8 @@ import edu.fudan.stormcv.capture.BufferedImagePackQueue;
 import edu.fudan.stormcv.capture.ThreadManager;
 import edu.fudan.stormcv.codec.JPEGImageCodec;
 import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
+import edu.fudan.stormcv.util.TimeElasper;
+
 import org.apache.storm.utils.Utils;
 import org.opencv.core.CvException;
 import org.opencv.core.Mat;
@@ -37,6 +39,8 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
     private long lastRead = -1; // used to determine if the EOF was reached if Xuggler does not detect it
     private int sleepTime;
     private JPEGImageCodec codec;
+    private TimeElasper timeElasper = new TimeElasper();
+    private int frameNrEncoded = 0;
 
     private String streamLocation;
     private String imageType = edu.fudan.stormcv.model.Frame.JPG_IMAGE;
@@ -93,7 +97,7 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
         VideoCapture capture = new VideoCapture();
         Mat mat = new Mat();
         frameNr = 0;
-        long start = 0, end;
+        long start = 0, end = 0;
 
         capture.open(this.streamLocation);
         int width = (int) capture.get(Highgui.CV_CAP_PROP_FRAME_WIDTH);
@@ -107,7 +111,25 @@ public class OpenCVStreamReader extends MediaListenerAdapter implements Runnable
                 try {
                     capture.read(mat);
                     if (mat == null || mat.width() != width || mat.height() != height) continue;
+                    
+//                    if(frameNrEncoded == 500) {
+//                    	Highgui.imwrite("/home/jliu/Pictures/jpegcpu/"+frameNrEncoded+".jpg", mat);
+//                    }
+                    
+                    ////////////////// Turbo JPEG encoding ///////////////////
+                    long startEncoding = System.currentTimeMillis();
                     imageBytes = this.codec.MatToJPEGBytes(mat);
+                    if(imageBytes == null) continue;
+                    long endEncoding = System.currentTimeMillis();
+                    
+                    timeElasper.push((int)(endEncoding-startEncoding));
+            		if(frameNrEncoded == 100 || frameNrEncoded == 500 || frameNrEncoded == 900
+            				|| frameNrEncoded == 1300 || frameNrEncoded == 1700 || frameNrEncoded == 2100 || frameNrEncoded == 2500) {
+            			logger.info("JPEG Encoder on "+this.getClass().getSimpleName()+": Top "+frameNrEncoded+"'s time average cost: "+timeElasper.getKAve(frameNrEncoded));
+            		}
+            		frameNrEncoded++;
+                    
+                    ///////////////// end Turbo JPEG encoding ////////////////
                 } catch (Exception e) {
                     e.printStackTrace();
                     logger.info("Exception during executing matToBufferedImage " + streamLocation);

@@ -11,6 +11,8 @@ import edu.fudan.stormcv.model.serializer.GroupOfFramesSerializer;
 import edu.fudan.stormcv.operation.single.GroupOfFramesOp;
 import edu.fudan.stormcv.util.reader.OpenCVStreamReader;
 import org.apache.storm.task.TopologyContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,6 +52,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class OpenCVStreamFrameFetcher implements IFetcher<CVParticle> {
 
     private static final long serialVersionUID = 7135270229614102711L;
+    
+    private Logger logger = LoggerFactory.getLogger(OpenCVStreamFrameFetcher.class);
     protected List<String> locations;
     protected int frameSkip = 1;
     private int groupSize = 1;
@@ -165,8 +169,10 @@ public class OpenCVStreamFrameFetcher implements IFetcher<CVParticle> {
         if (streamReaders == null)
             this.activate();
         Frame frame = frameQueue.poll();
+ 
         if (frame != null) {
             if (batchSize <= 1) {
+
                 return frame;
             } else {
                 if (frameGroup == null || frameGroup.size() >= batchSize)

@@ -6,7 +6,9 @@ import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.model.serializer.FrameSerializer;
 import edu.fudan.stormcv.util.LibLoader;
 import edu.fudan.stormcv.util.StreamerHelper;
+import edu.fudan.stormcv.util.TimeElasper;
 import edu.fudan.stormcv.model.Frame;
+
 import org.apache.storm.task.TopologyContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +32,7 @@ public class H264RtmpStreamOp implements ISingleInputOperation<Frame> {
     private double frameRate = 25.0;
     private StreamerHelper sh;
     private int frameNr = 0;
+    private TimeElasper timeElasper = new TimeElasper();
 
     private static final String H264Dir = "/root/H264Data/";
 
@@ -136,7 +139,10 @@ public class H264RtmpStreamOp implements ISingleInputOperation<Frame> {
 		//logger.info("Receive frame: " + frame);
 
         // printData(frame);
-
+        
+        long start = System.currentTimeMillis();
+        
+        
         byte[] frameBytes = frame.getImageBytes();
         if (frameBytes.length > 0) {
             if (frameBytes[4] == 103) {
@@ -144,10 +150,19 @@ public class H264RtmpStreamOp implements ISingleInputOperation<Frame> {
             } else {
                 sh.sendNormalFrame(frameBytes);
             }
+            long end = System.currentTimeMillis();
+            timeElasper.push((int)(end-start));
+            
+    		if(frameNr == 100 || frameNr == 500 || frameNr == 900
+    				|| frameNr == 1300 || frameNr == 1700 || frameNr == 2100 || frameNr == 2500) {
+    			logger.info("Operation on: "+getContext()+" Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(frameNr));
+    		}
+    		frameNr++;
 //			logger.info("Emmit frame to rtmp: "+frame);
         } else {
-            logger.info("Frame is empty, ignore: " + frame);
+           // logger.info("Frame is empty, ignore: " + frame);
         }
+        
 
         List<Frame> results = new ArrayList<>();
         results.add(frame);

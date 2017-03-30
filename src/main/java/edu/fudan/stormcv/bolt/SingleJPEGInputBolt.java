@@ -1,5 +1,6 @@
 package edu.fudan.stormcv.bolt;
 
+import edu.fudan.lwang.codec.OperationHandler;
 import edu.fudan.stormcv.constant.BOLT_HANDLE_TYPE;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.operation.single.ISingleInputOperation;
@@ -28,6 +29,7 @@ public class SingleJPEGInputBolt extends CVParticleBolt {
     private int taskIndex;
     private String workerSlot;
 
+
     /**
      * Constructs a SingleInputOperation
      *
@@ -39,6 +41,7 @@ public class SingleJPEGInputBolt extends CVParticleBolt {
         this.startTime = 0;
         this.endTime = 0;
         this.count = 0;
+
     }
 
     @Override

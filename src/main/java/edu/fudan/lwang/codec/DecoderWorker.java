@@ -78,19 +78,39 @@ public class DecoderWorker extends Thread {
                         .decodeFrame(decoderId, encodedData, results, yuvMat.nativeObj);
                 long end = System.currentTimeMillis();
                 timeElasper.push((int) (end - start));
+                
+        		if(frameNr == 100 || frameNr == 500 || frameNr == 900
+        				|| frameNr == 1300 || frameNr == 1700 || frameNr == 2100 || frameNr == 2500) {
+        			logger.info("Decoder on "+decoderId+": Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(frameNr));
+        		}
 
-//                if (frameNr == 100) {
-//                    logger.info("Top {}'s time average cost: {}ms", frameNr, timeElasper.getKAve(100));
-//                }
+//        		if(frameNr == 100) {
+//        			logger.info("Decoder on "+decoderId+"Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(100));
+//        		}
+//        		
+//        		if(frameNr == 500) {
+//        			logger.info("Decoder on "+decoderId+"Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(500));
+//        		}
+//        		
+//        		if(frameNr == 900) {
+//        			logger.info("Decoder on "+decoderId+"Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(900));
+//        		}
+//        		
+//        		if(frameNr == 1300) {
+//        			logger.info("Decoder on "+decoderId+"Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(1300));
+//        		}
+//        		
+//        		if(frameNr == 1700) {
+//        			logger.info("Decoder on "+decoderId+"Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(1700));
+//        		}
+//        		
+//        		if(frameNr == 2000) {
+//        			logger.info("Decoder on "+decoderId+"Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(2000));
+//        		}
 //
-//                if (frameNr == 2000) {
-//                    logger.info("Top {}'s time average cost: {}ms", frameNr, timeElasper.getKAve(2000));
-//                }
-                
-                if(frameNr%100==0) {
-                	logger.info("Top {}'s time average cost: {}ms", frameNr, timeElasper.getKAve(frameNr));
-                }
-                
+//        		if(frameNr == 2500) {
+//        			logger.info("Decoder on "+decoderId+"Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(2000));
+//        		}
                 // logger.info("decode results: "+results[0]+", "+results[1]);
                 if (results[0] != 0) {
                     frameNr++;

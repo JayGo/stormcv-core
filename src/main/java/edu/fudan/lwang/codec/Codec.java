@@ -311,16 +311,10 @@ public class Codec {
                         if (frameNumDecoded > 0) {
                             // logger1.info("===================== get decoded data =================");
                             Mat rgbFrame = new Mat();
-                            // System.out.println("decoded yuv : channel: "+frame.channels()+"height: "+frame.height()+"width: "+frame.width()+"depth: "+frame.depth());
-                            //Highgui.imwrite("/home/jkyan/Pictures/"+frNum+".jpg", frame);
                             Imgproc.cvtColor(frame, rgbFrame, Imgproc.COLOR_YUV2BGR_I420);
-                            //Highgui.imwrite("/home/jkyan/Pictures/rgb_"+frNum+".jpg", rgbFrame);
-                            // System.out.println("decoded rgb : channel: "+rgbFrame.channels()+"height: "+rgbFrame.height()+"width: "+rgbFrame.width()+"depth: "+rgbFrame.depth());
-//                            System.out.println("rgbFrame is null ? " + ((rgbFrame == null) ? "yes" : "no"));
-                            // logger1.info("==================== cvt done ===================");
-                            // Highgui.imwrite("/root/Pictures/" + frNum++ + ".jpg", rgbFrame);
-                            // Highgui.imwrite("/home/jliu/Pictures/"+frNum++
-                            // +".jpg", rgbFrame);
+                            
+//                            Highgui.imwrite("/home/jliu/Pictures/codec/"+frNum++ +"_codec.jpg", rgbFrame);
+                            
                             mMatQueueManager.putElement(decoderQueueId, rgbFrame);
                             // logger1.info("========================== decode done ================================");
                         }

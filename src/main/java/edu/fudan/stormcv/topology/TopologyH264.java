@@ -41,17 +41,17 @@ public class TopologyH264 extends BaseTopology {
     private boolean isEffect = false;
     private String effect;
     
-//    public static void main(String args[]) {
-//        LibLoader.loadOpenCVLib();
-//        LibLoader.loadRtmpStreamerLib();
-//    	TopologyH264 mTopologyH264 = new TopologyH264("test1", GlobalConstants.DefaultRTMPServer, GlobalConstants.PseudoFaceRtspAddress, "colorHistogram");
-//    	try {
-//			mTopologyH264.submitTopology();
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//    }
+    public static void main(String args[]) {
+        LibLoader.loadOpenCVLib();
+        LibLoader.loadRtmpStreamerLib();
+    	TopologyH264 mTopologyH264 = new TopologyH264("test1", GlobalConstants.DefaultRTMPServer, GlobalConstants.Video720p, "gray");
+    	try {
+			mTopologyH264.submitTopology();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
 
     public TopologyH264(String streamId, String rtmpAddr, String videoAddr) {
         this.streamId = streamId;

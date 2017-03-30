@@ -1,11 +1,16 @@
 package edu.fudan.stormcv.util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class TimeElasper {
-    List<Integer> times;
+public class TimeElasper implements Serializable {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6149534041006930094L;
+	List<Integer> times;
 
     public TimeElasper() {
         times = new ArrayList<Integer>();

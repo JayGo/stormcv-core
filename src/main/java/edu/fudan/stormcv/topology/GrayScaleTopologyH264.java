@@ -51,13 +51,13 @@ public class GrayScaleTopologyH264 extends BaseTopology {
 
         if (view720p) {
             if (this.type == BOLT_OPERTION_TYPE.FACEDETECT) {
-                videoAddr = GlobalConstants.Pseudo720pFaceRtspAddress;
+//                videoAddr = GlobalConstants.Pseudo720pFaceRtspAddress;
             } else {
                 videoAddr = GlobalConstants.Pseudo720pRtspAddress;
             }
         } else {
             if (this.type == BOLT_OPERTION_TYPE.FACEDETECT) {
-                videoAddr = GlobalConstants.PseudoFaceRtspAddress;
+//                videoAddr = GlobalConstants.PseudoFaceRtspAddress;
             } else {
                 videoAddr = GlobalConstants.PseudoRtspAddress;
             }
