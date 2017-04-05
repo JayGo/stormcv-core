@@ -50,7 +50,10 @@ public class EffectMessage extends BaseMessage {
         // TODO Auto-generated method stub
         StringBuilder sBuilder = new StringBuilder(super.toString());
         sBuilder.append(" effctType: " + effectType);
-        sBuilder.append(" parameters' size: " + parameters.size());
+        if(parameters!=null) {
+        	sBuilder.append(" parameters' size: " + parameters.size());
+        }
+        
         return sBuilder.toString();
     }
 }

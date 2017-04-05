@@ -1,0 +1,1 @@
+storm jar ./target/stormcv-0.8-jar-with-dependencies.jar edu.fudan.stormcv.topology.ImageFetchTopologyJPEG

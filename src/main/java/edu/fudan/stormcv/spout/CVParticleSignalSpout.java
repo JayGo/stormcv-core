@@ -106,7 +106,7 @@ public class CVParticleSignalSpout extends BaseSignalSpout {
 
         LibLoader.loadOpenCVLib();
 
-//       logger.info("[jkyan]zkHosts:{}", zkHosts(conf));
+       logger.info("[jkyan]zkHosts:{}", zkHosts(conf));
     }
 
     private static String zkHosts(Map conf) {
