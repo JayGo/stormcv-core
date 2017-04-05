@@ -1,8 +1,8 @@
 package edu.fudan.stormcv.operation.single;
 
 import edu.fudan.lwang.codec.OperationHandler;
-import edu.fudan.stormcv.codec.JPEGImageCodec;
-import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
+import edu.fudan.stormcv.codec.ImageCodec;
+import edu.fudan.stormcv.codec.TurboImageCodec;
 import edu.fudan.stormcv.constant.BOLT_HANDLE_TYPE;
 import edu.fudan.stormcv.constant.BOLT_OPERTION_TYPE;
 import edu.fudan.stormcv.constant.GlobalConstants;
@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,10 +35,10 @@ import java.util.Map;
 public class ImageFetchAndOperation implements  ISingleInputOperation<CVParticle> {
 
     private static final Logger logger = LoggerFactory.getLogger(ImageFetchAndOperation.class);
-    private ISingleInputOperation operation;
+    private ISingleInputOperation operation = null;
     private ConnectorHolder connectorHolder;
     private FileConnector fileConnector = null;
-    private JPEGImageCodec codec;
+    private ImageCodec codec;
     private BOLT_HANDLE_TYPE type;
     private  CVParticleSerializer serializer = new FrameSerializer();
     private Map<String, String> streamToOutputLocation = null;
@@ -60,7 +59,7 @@ public class ImageFetchAndOperation implements  ISingleInputOperation<CVParticle
     @Override
     public void prepare(Map stormConf, TopologyContext context) throws Exception {
         connectorHolder = new ConnectorHolder(stormConf);
-        this.codec = new TurboJPEGImageCodec();
+        this.codec = new TurboImageCodec();
 //        operation.prepare(stormConf, context);
         if (drawFrame) {
             drawFeaturesOp = new DrawFeaturesOp();
@@ -68,6 +67,9 @@ public class ImageFetchAndOperation implements  ISingleInputOperation<CVParticle
         }
         opertionFactory = new OpertionFactory();
         opertionFactory.prepare(stormConf, context);
+        if (operation != null) {
+            operation.prepare(stormConf, context);
+        }
     }
 
     @Override
@@ -86,8 +88,12 @@ public class ImageFetchAndOperation implements  ISingleInputOperation<CVParticle
         if (count > 0) {
             List<String> locations = imageHandle.getLocations();
             BOLT_OPERTION_TYPE opType = imageHandle.getType();
-            operation = opertionFactory.getOperation(opType);
-            type = opertionFactory.getOperationHandleType(opType);
+            if (opType != BOLT_OPERTION_TYPE.CUSTOM) {
+                operation = opertionFactory.getOperation(opType);
+                type = opertionFactory.getOperationHandleType(opType);
+            } else if (this.operation == null) {
+                logger.error("You didn't assign a specific opertion for image processing");
+            }
 
             for (int i = 0; i < count; i++) {
                 String location = locations.get(i);
@@ -95,10 +101,11 @@ public class ImageFetchAndOperation implements  ISingleInputOperation<CVParticle
                 fileConnector = connectorHolder.getConnector(location);
                 fileConnector.moveTo(location);
                 BufferedImage image = ImageIO.read(fileConnector.getAsFile());
+                String imageType = location.substring(location.lastIndexOf(".")+1);
 
-                byte[] imageBytes = this.codec.BufferedImageToJPEGBytes(image);
+                byte[] imageBytes = this.codec.BufferedImageToBytes(image, imageType);
                 Frame frame = new Frame(imageHandle.getStreamId(), imageHandle.getSequenceNr(),
-                        Frame.JPG_IMAGE, imageBytes, 0,
+                        imageType, imageBytes, 0,
                         new Rectangle(0, 0, image.getWidth(), image.getHeight()));
 
                 if (operation != null) {

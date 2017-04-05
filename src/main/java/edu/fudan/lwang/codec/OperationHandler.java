@@ -7,5 +7,5 @@ public interface OperationHandler<E> {
 
     public E getDecodedData();
 
-    public byte[] getEncodedData(E processedResult);
+    public byte[] getEncodedData(E processedResult, String imageType);
 }

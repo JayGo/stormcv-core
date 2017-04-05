@@ -1,10 +1,11 @@
 package edu.fudan.stormcv.fetcher;
 
+import edu.fudan.stormcv.codec.ImageCodec;
+import edu.fudan.stormcv.codec.TurboImageCodec;
+import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.model.serializer.FrameSerializer;
 import edu.fudan.stormcv.util.connector.ConnectorHolder;
 import edu.fudan.stormcv.StormCVConfig;
-import edu.fudan.stormcv.codec.JPEGImageCodec;
-import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
 import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.util.connector.FileConnector;
@@ -41,7 +42,7 @@ public class ImageFetcher implements IFetcher<Frame> {
     private int sleepTime = 0;
     private ConnectorHolder connectorHolder;
     private String imageType = Frame.JPG_IMAGE;
-    private JPEGImageCodec codec;
+    private ImageCodec codec;
 
     /**
      * Sets the locations this fetcher will read images from. The list is split
@@ -69,7 +70,7 @@ public class ImageFetcher implements IFetcher<Frame> {
     @Override
     public void prepare(Map stormConf, TopologyContext context)
             throws Exception {
-        this.codec = new TurboJPEGImageCodec();
+        this.codec = new TurboImageCodec();
 
         this.connectorHolder = new ConnectorHolder(stormConf);
         if (stormConf.containsKey(StormCVConfig.STORMCV_FRAME_ENCODING)) {
@@ -121,8 +122,7 @@ public class ImageFetcher implements IFetcher<Frame> {
             if (imgFile.startsWith("http://")) {
                 try {
                     BufferedImage image = ImageIO.read(new URL(imgFile));
-                    byte[] buffer = this.codec.BufferedImageToJPEGBytes(image);
-                    //byte[] buffer = ImageUtils.imageToBytes(image, imageType);
+                    byte[] buffer = this.codec.BufferedImageToBytes(image, imageType);
                     frame = new Frame(imgFile.substring(imgFile
                             .lastIndexOf('/')) + "_" + imgFile.hashCode(), 0,
                             imageType, buffer, 0, new Rectangle(0, 0,
@@ -142,7 +142,7 @@ public class ImageFetcher implements IFetcher<Frame> {
                             BufferedImage image = ImageIO.read(file);
 //							byte[] buffer = ImageUtils.imageToBytes(image,
 //									imageType);
-                            byte[] buffer = this.codec.BufferedImageToJPEGBytes(image);
+                            byte[] buffer = this.codec.BufferedImageToBytes(image, imageType);
                             frame = new Frame(file.getName() + "_"
                                     + file.hashCode(), 0, imageType, buffer, 0,
                                     new Rectangle(0, 0, image.getWidth(),

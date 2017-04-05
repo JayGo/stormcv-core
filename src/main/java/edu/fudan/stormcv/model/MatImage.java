@@ -1,6 +1,6 @@
 package edu.fudan.stormcv.model;
 
-import edu.fudan.stormcv.codec.OpenCVJPEGImageCodec;
+import edu.fudan.stormcv.codec.OpenCVImageCodec;
 import org.opencv.core.Mat;
 
 import java.awt.*;
@@ -75,7 +75,7 @@ public class MatImage {
 
     public byte[] getMatbytes() {
         if (matbytes == null && mat != null) {
-            matbytes = OpenCVJPEGImageCodec.getInstance().MatToRawBytes(mat);
+            matbytes = OpenCVImageCodec.getInstance().MatToRawBytes(mat);
         }
         return matbytes;
     }
@@ -94,7 +94,7 @@ public class MatImage {
 
     public Mat getMat() {
         if (mat == null && matbytes != null) {
-            mat = OpenCVJPEGImageCodec.getInstance().RawBytesToMat(matbytes, width, height, type);
+            mat = OpenCVImageCodec.getInstance().RawBytesToMat(matbytes, width, height, type);
         }
 
         return mat;

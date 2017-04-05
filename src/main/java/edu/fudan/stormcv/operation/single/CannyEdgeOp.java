@@ -67,7 +67,7 @@ public class CannyEdgeOp extends OpenCVOp<CVParticle> implements
         Mat output3Bytes = new Mat();
         Imgproc.cvtColor(output, output3Bytes, Imgproc.COLOR_GRAY2BGR);
 
-        byte[] encodedData = codecHandler.getEncodedData(output3Bytes);
+        byte[] encodedData = codecHandler.getEncodedData(output3Bytes, frame.getImageType());
         frame.swapImageBytes(encodedData);
         results.add(frame);
 

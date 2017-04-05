@@ -58,7 +58,7 @@ public class InpaintOp implements ISingleInputOperation<Frame> {
         logger.info("end:" + endMili);
         logger.info("total:" + (endMili - startMili) + "s");
 
-        frame.swapImageBytes(codecHandler.getEncodedData(buffer));
+        frame.swapImageBytes(codecHandler.getEncodedData(buffer, frame.getImageType()));
         result.add(frame);
         return result;
     }

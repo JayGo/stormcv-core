@@ -111,9 +111,9 @@ public class DrawFeaturesOp implements ISingleInputOperation<Frame> {
                     }
                 }
             }
-            frame.swapImageBytes(codecHandler.getEncodedData(matImage));
+            frame.swapImageBytes(codecHandler.getEncodedData(matImage, frame.getImageType()));
             if (writeLocation != null) {
-                writePicture("jpg", matImage, frame);
+                writePicture(frame.getImageType(), matImage, frame);
             }
         } else {
             BufferedImage image = (BufferedImage) codecHandler.getDecodedData();
@@ -145,9 +145,9 @@ public class DrawFeaturesOp implements ISingleInputOperation<Frame> {
                 graphics.drawString(key + " = " + frame.getMetadata().get(key), 5, y);
                 y += 12;
             }
-            frame.swapImageBytes(codecHandler.getEncodedData(image));
+            frame.swapImageBytes(codecHandler.getEncodedData(image, frame.getImageType()));
             if (writeLocation != null) {
-                writePicture("jpg", image, frame);
+                writePicture(frame.getImageType(), image, frame);
             }
         }
 

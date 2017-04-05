@@ -2,11 +2,13 @@ package edu.fudan.stormcv.topology;
 
 import edu.fudan.lwang.codec.Common.CodecType;
 import edu.fudan.lwang.codec.SourceInfo;
+import edu.fudan.stormcv.StormCVConfig;
 import edu.fudan.stormcv.batcher.SlidingWindowBatcher;
 import edu.fudan.stormcv.bolt.BatchH264InputBolt;
 import edu.fudan.stormcv.bolt.SingleH264InputBolt;
 import edu.fudan.stormcv.constant.BOLT_OPERTION_TYPE;
 import edu.fudan.stormcv.constant.GlobalConstants;
+import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.operation.batch.MjpegStreamingOp;
 import edu.fudan.stormcv.operation.single.ColorHistogramOp;
@@ -53,6 +55,7 @@ public class GrayScaleTopologyH264WithOpts extends BaseTopology {
 
     public GrayScaleTopologyH264WithOpts(BOLT_OPERTION_TYPE type) {
         conf.setNumWorkers(workerNum);
+        conf.put(StormCVConfig.STORMCV_FRAME_ENCODING, Frame.X264_IMAGE);
         this.type = type;
         isTopologyRunningAtLocal = true;
 

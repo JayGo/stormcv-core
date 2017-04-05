@@ -2,12 +2,12 @@ package edu.fudan.stormcv.operation.batch;
 
 import edu.fudan.lwang.codec.OperationHandler;
 import edu.fudan.stormcv.StormCVConfig;
-import edu.fudan.stormcv.codec.JPEGImageCodec;
+import edu.fudan.stormcv.codec.ImageCodec;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.model.Feature;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.model.serializer.FeatureSerializer;
-import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
+import edu.fudan.stormcv.codec.TurboImageCodec;
 import edu.fudan.stormcv.model.Descriptor;
 import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.model.serializer.FrameSerializer;
@@ -40,7 +40,7 @@ public class TilesRecombinerOp implements IBatchOperation<CVParticle> {
     @SuppressWarnings("rawtypes")
     private CVParticleSerializer serializer = new FeatureSerializer();
     private String imageType;
-    private JPEGImageCodec codec = new TurboJPEGImageCodec();
+    private ImageCodec codec = new TurboImageCodec();
 
     /**
      * Sets the output of this Operation to be a {@link Frame} which contains all the features. If set to false
@@ -101,7 +101,7 @@ public class TilesRecombinerOp implements IBatchOperation<CVParticle> {
                     merge(feature, featureNameMap, box, totalFrame);
                 }
                 if (outputFrame) {
-                    newImage.getGraphics().drawImage(codec.JPEGBytesToBufferedImage(frame.getImageBytes()), box.x, box.y, null);
+                    newImage.getGraphics().drawImage(codec.BytesToBufferedImage(frame.getImageBytes(), frame.getImageType()), box.x, box.y, null);
                 }
             } else {
                 logger.warn("Can only operate on Frame but got " + particle.getClass().getName() + " else so input is dropped.");
@@ -109,7 +109,7 @@ public class TilesRecombinerOp implements IBatchOperation<CVParticle> {
         }
 
         List<CVParticle> result = new ArrayList<CVParticle>();
-        byte[] bytes = codec.BufferedImageToJPEGBytes(newImage);
+        byte[] bytes = codec.BufferedImageToBytes(newImage, imageType);
         if (outputFrame) {
             Frame newFrame = new Frame(input.get(0).getStreamId(), input.get(0).getSequenceNr(),
                     imageType, bytes, ((Frame) input.get(0)).getTimestamp(), totalFrame);

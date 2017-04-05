@@ -1,9 +1,9 @@
 package edu.fudan.stormcv.util;
 
 import edu.fudan.lwang.codec.OperationHandler;
-import edu.fudan.stormcv.codec.JPEGImageCodec;
+import edu.fudan.stormcv.codec.ImageCodec;
 import edu.fudan.stormcv.constant.BOLT_HANDLE_TYPE;
-import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
+import edu.fudan.stormcv.codec.TurboImageCodec;
 import edu.fudan.stormcv.model.Frame;
 import org.opencv.core.Mat;
 
@@ -22,11 +22,11 @@ public class OpertionHandlerFactory {
                 return new OperationHandler<BufferedImage>() {
                     private BufferedImage decodedData = null;
 
-                    private JPEGImageCodec codec = new TurboJPEGImageCodec();
+                    private ImageCodec codec = new TurboImageCodec();
 
                     @Override
                     public boolean fillSourceBufferQueue(Frame frame) {
-                        this.decodedData = codec.JPEGBytesToBufferedImage(frame.getImageBytes());
+                        this.decodedData = codec.BytesToBufferedImage(frame.getImageBytes(), frame.getImageType());
                         return true;
                     }
 
@@ -36,8 +36,8 @@ public class OpertionHandlerFactory {
                     }
 
                     @Override
-                    public byte[] getEncodedData(BufferedImage processedResult) {
-                        return codec.BufferedImageToJPEGBytes(processedResult);
+                    public byte[] getEncodedData(BufferedImage processedResult, String imageType) {
+                        return codec.BufferedImageToBytes(processedResult, imageType);
                     }
                 };
             }
@@ -45,11 +45,11 @@ public class OpertionHandlerFactory {
                 return new OperationHandler<Mat>() {
                     private Mat decodedData = null;
 
-                    private JPEGImageCodec codec = new TurboJPEGImageCodec();
+                    private ImageCodec codec = new TurboImageCodec();
 
                     @Override
                     public boolean fillSourceBufferQueue(Frame frame) {
-                        this.decodedData = codec.JPEGBytesToMat(frame.getImageBytes());
+                        this.decodedData = codec.BytesToMat(frame.getImageBytes(), frame.getImageType());
                         return true;
                     }
 
@@ -59,8 +59,8 @@ public class OpertionHandlerFactory {
                     }
 
                     @Override
-                    public byte[] getEncodedData(Mat processedResult) {
-                        return codec.MatToJPEGBytes(processedResult);
+                    public byte[] getEncodedData(Mat processedResult,  String imageType) {
+                        return codec.MatToBytes(processedResult, imageType);
                     }
                 };
             }

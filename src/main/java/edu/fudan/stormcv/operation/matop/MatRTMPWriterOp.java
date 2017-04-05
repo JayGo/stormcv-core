@@ -5,12 +5,14 @@ import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.ConverterFactory.Type;
 import com.xuggle.xuggler.video.IConverter;
 import edu.fudan.lwang.converter.GrayConverter;
-import edu.fudan.stormcv.codec.JPEGImageCodec;
+import edu.fudan.stormcv.codec.ImageCodec;
+import edu.fudan.stormcv.codec.OpenCVImageCodec;
+import edu.fudan.stormcv.codec.TurboImageCodec;
 import edu.fudan.stormcv.constant.GlobalConstants;
+import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.model.MatImage;
 import edu.fudan.stormcv.model.serializer.MatImageSerializer;
 import edu.fudan.stormcv.operation.single.IMatOperation;
-import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
 import org.apache.storm.task.TopologyContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +33,7 @@ public class MatRTMPWriterOp implements IMatOperation<MatImage> {
     private IContainer container = null;
     private Boolean isCoderInit = false;
     private double frameRate = 0.0;
-    private JPEGImageCodec codec;
+    private ImageCodec codec;
 
     private IContainerFormat containerFormat;
 
@@ -62,7 +64,7 @@ public class MatRTMPWriterOp implements IMatOperation<MatImage> {
             throws Exception {
         // TODO Auto-generated method stub
         initCoder();
-        this.codec = new TurboJPEGImageCodec();
+        this.codec = new TurboImageCodec();
     }
 
     @Override
@@ -88,7 +90,7 @@ public class MatRTMPWriterOp implements IMatOperation<MatImage> {
             return result;
         }
 
-        BufferedImage bfImage = this.codec.JPEGBytesToBufferedImage(this.codec.MatToJPEGBytes(image.getMat()));
+        BufferedImage bfImage = OpenCVImageCodec.getInstance().MatToBufferedImage(image.getMat(), Frame.JPG_IMAGE);
         //BufferedImage bfImage = ImageUtils.matToBufferedImage(image.getMat());
 
 //		if (frame.getSequenceNr() < 400) {
