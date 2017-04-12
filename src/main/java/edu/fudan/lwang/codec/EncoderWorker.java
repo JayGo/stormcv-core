@@ -1,12 +1,19 @@
 package edu.fudan.lwang.codec;
 
+import edu.fudan.lwang.codec.Common;
 import edu.fudan.lwang.codec.Common.CodecType;
 import edu.fudan.stormcv.util.TimeElasper;
+
+import org.apache.storm.shade.org.apache.zookeeper.KeeperException.Code;
+import org.apache.storm.thrift.server.THsHaServer;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfInt;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.amazonaws.services.opsworks.model.Source;
 
 public class EncoderWorker extends Thread {
 
@@ -19,6 +26,8 @@ public class EncoderWorker extends Thread {
     private int frameWidth;
     private int frameHeight;
     private Mat frame;
+    
+    private SourceInfo mSourceInfo;
     
     private int frameNrRead = 0;
 
@@ -56,6 +65,25 @@ public class EncoderWorker extends Thread {
         this.frameHeight = frameHeight;
         this.mEncoderCallBack = encoderCallBack;
         return this;
+    }
+    
+    public EncoderWorker(SourceInfo sourceInfo, EncoderCallback encoderCallBack) {
+    	this.mSourceInfo = sourceInfo;
+        this.encoderId = mSourceInfo.getSourceId();
+        this.codecType = mSourceInfo.getCodecType();
+    	this.videoAddr = mSourceInfo.getVideoAddr();
+        this.frameWidth = mSourceInfo.getFrameWidth();
+        this.frameHeight = mSourceInfo.getFrameHeight();
+    	this.mEncoderCallBack = encoderCallBack;
+    }
+    
+    public EncoderWorker setCapture() {
+    	VideoCapture capture = new VideoCapture();
+    	while(!capture.open(videoAddr)) {
+    		
+    	}
+    	this.capture = capture;
+    	return this;
     }
 
     public String getVideoAddr() {
@@ -115,8 +143,11 @@ public class EncoderWorker extends Thread {
     }
 
     public int registerEncoder() {
-        int codecTypeInt = CodecHelper.getInstance().getCodecTypeInt(codecType);
-        return CodecHelper.getInstance().registerEncoder(encoderId, codecTypeInt, frameWidth, frameHeight);
+        int codecTypeInt = CodecHelper.getInstance().getCodecTypeInt(mSourceInfo.getCodecType());
+        
+		MatOfInt params = new MatOfInt();
+		Mat sample = Codec.fetchMatSample(mSourceInfo.getVideoAddr(), false);
+		return CodecHelper.getInstance().registerEncoder(mSourceInfo.getSourceId(), codecTypeInt, sample.nativeObj, params.nativeObj);
     }
 
     public void releaseEncoder() {

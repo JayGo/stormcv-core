@@ -13,33 +13,22 @@ public class DecoderWorker extends Thread {
     private final static Logger logger = LoggerFactory.getLogger(DecoderWorker.class);
 
     private String decoderId;
+    private SourceInfo mSourceInfo;
     private CodecType codecType;
     private DecoderCallback mDecoderCallback;
-    private int frameWidth;
-    private int frameHeight;
-    private int frameType;
+    private int yuvFrameWidth;
+    private int yuvFrameHeight;
+    private int yuvMatType;
     private byte[] encodedData;
-
-    public DecoderWorker(String decoderId, CodecType codecType,
-                         int frameWidth, int frameHeight, int frameType, DecoderCallback mDecoderCallback) {
-        this.decoderId = decoderId;
-        this.codecType = codecType;
-        this.frameWidth = frameWidth;
-        this.frameHeight = frameHeight;
-        this.frameType = frameType;
-        this.mDecoderCallback = mDecoderCallback;
-    }
-
-    public DecoderWorker(CodecType codecType) {
-        this.codecType = codecType;
-    }
-
-    public DecoderWorker build(String decoderId, int frameWidth, int frameHeight, DecoderCallback mDecoderCallback) {
-        this.decoderId = decoderId;
-        this.frameWidth = frameWidth;
-        this.frameHeight = (int) (frameHeight * 1.5);
-        this.mDecoderCallback = mDecoderCallback;
-        return this;
+    
+    public DecoderWorker(SourceInfo sourceInfo, DecoderCallback decoderCallback) {
+    	this.mSourceInfo = sourceInfo;
+    	this.codecType = mSourceInfo.getCodecType();
+        this.decoderId = mSourceInfo.getSourceId();
+        this.yuvFrameWidth = mSourceInfo.getYuvFrameWidth();
+        this.yuvFrameHeight = mSourceInfo.getYuvFrameHeight();
+        this.yuvMatType = mSourceInfo.getYuvMatType();
+    	this.mDecoderCallback = decoderCallback;
     }
 
     public String getDecoderId() {
@@ -48,7 +37,8 @@ public class DecoderWorker extends Thread {
 
     public int registerDecoder() {
         int codecTypeInt = CodecHelper.getInstance().getCodecTypeInt(codecType);
-        return CodecHelper.getInstance().registerDecoder(decoderId, codecTypeInt);
+        Mat pMat = new Mat();
+        return CodecHelper.getInstance().registerDecoder(decoderId, codecTypeInt, yuvFrameWidth, yuvFrameHeight, pMat.nativeObj);
     }
 
     public void releaseDecoder() {
@@ -61,14 +51,19 @@ public class DecoderWorker extends Thread {
 
     @Override
     public void run() {
-
+        
+        logger.info("Decoder run1!!!!");
+        
         int[] results = new int[2];
-        Mat yuvMat = new Mat((int) 1.5 * frameHeight, frameWidth, frameType, new Scalar(0));
+        Mat yuvMat = new Mat(yuvFrameHeight, yuvFrameWidth, yuvMatType, new Scalar(0));
 
         TimeElasper timeElasper = new TimeElasper();
         int frameNr = 0;
+        
+        logger.info("Decoder worker starts to run!");
 
         while (!Thread.interrupted()) {
+//            logger.info("Decoder running!");
             encodedData = mDecoderCallback.getEncodedData();
             if (encodedData != null && encodedData.length > 0) {
 //				logger.info("Decoding thread info: [decoderId: "+decoderId+", size: "+encodedData.length);
@@ -84,34 +79,6 @@ public class DecoderWorker extends Thread {
         			logger.info("Decoder on "+decoderId+": Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(frameNr));
         		}
 
-//        		if(frameNr == 100) {
-//        			logger.info("Decoder on "+decoderId+"Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(100));
-//        		}
-//        		
-//        		if(frameNr == 500) {
-//        			logger.info("Decoder on "+decoderId+"Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(500));
-//        		}
-//        		
-//        		if(frameNr == 900) {
-//        			logger.info("Decoder on "+decoderId+"Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(900));
-//        		}
-//        		
-//        		if(frameNr == 1300) {
-//        			logger.info("Decoder on "+decoderId+"Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(1300));
-//        		}
-//        		
-//        		if(frameNr == 1700) {
-//        			logger.info("Decoder on "+decoderId+"Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(1700));
-//        		}
-//        		
-//        		if(frameNr == 2000) {
-//        			logger.info("Decoder on "+decoderId+"Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(2000));
-//        		}
-//
-//        		if(frameNr == 2500) {
-//        			logger.info("Decoder on "+decoderId+"Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(2000));
-//        		}
-                // logger.info("decode results: "+results[0]+", "+results[1]);
                 if (results[0] != 0) {
                     frameNr++;
                     // logger.info("The yuvMat size: "+ yuvMat.width() +"x"+yuvMat.height());

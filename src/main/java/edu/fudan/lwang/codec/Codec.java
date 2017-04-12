@@ -2,12 +2,18 @@ package edu.fudan.lwang.codec;
 
 import edu.fudan.lwang.codec.Common.CodecType;
 import edu.fudan.stormcv.model.Frame;
+import kafka.serializer.Decoder;
+
+import org.apache.logging.log4j.core.appender.db.jpa.converter.StackTraceElementAttributeConverter;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.amazonaws.services.elasticbeanstalk.model.transform.RetrieveEnvironmentInfoResultStaxUnmarshaller;
+import com.yammer.metrics.stats.EWMA;
 
 import java.awt.*;
 
@@ -29,6 +35,25 @@ public class Codec {
     public static byte[] getEncodeDataFromBuffer(String queueId) {
         return mBufferQueueManager.getBuffer(queueId, ENCODE_DATA_SEG);
     }
+    
+    public static Mat fetchMatSample(String videoAddr, boolean isYUVSample) {
+    	Mat sample = new Mat();
+    	VideoCapture cap = new VideoCapture();
+
+    	while(!cap.open(videoAddr)) {
+    		logger.info("Try to open capture for: "+videoAddr);
+    	}
+
+    	while (!cap.read(sample) || sample==null || sample.empty()) {
+    		logger.info("Try to read mat sample from "+videoAddr);
+		}
+
+    	if(isYUVSample) {
+    		Imgproc.cvtColor(sample, sample, Imgproc.COLOR_BGR2YUV_I420);
+    	}
+
+    	return sample;
+    }
 
     public static SourceInfo fetchSourceInfo(String videoAddr, String streamId, CodecType type) {
         SourceInfo sourceInfo = null;
@@ -38,19 +63,32 @@ public class Codec {
             return sourceInfo;
         }
         sourceInfo = new SourceInfo();
-        sourceInfo.setFrameWidth((int) videoCapture.get(Highgui.CV_CAP_PROP_FRAME_WIDTH));
-        sourceInfo.setFrameHeight((int) videoCapture.get(Highgui.CV_CAP_PROP_FRAME_HEIGHT));
-        sourceInfo.setEncodeQueueId(streamId);
-        sourceInfo.setType(type);
+        Mat sample = fetchMatSample(videoAddr, false);
+        sourceInfo.setFrameWidth(sample.width());
+        sourceInfo.setFrameHeight(sample.height());
+        sourceInfo.setMatType(sample.type());
+        
+        sourceInfo.setSourceId(streamId);
+        sourceInfo.setCodecType(type);
         sourceInfo.setVideoAddr(videoAddr);
+        
+        Mat yuvSample = fetchMatSample(videoAddr, true);
+        sourceInfo.setYuvFrameWidth(yuvSample.width());
+        sourceInfo.setYuvFrameHeight(yuvSample.height());
+        sourceInfo.setYuvMatType(yuvSample.type());
+        
+        sourceInfo.setCodecType(Common.CodecType.CODEC_TYPE_H264_CPU);
+        
         return sourceInfo;
     }
+    
+    
 
     public static String startEncodeToBuffer(SourceInfo si) {
         String encoderId = null;
         String videoAddr = si.getVideoAddr();
-        String streamId = si.getEncodeQueueId();
-        CodecType type = si.getType();
+        String streamId = si.getSourceId();
+        CodecType type = si.getCodecType();
         final VideoCapture capture = new VideoCapture();
 
         if (!capture.open(videoAddr)) {
@@ -59,8 +97,8 @@ public class Codec {
         }
 
         encoderId = streamId;
-        final String encodeQueueId = encoderId;
-        mBufferQueueManager.registerBufferQueue(encodeQueueId, maxEncoderQueueSize);
+        final String sourceId = encoderId;
+        mBufferQueueManager.registerBufferQueue(sourceId, maxEncoderQueueSize);
 
         EncoderWorker encoderWorker = EncoderFactory.create(type).build(videoAddr, encoderId, capture, new EncoderCallback() {
             private int frameNr = 0;
@@ -77,7 +115,7 @@ public class Codec {
             public void onDataEncoded(byte[] encodedData) {
                 // TODO Auto-generated method stub
                 if (encodedData.length == 0) return;
-                while (!mBufferQueueManager.fillBuffer(encodeQueueId, encodedData)) ;
+                while (!mBufferQueueManager.fillBuffer(sourceId, encodedData)) ;
             }
 
             @Override
@@ -104,20 +142,15 @@ public class Codec {
         }
 
         mCodecManager.startEncode(encoderId);
-        return encodeQueueId;
+        return sourceId;
     }
+    
 
     public static String startEncodeToFrameQueue(final SourceInfo si) {
         String encoderId = null;
         String videoAddr = si.getVideoAddr();
-        String streamId = si.getEncodeQueueId();
-        CodecType type = si.getType();
-        final VideoCapture capture = new VideoCapture();
+        String streamId = si.getSourceId();
 
-        if (!capture.open(videoAddr)) {
-            logger.info("Video open failed!");
-            return null;
-        }
 
         encoderId = streamId;
         final String encodeFrameQueueId = encoderId;
@@ -127,8 +160,8 @@ public class Codec {
             logger.info("Register ecodedFrameQueue for " + encodeFrameQueueId + " failed!");
             return null;
         }
-
-        EncoderWorker encoderWorker = EncoderFactory.create(type).build(videoAddr, encoderId, capture, new EncoderCallback() {
+        
+        EncoderWorker encoderWorker = new EncoderWorker(si, new EncoderCallback() {
             private int frameNr = 0;
             private final Logger logger1 = LoggerFactory.getLogger(EncoderCallback.class);
 
@@ -149,7 +182,7 @@ public class Codec {
                 // logger1.info("=================== get data ==================================");
                 long timeStamp = System.currentTimeMillis();
 
-                Frame frame = new Frame(si.getEncodeQueueId(), frameNr++, Frame.X264_IMAGE, encodedData, timeStamp,
+                Frame frame = new Frame(si.getSourceId(), frameNr++, Frame.X264_IMAGE, encodedData, timeStamp,
                         new Rectangle(0, 0, si.getFrameWidth(), si.getFrameHeight()));
 
                 mEncodedFrameQueue.enqueue(frame);
@@ -170,24 +203,21 @@ public class Codec {
                 return null;
             }
         });
-
-        if (null == encoderWorker) {
-            logger.info("Unknow encoder type, encoderWorker is null!");
-            return null;
-        }
+        encoderWorker = encoderWorker.setCapture();
 
         if (Common.CODEC_OK != mCodecManager.registerEncoder(encoderWorker)) {
             logger.info("Register encoder for " + encoderWorker.getEncoderId() + " failed!");
             return null;
         }
+        
 
         mCodecManager.startEncode(encoderId);
         return encodeFrameQueueId;
     }
 
     public static boolean registerEncoder(SourceInfo si, final String sourceQueueId, final String encodedQueueId) {
-        String sourceId = si.getEncodeQueueId();
-        final CodecType type = si.getType();
+        String sourceId = si.getSourceId();
+        final CodecType type = si.getCodecType();
         final int frameWidth = si.getFrameWidth();
         final int frameHeight = si.getFrameHeight();
 
@@ -202,53 +232,48 @@ public class Codec {
         }
 
         final String encoderId = encodedQueueId;
+        si.setSourceId(encoderId);
+        
+        EncoderWorker encoderWorker = new EncoderWorker(si, new EncoderCallback() {
+            private final Logger logger1 = LoggerFactory.getLogger(EncoderCallback.class);
 
-        EncoderWorker encoderWorker = EncoderFactory.create(type).build(encoderId, frameWidth, frameHeight,
+            @Override
+            public Mat getDecodedData() {
+                // TODO Auto-generated method stub
+                Mat decodedMat = null;
+//				logger1.info("Before get element "+ sourceQueueId +" queue size:" + mMatQueueManager.getQueueById(sourceQueueId).getSize());
+                while ((decodedMat = mMatQueueManager.getElement(sourceQueueId)) == null) {
+                }
+//				logger1.info("After get element "+ sourceQueueId +" queue size:" + mMatQueueManager.getQueueById(sourceQueueId).getSize());
+                return decodedMat;
+            }
 
-                new EncoderCallback() {
-                    private final Logger logger1 = LoggerFactory.getLogger(EncoderCallback.class);
+            @Override
+            public Mat beforeDataEncoded(Mat frame) {
+                // TODO Auto-generated method stub
+                Mat yuvMat = new Mat();
+                if (frame.channels() < 3) {
+                    Imgproc.cvtColor(frame, frame, Imgproc.COLOR_GRAY2BGR);
+                }
+                Imgproc.cvtColor(frame, yuvMat, Imgproc.COLOR_BGR2YUV_I420);
+                return yuvMat;
+            }
 
-                    @Override
-                    public Mat getDecodedData() {
-                        // TODO Auto-generated method stub
-                        Mat decodedMat = null;
-//						logger1.info("Before get element "+ sourceQueueId +" queue size:" + mMatQueueManager.getQueueById(sourceQueueId).getSize());
-                        while ((decodedMat = mMatQueueManager.getElement(sourceQueueId)) == null) {
-                        }
-//						logger1.info("After get element "+ sourceQueueId +" queue size:" + mMatQueueManager.getQueueById(sourceQueueId).getSize());
-                        return decodedMat;
-                    }
+            @Override
+            public void onDataEncoded(byte[] encodedData) {
+                // TODO Auto-generated method stub
+//				logger1.info("Before put element "+ encodedQueueId +" queue size: "+mFrameQueueManager.getQueueById(encodedQueueId).getSize());
+                mFrameQueueManager.putElement(encodedQueueId, new Frame(encodedData));
+//				logger1.info("After put element "+ encodedQueueId +" queue size: "+mFrameQueueManager.getQueueById(encodedQueueId).getSize());
+            }
 
-                    @Override
-                    public Mat beforeDataEncoded(Mat frame) {
-                        // TODO Auto-generated method stub
-                        Mat yuvMat = new Mat();
-                        if (frame.channels() < 3) {
-                            Imgproc.cvtColor(frame, frame, Imgproc.COLOR_GRAY2BGR);
-                        }
-                        Imgproc.cvtColor(frame, yuvMat, Imgproc.COLOR_BGR2YUV_I420);
-                        return yuvMat;
-                    }
+            @Override
+            public void onEncoderClosed() {
+                // TODO Auto-generated method stub
+            }
+        });
+        
 
-                    @Override
-                    public void onDataEncoded(byte[] encodedData) {
-                        // TODO Auto-generated method stub
-//						logger1.info("Before put element "+ encodedQueueId +" queue size: "+mFrameQueueManager.getQueueById(encodedQueueId).getSize());
-                        mFrameQueueManager.putElement(encodedQueueId, new Frame(encodedData));
-//						logger1.info("After put element "+ encodedQueueId +" queue size: "+mFrameQueueManager.getQueueById(encodedQueueId).getSize());
-                    }
-
-                    @Override
-                    public void onEncoderClosed() {
-                        // TODO Auto-generated method stub
-                    }
-                });
-
-        if (null == encoderWorker) {
-            logger.info("Unknow encoder type, encoderWorker is null!");
-            System.exit(1);
-            return false;
-        }
 
         if (Common.CODEC_OK != mCodecManager.registerEncoder(encoderWorker)) {
             logger.info("Register encoder for " + encoderWorker.getEncoderId() + " failed!");
@@ -264,10 +289,6 @@ public class Codec {
 
     public static boolean registerDecoder(SourceInfo si, final String sourceQueueId, final String decoderQueueId) {
 
-        final CodecType type = si.getType();
-        final int frameWidth = si.getFrameWidth();
-        final int frameHeight = si.getFrameHeight();
-
         if (mBufferQueueManager.getBufferQueue(sourceQueueId) == null) {
             logger.error("Buffer queue for source " + sourceQueueId + " hasn't register yet!");
             return false;
@@ -279,48 +300,49 @@ public class Codec {
         }
 
         final String decoderId = decoderQueueId;
+        si.setSourceId(decoderId);
+        
+        DecoderWorker decoderWorker = new DecoderWorker(si, new DecoderCallback() {
+            private int frNum = 0;
+            private final Logger logger1 = LoggerFactory.getLogger(DecoderCallback.class);
 
-        DecoderWorker decoderWorker = DecoderFactory.create(type).build(decoderId, frameWidth, frameHeight,
-                new DecoderCallback() {
-                    private int frNum = 0;
-                    private final Logger logger1 = LoggerFactory.getLogger(DecoderCallback.class);
+            @Override
+            public byte[] getEncodedData() {
+                // TODO Auto-generated method stub
+                byte[] encodedData = null;
+//                logger1.info("start to get encoded data!");
+//				do {
+                encodedData = mBufferQueueManager.getBuffer(sourceQueueId, ENCODE_DATA_SEG, false);
+//				} while (encodedData == null || encodedData.length < ENCODE_DATA_SEG);
+                if (encodedData != null) {
+//                     logger1.info("data from sourceQueue "+ sourceQueueId +" size: "+encodedData.length);
+                } else {
+//                     logger1.info("sourceQueue "+ sourceQueueId +" is empty!");
+                }
 
-                    @Override
-                    public byte[] getEncodedData() {
-                        // TODO Auto-generated method stub
-                        byte[] encodedData = null;
-//						do {
-                        encodedData = mBufferQueueManager.getBuffer(sourceQueueId, ENCODE_DATA_SEG, false);
-//						} while (encodedData == null || encodedData.length < ENCODE_DATA_SEG);
-                        if (encodedData != null) {
-                            // logger1.info("data from sourceQueue "+ sourceQueueId +" size: "+encodedData.length);
-                        } else {
-                            // logger1.info("sourceQueue "+ sourceQueueId +" is empty!");
-                        }
+                return encodedData;
+            }
 
-                        return encodedData;
-                    }
+            @Override
+            public void onDataDecoded(Mat frame, int[] results) {
+                // TODO Auto-generated method stub
+                int dataUsed = results[1];
+                mBufferQueueManager.moveHeadPtr(sourceQueueId, dataUsed);
 
-                    @Override
-                    public void onDataDecoded(Mat frame, int[] results) {
-                        // TODO Auto-generated method stub
-                        int dataUsed = results[1];
-                        mBufferQueueManager.moveHeadPtr(sourceQueueId, dataUsed);
+                int frameNumDecoded = results[0];
+                if (frameNumDecoded > 0) {
+                    // logger1.info("===================== get decoded data =================");
+                    Mat rgbFrame = new Mat();
+                    Imgproc.cvtColor(frame, rgbFrame, Imgproc.COLOR_YUV2BGR_I420);
+                    
+                     Highgui.imwrite("/home/jliu/Pictures/codec/"+frNum++ +"_codec.jpg", rgbFrame);
+                    
+                    mMatQueueManager.putElement(decoderQueueId, rgbFrame);
+                    // logger1.info("========================== decode done ================================");
+                }
 
-                        int frameNumDecoded = results[0];
-                        if (frameNumDecoded > 0) {
-                            // logger1.info("===================== get decoded data =================");
-                            Mat rgbFrame = new Mat();
-                            Imgproc.cvtColor(frame, rgbFrame, Imgproc.COLOR_YUV2BGR_I420);
-                            
-//                            Highgui.imwrite("/home/jliu/Pictures/codec/"+frNum++ +"_codec.jpg", rgbFrame);
-                            
-                            mMatQueueManager.putElement(decoderQueueId, rgbFrame);
-                            // logger1.info("========================== decode done ================================");
-                        }
-
-                    }
-                });
+            }
+        });
 
         if (Common.CODEC_OK != mCodecManager.registerDecoder(decoderWorker)) {
             logger.error("Register decoder for " + decoderWorker.getDecoderId() + " failed!");

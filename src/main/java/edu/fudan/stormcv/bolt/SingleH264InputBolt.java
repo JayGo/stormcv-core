@@ -88,10 +88,10 @@ public class SingleH264InputBolt extends CVParticleBolt {
     private Queue<Frame> mEncodedFrameQueue;
 
     private void init() {
-        mDecodeQueueId = mSourceInfo.getEncodeQueueId() + "_" + operation.getContext() + "_decode";
-        mSourceQueueId = mSourceInfo.getEncodeQueueId() + "_" + operation.getContext() + "_source";
-        mResultMatQueueId = mSourceInfo.getEncodeQueueId() + "_" + operation.getContext() + "_result";
-        mEncodedQueueId = mSourceInfo.getEncodeQueueId() + "_" + operation.getContext() + "_encode";
+        mDecodeQueueId = mSourceInfo.getSourceId() + "_" + operation.getContext() + "_decode";
+        mSourceQueueId = mSourceInfo.getSourceId() + "_" + operation.getContext() + "_source";
+        mResultMatQueueId = mSourceInfo.getSourceId() + "_" + operation.getContext() + "_result";
+        mEncodedQueueId = mSourceInfo.getSourceId() + "_" + operation.getContext() + "_encode";
 
 
         // Register the source queue.
@@ -139,8 +139,7 @@ public class SingleH264InputBolt extends CVParticleBolt {
     void prepare(Map stormConf, TopologyContext context) {
         try {
             LibLoader.loadOpenCVLib();
-            LibLoader.loadH264CodecLib();
-            // LibLoader.loadHgCodecLib();
+             LibLoader.loadHgCodecLib();
             operation.prepare(stormConf, context);
             init();
         } catch (Exception e) {
@@ -166,10 +165,12 @@ public class SingleH264InputBolt extends CVParticleBolt {
             public boolean fillSourceBufferQueue(Frame frame) {
                 // TODO Auto-generated method stub
                 byte[] encodedData = frame.getImageBytes();
-                // logger1.info("get image bytes length: "+encodedData.length);
+              
                 while (!mSourceBufferQueue.fillBuffer(encodedData)) {
                     logger1.info("atempt to fill buffer...");
                 }
+//                logger1.info("get image bytes length: "+encodedData.length);
+//                logger1.info("into source queue: "+mSourceBufferQueue.getQueueId());
                 return true;
             }
 

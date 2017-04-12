@@ -103,7 +103,7 @@ public class TCPCaptureSpout implements IRichSpout {
         while ((frame = mEncodedFrameQueue.dequeue()) == null) ;
         try {
             collector.emit(serializer.toTuple(frame), streamId + "_" + frameNr++);
-            //logger.info("spout send a frame - bounding:{}, size:{}, frameNr:{}", frame.getBoundingBox(), frame.getImageBytes().length, frame.getSequenceNr());
+//            logger.info("spout send a frame - bounding:{}, size:{}, frameNr:{}", frame.getBoundingBox(), frame.getImageBytes().length, frame.getSequenceNr());
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -116,7 +116,7 @@ public class TCPCaptureSpout implements IRichSpout {
     public void open(Map paramMap, TopologyContext paramTopologyContext,
                      SpoutOutputCollector paramSpoutOutputCollector) {
         collector = paramSpoutOutputCollector;
-        LibLoader.loadH264CodecLib();
+        LibLoader.loadHgCodecLib();
         LibLoader.loadOpenCVLib();
         logger.info("TCPCaptureSpout ready to start: " + mSourceInfo);
 

@@ -1,12 +1,32 @@
 package edu.fudan.lwang.codec;
 
 import edu.fudan.lwang.codec.Common.CodecType;
+import scala.collection.generic.BitOperations.Int;
 
 import java.io.Serializable;
 
 public class SourceInfo implements Serializable {
 
-    /**
+    public CodecType getCodecType() {
+		return codecType;
+	}
+
+	public void setCodecType(CodecType codecType) {
+		this.codecType = codecType;
+	}
+
+
+
+	@Override
+	public String toString() {
+		return "SourceInfo [frameWidth=" + frameWidth + ", frameHeight=" + frameHeight + ", matType=" + matType
+				+ ", yuvFrameWidth=" + yuvFrameWidth + ", yuvFrameHeight=" + yuvFrameHeight + ", yuvMatType="
+				+ yuvMatType + ", sourceId=" + sourceId + ", videoAddr=" + videoAddr + ", codecType=" + codecType + "]";
+	}
+
+
+
+	/**
      *
      */
     private static final long serialVersionUID = -4198085328451136021L;
@@ -15,24 +35,66 @@ public class SourceInfo implements Serializable {
      */
     private int frameWidth;
     private int frameHeight;
-    private String encodeQueueId;
+    private int matType;
+    
+    private int yuvFrameWidth;
+    private int yuvFrameHeight;
+    private int yuvMatType;
+    
+    private String sourceId;
     private String videoAddr;
-    private CodecType type;
+    private CodecType codecType;
 
-    public SourceInfo() {
+    public int getMatType() {
+		return matType;
+	}
+
+	public void setMatType(int matType) {
+		this.matType = matType;
+	}
+
+	public int getYuvMatType() {
+		return yuvMatType;
+	}
+
+	public void setYuvMatType(int yuvMatType) {
+		this.yuvMatType = yuvMatType;
+	}
+
+	public SourceInfo() {
 
     }
 
-    public SourceInfo(int frameWidth, int frameHeight, String encodeQueueId, CodecType type) {
+    public SourceInfo(int frameWidth, int frameHeight, int yuvFrameWidth, int yuvFrameHeigth, String sourceId, CodecType codecType, int matType, int yuvMatType) {
         super();
         this.frameWidth = frameWidth;
         this.frameHeight = frameHeight;
-        this.encodeQueueId = encodeQueueId;
-        this.type = type;
+        this.yuvFrameWidth = yuvFrameWidth;
+        this.yuvFrameHeight = yuvFrameHeigth;
+        this.sourceId = sourceId;
+        this.codecType = codecType;
+        this.matType = matType;
+        this.yuvMatType = yuvMatType;
     }
 
 
-    public String getVideoAddr() {
+    public int getYuvFrameWidth() {
+		return yuvFrameWidth;
+	}
+
+	public void setYuvFrameWidth(int yuvFrameWidth) {
+		this.yuvFrameWidth = yuvFrameWidth;
+	}
+
+	public int getYuvFrameHeight() {
+		return yuvFrameHeight;
+	}
+
+	public void setYuvFrameHeight(int yuvFrameHeight) {
+		this.yuvFrameHeight = yuvFrameHeight;
+	}
+
+	public String getVideoAddr() {
         return videoAddr;
     }
 
@@ -40,13 +102,7 @@ public class SourceInfo implements Serializable {
         this.videoAddr = videoAddr;
     }
 
-    public CodecType getType() {
-        return type;
-    }
 
-    public void setType(CodecType type) {
-        this.type = type;
-    }
 
     public int getFrameWidth() {
         return frameWidth;
@@ -64,19 +120,15 @@ public class SourceInfo implements Serializable {
         this.frameHeight = frameHeight;
     }
 
-    public String getEncodeQueueId() {
-        return encodeQueueId;
+    public String getSourceId() {
+        return sourceId;
     }
 
-    public void setEncodeQueueId(String encodeQueueId) {
-        this.encodeQueueId = encodeQueueId;
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
     }
 
-    @Override
-    public String toString() {
-        return "SourceInfo [frameWidth=" + frameWidth + ", frameHeight=" + frameHeight + ", encodeQueueId="
-                + encodeQueueId + ", videoAddr=" + videoAddr + ", type=" + type + "]";
-    }
+
 
 
 }
