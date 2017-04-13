@@ -5,11 +5,13 @@ public class GlobalConstants {
     public static final String RTSPAddress177 = "rtsp://admin:123456qaz@10.134.141.177:554/h264/ch1/main/av_stream";
     public static final String RTSPAddress178 = "rtsp://admin:123456qaz@10.134.141.178:554/h264/ch1/main/av_stream";
 
-    public static final String PseudoRtspAddress = "rtsp://10.134.142.114/planet-sub.mkv";
-    public static final String Pseudo720pRtspAddress = "rtsp://10.134.142.114/planet720-sub.mkv";
+    public static final String RTSPServer = "rtsp://10.134.142.141:8554/";
+
+    public static final String PseudoRtspAddress = RTSPServer + "planet-sub.mkv";
+    public static final String Pseudo720pRtspAddress = RTSPServer + "planet720-sub.mkv";
     //for face detect
-    public static final String Video480p = "rtsp://10.134.142.114/bigbang480.mkv";
-    public static final String Video720p = "rtsp://10.134.142.114/bigbang720.mkv";
+    public static final String PseudoFaceRtspAddress = RTSPServer + "bigbang480.mkv";
+    public static final String Pseudo720pFaceRtspAddress = RTSPServer + "bigbang720.mkv";
     
     public static final String Video1080p = "rtsp://10.134.142.114/sherlock.mkv";
     
@@ -21,7 +23,7 @@ public class GlobalConstants {
     public static final int MatToBIWorkerPerStream = 4;
 
     public static int SpoutQueueSize = 100;
-    public static String DefaultRTMPServer = "rtmp://10.134.142.114/live/";
+    public static String DefaultRTMPServer = "rtmp://10.134.142.141:1935/live/";
     public static String OldRTMPServer = "rtmp://10.134.142.114:1935/live1/";
 
     public static int JPEGCodecQuality = 80;

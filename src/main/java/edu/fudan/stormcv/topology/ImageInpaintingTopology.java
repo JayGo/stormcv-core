@@ -9,25 +9,23 @@ import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.fetcher.ImageUrlFetcher;
 import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.operation.single.ImageFetchAndOperation;
-import edu.fudan.stormcv.operation.single.*;
+import edu.fudan.stormcv.operation.single.InpaintOp;
 import edu.fudan.stormcv.spout.CVParticleSignalSpout;
-
-import java.awt.image.BufferedImage;
 
 /**
  * Created by IntelliJ IDEA.
  * User: jkyan
- * Time: 2/23/17 - 6:24 AM
+ * Time: 3/6/17 - 7:06 AM
  * Description:
  */
-public class ImageFetchTopologyJPEG extends BaseTopology {
+public class ImageInpaintingTopology extends BaseTopology {
 
-    private String streamId = "ImageFetchTopologyJPEG";
-    private String readLocations = "file:///home/nfs/images/480p";
-    private String writeLocations = "file:///home/nfs/images/480p/output";
+    private String streamId = "image_inpaint";
+    private String readLocations = "file:///home/nfs/images/inpaint";
+    private String writeLocations = "file:///home/nfs/images/inpaint/output";
 
     public static void main(String[] args) {
-        ImageFetchTopologyJPEG topology = new ImageFetchTopologyJPEG();
+        ImageInpaintingTopology topology = new ImageInpaintingTopology();
         try {
             topology.submitTopology();
         } catch (Exception e) {
@@ -35,21 +33,23 @@ public class ImageFetchTopologyJPEG extends BaseTopology {
         }
     }
 
-    public ImageFetchTopologyJPEG() {
+    public ImageInpaintingTopology() {
         conf.setNumWorkers(2);
-        conf.put(StormCVConfig.STORMCV_FRAME_ENCODING, Frame.JPG_IMAGE);
+        conf.put(StormCVConfig.STORMCV_FRAME_ENCODING, Frame.PNG_IMAGE);
         isTopologyRunningAtLocal = true;
     }
 
     @Override
     public void setSpout() {
-        builder.setSpout("spout", new CVParticleSignalSpout(GlobalConstants.ImageRequestZKRoot, new ImageUrlFetcher("cat", readLocations, writeLocations,
-                BOLT_OPERTION_TYPE.COLORHISTOGRAM).batchSize(32)), 1);
+        builder.setSpout("spout", new CVParticleSignalSpout(GlobalConstants.ImageRequestZKRoot,
+                new ImageUrlFetcher(streamId, readLocations, writeLocations,
+                BOLT_OPERTION_TYPE.CUSTOM).batchSize(32)), 1);
     }
 
     @Override
     public void setBolts() {
-        builder.setBolt("operation", new SingleJPEGInputBolt(new ImageFetchAndOperation(),
+        builder.setBolt("operation", new SingleJPEGInputBolt(new ImageFetchAndOperation(new InpaintOp(),
+                BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE),
                 BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 1).localOrShuffleGrouping("spout");
 
         builder.setBolt("collector", new StatCollectorBolt(), 1).localOrShuffleGrouping("operation");

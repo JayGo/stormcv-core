@@ -5,8 +5,11 @@ import com.xuggle.mediatool.MediaListenerAdapter;
 import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.mediatool.event.IVideoPictureEvent;
 import com.xuggle.xuggler.*;
-import edu.fudan.stormcv.codec.JPEGImageCodec;
-import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
+import edu.fudan.stormcv.codec.ImageCodec;
+import edu.fudan.stormcv.codec.TurboImageCodec;
+import edu.fudan.stormcv.constant.GlobalConstants;
+import edu.fudan.stormcv.model.*;
+import edu.fudan.stormcv.model.Frame;
 import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +34,11 @@ public class XugglerStreamReader extends MediaListenerAdapter implements Runnabl
     private int groupSize;
     private long frameNr; // number of the frame read so far
     private boolean running = false; // indicator if the reader is still active
-    private LinkedBlockingQueue<edu.fudan.stormcv.model.Frame> frameQueue; // queue used to store frames
+    private LinkedBlockingQueue<Frame> frameQueue; // queue used to store frames
     private int sleepTime;
     private String streamLocation;
-    private String imageType = edu.fudan.stormcv.model.Frame.JPG_IMAGE;
-    private JPEGImageCodec codec;
+    private String imageType = Frame.JPG_IMAGE;
+    private ImageCodec codec;
 
     public XugglerStreamReader(String streamId, String streamLocation, String imageType, int frameSkip, int groupSize, int sleepTime, LinkedBlockingQueue<edu.fudan.stormcv.model.Frame> frameQueue) {
         this.streamLocation = streamLocation;
@@ -45,7 +48,7 @@ public class XugglerStreamReader extends MediaListenerAdapter implements Runnabl
         this.sleepTime = sleepTime;
         this.frameQueue = frameQueue;
         this.streamId = streamId;
-        this.codec = new TurboJPEGImageCodec();
+        this.codec = new TurboImageCodec();
     }
 
     @Override
@@ -157,7 +160,7 @@ public class XugglerStreamReader extends MediaListenerAdapter implements Runnabl
 
     private void processFrame(BufferedImage image) {
         if (frameNr % frameSkip < groupSize) {
-            byte[] buffer = this.codec.BufferedImageToJPEGBytes(image);
+            byte[] buffer = this.codec.BufferedImageToBytes(image, imageType);
             long timestamp = System.currentTimeMillis();
             edu.fudan.stormcv.model.Frame newFrame = new edu.fudan.stormcv.model.Frame(streamId, frameNr, imageType, buffer, timestamp, new Rectangle(0, 0, image.getWidth(), image.getHeight()));
             newFrame.getMetadata().put("uri", streamLocation);

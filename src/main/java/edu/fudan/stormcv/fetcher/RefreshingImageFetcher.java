@@ -1,9 +1,9 @@
 package edu.fudan.stormcv.fetcher;
 
+import edu.fudan.stormcv.codec.TurboImageCodec;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.StormCVConfig;
-import edu.fudan.stormcv.codec.JPEGImageCodec;
-import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
+import edu.fudan.stormcv.codec.ImageCodec;
 import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.model.serializer.FrameSerializer;
 import org.apache.storm.task.TopologyContext;
@@ -119,13 +119,13 @@ public class RefreshingImageFetcher implements IFetcher<Frame> {
         private int sleep;
         private int sequenceNr;
         private boolean running = true;
-        private JPEGImageCodec codec;
+        private ImageCodec codec;
 
         public ImageReader(URL url, int sleep, LinkedBlockingQueue<Frame> frameQueue) {
             this.url = url;
             this.sleep = sleep;
             this.frameQueue = frameQueue;
-            this.codec = new TurboJPEGImageCodec();
+            this.codec = new TurboImageCodec();
         }
 
         @Override
@@ -133,7 +133,7 @@ public class RefreshingImageFetcher implements IFetcher<Frame> {
             while (running) {
                 try {
                     BufferedImage image = ImageIO.read(url);
-                    byte[] buffer = this.codec.BufferedImageToJPEGBytes(image);
+                    byte[] buffer = this.codec.BufferedImageToBytes(image, imageType);
                     Frame frame = new Frame(url.getFile().substring(1), sequenceNr, imageType, buffer, System.currentTimeMillis(), new Rectangle(image.getWidth(), image.getHeight()));
                     frame.getMetadata().put("uri", url);
                     frameQueue.put(frame);

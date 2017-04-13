@@ -1,11 +1,14 @@
 package edu.fudan.stormcv.spout;
 
 import edu.fudan.jliu.message.BaseMessage;
-import edu.fudan.stormcv.codec.JPEGImageCodec;
+import edu.fudan.stormcv.codec.ImageCodec;
+import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.constant.RequestCode;
+import edu.fudan.stormcv.model.*;
+import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.model.serializer.FrameSerializer;
 import edu.fudan.stormcv.service.TCPClient;
-import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
+import edu.fudan.stormcv.codec.TurboImageCodec;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.IRichSpout;
@@ -33,7 +36,7 @@ public class TCPReaderSpout implements IRichSpout {
     private int port;
     private String streamId;
     private TCPClient mTCPClient;
-    private JPEGImageCodec codec;
+    private ImageCodec codec;
 
     private long frameNr;
 
@@ -85,12 +88,12 @@ public class TCPReaderSpout implements IRichSpout {
         long timestamp = System.currentTimeMillis();
         BufferedImage image;
         try {
-            image = this.codec.JPEGBytesToBufferedImage(buffer);
+            image = this.codec.BytesToBufferedImage(buffer, Frame.JPG_IMAGE);
 //			image = ImageUtils.bytesToImage(buffer);
             if (image == null) {
                 return;
             }
-            edu.fudan.stormcv.model.Frame newFrame = new edu.fudan.stormcv.model.Frame(streamId + "", frameNr, edu.fudan.stormcv.model.Frame.JPG_IMAGE, buffer,
+            edu.fudan.stormcv.model.Frame newFrame = new edu.fudan.stormcv.model.Frame(streamId + "", frameNr, Frame.JPG_IMAGE, buffer,
                     timestamp, new Rectangle(0, 0, image.getWidth(),
                     image.getHeight()));
             frameNr++;
@@ -114,7 +117,7 @@ public class TCPReaderSpout implements IRichSpout {
         streamIdMsg.setStreamId(streamId);
         mTCPClient.sendStreamIdMsg(streamIdMsg);
         logger.info("streamId message is sent out: " + streamId);
-        this.codec = new TurboJPEGImageCodec();
+        this.codec = new TurboImageCodec();
     }
 
     @Override

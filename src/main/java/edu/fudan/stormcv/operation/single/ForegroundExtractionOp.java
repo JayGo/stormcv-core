@@ -72,7 +72,7 @@ public class ForegroundExtractionOp implements ISingleInputOperation<Frame> {
                 height, width);
         if (processedBytes == null) return result;
 
-        frame.swapImageBytes(codecHandler.getEncodedData(processedBytes));
+        frame.swapImageBytes(codecHandler.getEncodedData(processedBytes, frame.getImageType()));
 
         result.add(frame);
         return result;

@@ -4,9 +4,9 @@ import com.xuggle.xuggler.*;
 import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
 import edu.fudan.lwang.codec.OperationHandler;
+import edu.fudan.stormcv.codec.ImageCodec;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
-import edu.fudan.stormcv.codec.JPEGImageCodec;
-import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
+import edu.fudan.stormcv.codec.TurboImageCodec;
 import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.model.Frame;
@@ -34,7 +34,7 @@ public class RTMPWriterOp implements IBatchOperation<Frame> {
     private IContainer container = null;
     private Boolean isCoderInit = false;
     private double frameRate = 0.0;
-    private JPEGImageCodec imageCodec;
+    private ImageCodec imageCodec;
 
     public RTMPWriterOp RTMPServer(String url) {
         this.url = url;
@@ -65,7 +65,7 @@ public class RTMPWriterOp implements IBatchOperation<Frame> {
     public void prepare(Map stormConf, TopologyContext context)
             throws Exception {
         initCoder();
-        this.imageCodec = new TurboJPEGImageCodec();
+        this.imageCodec = new TurboImageCodec();
     }
 
     @Override
@@ -136,7 +136,7 @@ public class RTMPWriterOp implements IBatchOperation<Frame> {
             }
             Frame frame = (Frame) s;
             result.add(frame);
-            BufferedImage image = this.imageCodec.JPEGBytesToBufferedImage(frame.getImageBytes());
+            BufferedImage image = this.imageCodec.BytesToBufferedImage(frame.getImageBytes(), frame.getImageType());
             if (image == null) {
                 logger.info("image null");
                 continue;

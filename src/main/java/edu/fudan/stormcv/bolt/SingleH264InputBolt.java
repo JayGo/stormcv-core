@@ -181,7 +181,7 @@ public class SingleH264InputBolt extends CVParticleBolt {
             }
 
             @Override
-            public byte[] getEncodedData(Mat proccessedResult) {
+            public byte[] getEncodedData(Mat proccessedResult, String imageType) {
                 // TODO Auto-generated method stub
                 mResultMatQueue.enqueue(proccessedResult);
 

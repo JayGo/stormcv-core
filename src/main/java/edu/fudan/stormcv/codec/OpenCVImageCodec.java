@@ -17,47 +17,47 @@ import java.io.IOException;
  * Time: 2/20/17 - 4:15 AM
  * Description:
  */
-public class OpenCVJPEGImageCodec implements JPEGImageCodec {
+public class OpenCVImageCodec implements ImageCodec {
 
-    private static OpenCVJPEGImageCodec mOpenCVJPEGImageCodec;
+    private static OpenCVImageCodec mOpenCVImageCodec;
 
-    private OpenCVJPEGImageCodec() {
+    private OpenCVImageCodec() {
 
     }
 
-    public synchronized static OpenCVJPEGImageCodec getInstance() {
-        if (mOpenCVJPEGImageCodec == null) {
-            mOpenCVJPEGImageCodec = new OpenCVJPEGImageCodec();
+    public synchronized static OpenCVImageCodec getInstance() {
+        if (mOpenCVImageCodec == null) {
+            mOpenCVImageCodec = new OpenCVImageCodec();
         }
-        return mOpenCVJPEGImageCodec;
+        return mOpenCVImageCodec;
     }
 
     @Override
-    public byte[] BufferedImageToJPEGBytes(BufferedImage image) {
-        Mat mat = bufferedImageToMat(image);
-        return MatToJPEGBytes(mat);
+    public byte[] BufferedImageToBytes(BufferedImage image, String byteType) {
+        Mat mat = BufferedImageToMat(image);
+        return MatToBytes(mat, byteType);
     }
 
     @Override
-    public BufferedImage JPEGBytesToBufferedImage(byte[] bytes) {
-        Mat in = JPEGBytesToMat(bytes);
-        return matToBufferedImage(in);
+    public BufferedImage BytesToBufferedImage(byte[] bytes, String byteType) {
+        Mat in = BytesToMat(bytes, byteType);
+        return MatToBufferedImage(in, byteType);
     }
 
     @Override
-    public Mat JPEGBytesToMat(byte[] bytes) {
+    public Mat BytesToMat(byte[] bytes, String byteType) {
         MatOfByte mob = new MatOfByte(bytes);
         return Highgui.imdecode(mob, Highgui.CV_LOAD_IMAGE_COLOR);
     }
 
     @Override
-    public byte[] MatToJPEGBytes(Mat mat) {
+    public byte[] MatToBytes(Mat mat, String byteType) {
         MatOfByte buffer = new MatOfByte();
-        Highgui.imencode(".jpg", mat, buffer);
+        Highgui.imencode("."+byteType, mat, buffer);
         return buffer.toArray();
     }
 
-    private Mat bufferedImageToMat(BufferedImage in) {
+    public Mat BufferedImageToMat(BufferedImage in) {
         Mat out;
         if (in.getType() == BufferedImage.TYPE_3BYTE_BGR) {
             out = new Mat(in.getHeight(), in.getWidth(), CvType.CV_8UC3);
@@ -75,9 +75,9 @@ public class OpenCVJPEGImageCodec implements JPEGImageCodec {
         return out;
     }
 
-    public static BufferedImage matToBufferedImage(Mat in) {
+    public BufferedImage MatToBufferedImage(Mat in, String byteType) {
         MatOfByte byteMat = new MatOfByte();
-        Highgui.imencode(".jpg", in, byteMat);
+        Highgui.imencode("."+byteType, in, byteMat);
         byte[] bytes = byteMat.toArray();
         ByteArrayInputStream input = new ByteArrayInputStream(bytes);
         BufferedImage img = null;
@@ -89,13 +89,13 @@ public class OpenCVJPEGImageCodec implements JPEGImageCodec {
         return img;
     }
 
-    public static byte[] MatToRawBytes(Mat in) {
+    public byte[] MatToRawBytes(Mat in) {
         byte[] out = new byte[in.width() * in.height() * (int) in.elemSize()];
         in.get(0, 0, out);
         return out;
     }
 
-    public static Mat RawBytesToMat(byte[] in, int width, int height, int type) {
+    public Mat RawBytesToMat(byte[] in, int width, int height, int type) {
         Mat out = Mat.eye(height, width, type);
         out.put(0, 0, in);
         return out;

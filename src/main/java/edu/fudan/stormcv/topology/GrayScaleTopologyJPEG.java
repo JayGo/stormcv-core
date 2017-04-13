@@ -32,59 +32,32 @@ public class GrayScaleTopologyJPEG extends BaseTopology {
     private BOLT_OPERTION_TYPE type;
 
     private boolean view720p = false;
-    private boolean sendRtmp = false;
-    
-    private String rtmpAddr;
-    private String videoAddr;
+    private boolean sendRtmp = true;
 
     public static void main(String[] args) {
-        GrayScaleTopologyJPEG topology = new GrayScaleTopologyJPEG("test1", GlobalConstants.DefaultRTMPServer,GlobalConstants.Video720p,"gray");
+        GrayScaleTopologyJPEG topology = new GrayScaleTopologyJPEG(BOLT_OPERTION_TYPE.SCALE);
         try {
             topology.submitTopology();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
-    public GrayScaleTopologyJPEG(String streamId, String rtmpAddr, String videoAddr, String effectType) {
-    	this.streamId = streamId;
-        this.rtmpAddr = rtmpAddr;
-        this.videoAddr = videoAddr;
-        isTopologyRunningAtLocal = true;
-        conf.setNumWorkers(2);
-        conf.put(StormCVConfig.STORMCV_FRAME_ENCODING, Frame.JPG_IMAGE);
-    	this.type = findEffectType(effectType);
-        urls = new ArrayList<String>();
-        urls.add(videoAddr);
-        sendRtmp=true;
-    }
-    
-    private BOLT_OPERTION_TYPE findEffectType(String effect) {
-    	if(effect.equals(BOLT_OPERTION_TYPE.GRAY.toString())) {
-    		return BOLT_OPERTION_TYPE.GRAY;
-    	} else if(effect.equals(BOLT_OPERTION_TYPE.COLORHISTOGRAM.toString())) {
-    		return BOLT_OPERTION_TYPE.COLORHISTOGRAM;
-    	} else if(effect.equals(BOLT_OPERTION_TYPE.FACEDETECT.toString())){
-    		return BOLT_OPERTION_TYPE.FACEDETECT;
-    	} else {
-    		return BOLT_OPERTION_TYPE.UNSUPPORT;
-    	}
-    }
 
     public GrayScaleTopologyJPEG(BOLT_OPERTION_TYPE type) {
         conf.setNumWorkers(2);
         conf.put(StormCVConfig.STORMCV_FRAME_ENCODING, Frame.JPG_IMAGE);
+
         urls = new ArrayList<String>();
         this.type = type;
         if (view720p) {
             if (this.type == BOLT_OPERTION_TYPE.FACEDETECT) {
-                urls.add(GlobalConstants.Video720p);
+                urls.add(GlobalConstants.Pseudo720pFaceRtspAddress);
             } else {
                 urls.add(GlobalConstants.Pseudo720pRtspAddress);
             }
         } else {
             if (this.type == BOLT_OPERTION_TYPE.FACEDETECT) {
-                urls.add(GlobalConstants.Video480p);
+                urls.add(GlobalConstants.PseudoFaceRtspAddress);
             } else {
                 urls.add(GlobalConstants.PseudoRtspAddress);
             }
@@ -149,7 +122,7 @@ public class GrayScaleTopologyJPEG extends BaseTopology {
             }
             case RTMPSTREAMER: {
                 builder.setBolt(BOLT_OPERTION_TYPE.RTMPSTREAMER.toString(),
-                        new SingleJPEGInputBolt(new SingleRTMPWriterOp().appName(streamId)
+                        new SingleJPEGInputBolt(new SingleRTMPWriterOp().appName("grayscale")
                         .frameRate(23.98).bitRate(886000), BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;

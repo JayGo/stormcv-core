@@ -9,5 +9,5 @@ public interface OperationHandler<E>  extends Serializable{
 
     public E getDecodedData();
 
-    public byte[] getEncodedData(E processedResult);
+    public byte[] getEncodedData(E processedResult, String imageType);
 }

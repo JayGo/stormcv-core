@@ -64,6 +64,7 @@ public class GrayImageOp implements ISingleInputOperation<Frame> {
         if (frame.getImageBytes().length <= 0) {
             return results;
         }
+        //logger.info("frame {} rectangle:{}, size:{}", frame.getSequenceNr(), frame.getBoundingBox(), frame.getImageBytes().length);
 
 //      	long startDecoding = System.currentTimeMillis();
         codecHandler.fillSourceBufferQueue(frame);

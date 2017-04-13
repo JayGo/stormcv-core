@@ -6,13 +6,13 @@ import com.xuggle.mediatool.ToolFactory;
 import com.xuggle.mediatool.event.IVideoPictureEvent;
 import edu.fudan.lwang.codec.OperationHandler;
 import edu.fudan.stormcv.StormCVConfig;
-import edu.fudan.stormcv.codec.JPEGImageCodec;
+import edu.fudan.stormcv.codec.ImageCodec;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.model.VideoChunk;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.model.serializer.FrameSerializer;
 import edu.fudan.stormcv.model.serializer.GroupOfFramesSerializer;
-import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
+import edu.fudan.stormcv.codec.TurboImageCodec;
 import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.model.GroupOfFrames;
 import org.apache.storm.task.TopologyContext;
@@ -43,7 +43,7 @@ public class VideoToFramesOp extends MediaListenerAdapter implements ISingleInpu
     private long seqNum;
     private String streamId;
     private String imageType = Frame.JPG_IMAGE;
-    private JPEGImageCodec codec;
+    private ImageCodec codec;
 
     /**
      * Instantiate a VideoToFrames operation by specifying the frameskip used to create the video (needed to calculate the correct
@@ -73,7 +73,7 @@ public class VideoToFramesOp extends MediaListenerAdapter implements ISingleInpu
         if (conf.containsKey(StormCVConfig.STORMCV_FRAME_ENCODING)) {
             imageType = (String) conf.get(StormCVConfig.STORMCV_FRAME_ENCODING);
         }
-        this.codec = new TurboJPEGImageCodec();
+        this.codec = new TurboImageCodec();
     }
 
     @Override
@@ -90,7 +90,7 @@ public class VideoToFramesOp extends MediaListenerAdapter implements ISingleInpu
     @Override
     public void onVideoPicture(IVideoPictureEvent event) {
         BufferedImage frame = event.getImage();
-        byte[] buffer = this.codec.BufferedImageToJPEGBytes(frame);
+        byte[] buffer = this.codec.BufferedImageToBytes(frame, imageType);
 //            byte[] buffer = ImageUtils.imageToBytes(frame, imageType);
         Frame newFrame = new Frame(streamId, seqNum + frames.size() * frameSkip, imageType, buffer, event.getTimeStamp(TimeUnit.MILLISECONDS), new Rectangle(0, 0, frame.getWidth(), frame.getHeight()));
         frames.add(newFrame);

@@ -1,13 +1,12 @@
 package edu.fudan.stormcv.util.writer;
 
-import com.amazonaws.services.simpleworkflow.model.Run;
 import com.xuggle.xuggler.*;
 import com.xuggle.xuggler.IPixelFormat.Type;
 import com.xuggle.xuggler.video.ConverterFactory;
 import com.xuggle.xuggler.video.IConverter;
 import edu.fudan.stormcv.util.connector.FileConnector;
-import edu.fudan.stormcv.codec.JPEGImageCodec;
-import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
+import edu.fudan.stormcv.codec.ImageCodec;
+import edu.fudan.stormcv.codec.TurboImageCodec;
 import edu.fudan.stormcv.model.Frame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +14,8 @@ import org.slf4j.LoggerFactory;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import java.util.Timer;
 
 import static org.apache.storm.utils.Utils.sleep;
 
@@ -50,7 +47,7 @@ public class XugglerStreamWriter {
     private IContainer writer;
     private double frameRate = -1;
     private String[] ffmpegParams;
-    private JPEGImageCodec jpegImageCodec;
+    private ImageCodec imageCodec;
 
     /**
      * Creates a XugglerStreamWriter which will write provided frames to the location using the provided
@@ -67,7 +64,7 @@ public class XugglerStreamWriter {
         this.location = location;
         if (!this.location.endsWith("/")) this.location += "/";
         this.connector = connector;
-        this.jpegImageCodec = new TurboJPEGImageCodec();
+        this.imageCodec = new TurboImageCodec();
     }
 
     /**
@@ -92,7 +89,7 @@ public class XugglerStreamWriter {
         tmpDir = File.createTempFile("abc12", "def");
         tmpDir.delete();
         tmpDir = tmpDir.getParentFile();
-        this.jpegImageCodec = new TurboJPEGImageCodec();
+        this.imageCodec = new TurboImageCodec();
     }
 
     /**
@@ -153,7 +150,7 @@ public class XugglerStreamWriter {
             }
             frameRate *= speed;
 
-            BufferedImage frame = this.jpegImageCodec.JPEGBytesToBufferedImage(frames.get(0).getImageBytes());
+            BufferedImage frame = this.imageCodec.BytesToBufferedImage(frames.get(0).getImageBytes(), frames.get(0).getImageType());
 
             currentFile = new File(tmpDir, frames.get(0).getStreamId() + "_" + fileCount + "." + this.container);
             logger.info("Writing TMP video to: " + currentFile);
@@ -161,7 +158,7 @@ public class XugglerStreamWriter {
         }
         // add frames to video
         for (Frame frame : frames) {
-            addImage(this.jpegImageCodec.JPEGBytesToBufferedImage(frame.getImageBytes()));
+            addImage(this.imageCodec.BytesToBufferedImage(frame.getImageBytes(), frame.getImageType()));
         }
 
         // check if we have written the required number of frames

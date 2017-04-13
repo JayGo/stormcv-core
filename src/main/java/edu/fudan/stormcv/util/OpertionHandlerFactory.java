@@ -1,13 +1,10 @@
 package edu.fudan.stormcv.util;
 
 import edu.fudan.lwang.codec.OperationHandler;
-import edu.fudan.stormcv.codec.JPEGImageCodec;
+import edu.fudan.stormcv.codec.ImageCodec;
 import edu.fudan.stormcv.constant.BOLT_HANDLE_TYPE;
-import edu.fudan.stormcv.codec.TurboJPEGImageCodec;
+import edu.fudan.stormcv.codec.TurboImageCodec;
 import edu.fudan.stormcv.model.Frame;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.opencv.core.Mat;
 
 import java.awt.image.BufferedImage;
@@ -19,20 +16,17 @@ import java.awt.image.BufferedImage;
  * Description:
  */
 public class OpertionHandlerFactory {
-	
-	
-	
     public static OperationHandler<?> create(BOLT_HANDLE_TYPE type) {
         switch (type) {
             case BOLT_HANDLE_TYPE_BUFFEREDIMAGE: {
                 return new OperationHandler<BufferedImage>() {
                     private BufferedImage decodedData = null;
-                    private JPEGImageCodec codec = new TurboJPEGImageCodec();
 
-                    
+                    private ImageCodec codec = new TurboImageCodec();
+
                     @Override
                     public boolean fillSourceBufferQueue(Frame frame) {
-                        this.decodedData = codec.JPEGBytesToBufferedImage(frame.getImageBytes());
+                        this.decodedData = codec.BytesToBufferedImage(frame.getImageBytes(), frame.getImageType());
                         return true;
                     }
 
@@ -42,8 +36,8 @@ public class OpertionHandlerFactory {
                     }
 
                     @Override
-                    public byte[] getEncodedData(BufferedImage processedResult) {
-                        return codec.BufferedImageToJPEGBytes(processedResult);
+                    public byte[] getEncodedData(BufferedImage processedResult, String imageType) {
+                        return codec.BufferedImageToBytes(processedResult, imageType);
                     }
                 };
             }
@@ -51,20 +45,11 @@ public class OpertionHandlerFactory {
                 return new OperationHandler<Mat>() {
                     private Mat decodedData = null;
 
-                    private JPEGImageCodec codec = new TurboJPEGImageCodec();
- 
-                    
-                    private Logger logger = LoggerFactory.getLogger(OperationHandler.class);
-                    
-                    
+                    private ImageCodec codec = new TurboImageCodec();
+
                     @Override
                     public boolean fillSourceBufferQueue(Frame frame) {
-                    	
-                    	////////// decode to Mat //////////
-                        this.decodedData = codec.JPEGBytesToMat(frame.getImageBytes());
-                        if(decodedData == null || decodedData.empty()) return false;
-                        ///////// end of decode ///////
-                        
+                        this.decodedData = codec.BytesToMat(frame.getImageBytes(), frame.getImageType());
                         return true;
                     }
 
@@ -74,14 +59,8 @@ public class OpertionHandlerFactory {
                     }
 
                     @Override
-                    public byte[] getEncodedData(Mat processedResult) {
-//                    	long start = System.currentTimeMillis();
-                    	byte [] encodedData = codec.MatToJPEGBytes(processedResult);
-                    	if(encodedData ==null) return null;
-//                    	long end = System.currentTimeMillis();
-//                    	
-
-                        return encodedData;
+                    public byte[] getEncodedData(Mat processedResult,  String imageType) {
+                        return codec.MatToBytes(processedResult, imageType);
                     }
                 };
             }
