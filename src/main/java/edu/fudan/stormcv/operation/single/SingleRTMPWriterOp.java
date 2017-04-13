@@ -9,6 +9,8 @@ import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.model.serializer.FrameSerializer;
+import edu.fudan.stormcv.util.TimeElasper;
+
 import org.apache.storm.task.TopologyContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,8 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
     private Boolean isCoderInit = false;
     private double frameRate = 0.0;
     private int bitRate = 512000;
+    private int frameNr = 0;
+    private TimeElasper timeElasper = new TimeElasper();
     //private IPacket packet;
 
     private IContainerFormat containerFormat;
@@ -142,7 +146,9 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
     public List<Frame> execute(CVParticle particle, OperationHandler codecHandler) throws Exception {
         List<Frame> result = new ArrayList<Frame>();
         Frame frame = (Frame) particle;
-
+        
+        long start = System.currentTimeMillis();
+       
         codecHandler.fillSourceBufferQueue(frame);
         BufferedImage image = (BufferedImage) codecHandler.getDecodedData();
 
@@ -150,6 +156,9 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
             logger.error("image null");
             return result;
         }
+        
+        
+        
         if (!container.isOpened()) {
             logger.error("The container of the rtmp server unexcepect closed!");
             initCoder();
@@ -211,6 +220,15 @@ public class SingleRTMPWriterOp implements ISingleInputOperation<Frame> {
 //                        containerFormat);
                 logger.warn("write frame {} to packet failed!", frame.getSequenceNr());
             }
+            
+            long end = System.currentTimeMillis();
+            timeElasper.push((int)(end-start));
+    		if(frameNr == 100 || frameNr == 500 || frameNr == 900
+    				|| frameNr == 1300 || frameNr == 1700 || frameNr == 2100 || frameNr == 2500) {
+    			logger.info("Operation on: "+getContext()+" Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(frameNr));
+    		}
+    		frameNr++;
+            
         }
         //packet.reset();
         return result;

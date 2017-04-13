@@ -163,13 +163,13 @@ public class GrayScaleTopologyJPEGWithOpts extends BaseTopology {
 
         if (view720p) {
             if (this.type == BOLT_OPERTION_TYPE.FACEDETECT) {
-                urls.add(GlobalConstants.Pseudo720pFaceRtspAddress);
+//                urls.add(GlobalConstants.Pseudo720pFaceRtspAddress);
             } else {
                 urls.add(GlobalConstants.Pseudo720pRtspAddress);
             }
         } else {
             if (this.type == BOLT_OPERTION_TYPE.FACEDETECT) {
-                urls.add(GlobalConstants.PseudoFaceRtspAddress);
+//                urls.add(GlobalConstants.PseudoFaceRtspAddress);
             } else {
                 urls.add(GlobalConstants.PseudoRtspAddress);
             }

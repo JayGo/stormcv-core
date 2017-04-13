@@ -147,10 +147,10 @@ public class BatchH264InputBolt extends CVParticleBolt implements RemovalListene
     private Queue<Frame> mEncodedFrameQueue;
 
     private void init() {
-        mDecodeQueueId = mSourceInfo.getEncodeQueueId() + "_" + operation.getContext() + "_decode";
-        mSourceQueueId = mSourceInfo.getEncodeQueueId() + "_" + operation.getContext() + "_source";
-        mResultMatQueueId = mSourceInfo.getEncodeQueueId() + "_" + operation.getContext() + "_result";
-        mEncodedQueueId = mSourceInfo.getEncodeQueueId() + "_" + operation.getContext() + "_encode";
+        mDecodeQueueId = mSourceInfo.getSourceId() + "_" + operation.getContext() + "_decode";
+        mSourceQueueId = mSourceInfo.getSourceId() + "_" + operation.getContext() + "_source";
+        mResultMatQueueId = mSourceInfo.getSourceId() + "_" + operation.getContext() + "_result";
+        mEncodedQueueId = mSourceInfo.getSourceId() + "_" + operation.getContext() + "_encode";
 
 
         // Register the source queue.

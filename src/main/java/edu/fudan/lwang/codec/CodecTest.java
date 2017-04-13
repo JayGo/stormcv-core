@@ -13,9 +13,9 @@ public class CodecTest {
         //************* this block is a test of lwang's encoder and decoder ********
         Codec.startEncodeToFrameQueue(mSourceInfo);
 
-        String decoderQueueId = mSourceInfo.getEncodeQueueId() + "_decoder";
+        String decoderQueueId = mSourceInfo.getSourceId() + "_decoder";
         MatQueueManager.getInstance().registerQueue(decoderQueueId);
-        Codec.registerDecoder(mSourceInfo, mSourceInfo.getEncodeQueueId(), decoderQueueId);
+        Codec.registerDecoder(mSourceInfo, mSourceInfo.getSourceId(), decoderQueueId);
         // ************************* end of block **********************************
     }
 }

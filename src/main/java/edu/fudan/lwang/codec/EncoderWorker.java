@@ -1,12 +1,19 @@
 package edu.fudan.lwang.codec;
 
+import edu.fudan.lwang.codec.Common;
 import edu.fudan.lwang.codec.Common.CodecType;
 import edu.fudan.stormcv.util.TimeElasper;
+
+import org.apache.storm.shade.org.apache.zookeeper.KeeperException.Code;
+import org.apache.storm.thrift.server.THsHaServer;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfInt;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.amazonaws.services.opsworks.model.Source;
 
 public class EncoderWorker extends Thread {
 
@@ -19,6 +26,10 @@ public class EncoderWorker extends Thread {
     private int frameWidth;
     private int frameHeight;
     private Mat frame;
+    
+    private SourceInfo mSourceInfo;
+    
+    private int frameNrRead = 0;
 
     private int frameNr = 0;
     private TimeElasper timeElasper = new TimeElasper();
@@ -54,6 +65,25 @@ public class EncoderWorker extends Thread {
         this.frameHeight = frameHeight;
         this.mEncoderCallBack = encoderCallBack;
         return this;
+    }
+    
+    public EncoderWorker(SourceInfo sourceInfo, EncoderCallback encoderCallBack) {
+    	this.mSourceInfo = sourceInfo;
+        this.encoderId = mSourceInfo.getSourceId();
+        this.codecType = mSourceInfo.getCodecType();
+    	this.videoAddr = mSourceInfo.getVideoAddr();
+        this.frameWidth = mSourceInfo.getFrameWidth();
+        this.frameHeight = mSourceInfo.getFrameHeight();
+    	this.mEncoderCallBack = encoderCallBack;
+    }
+    
+    public EncoderWorker setCapture() {
+    	VideoCapture capture = new VideoCapture();
+    	while(!capture.open(videoAddr)) {
+    		
+    	}
+    	this.capture = capture;
+    	return this;
     }
 
     public String getVideoAddr() {
@@ -113,8 +143,11 @@ public class EncoderWorker extends Thread {
     }
 
     public int registerEncoder() {
-        int codecTypeInt = CodecHelper.getInstance().getCodecTypeInt(codecType);
-        return CodecHelper.getInstance().registerEncoder(encoderId, codecTypeInt, frameWidth, frameHeight);
+        int codecTypeInt = CodecHelper.getInstance().getCodecTypeInt(mSourceInfo.getCodecType());
+        
+		MatOfInt params = new MatOfInt();
+		Mat sample = Codec.fetchMatSample(mSourceInfo.getVideoAddr(), false);
+		return CodecHelper.getInstance().registerEncoder(mSourceInfo.getSourceId(), codecTypeInt, sample.nativeObj, params.nativeObj);
     }
 
     public void releaseEncoder() {
@@ -124,22 +157,48 @@ public class EncoderWorker extends Thread {
     private void processEncoding() {
         Mat processedMat = mEncoderCallBack.beforeDataEncoded(frame);
 
-//		long start = System.currentTimeMillis();
+		long start = System.currentTimeMillis();
 //		logger.info("encode "+ ++frameNr + "frame started!");
         byte[] encodedData = CodecHelper.getInstance().encodeFrame(encoderId, processedMat.nativeObj);
-//		long end = System.currentTimeMillis();
+		long end = System.currentTimeMillis();
 //		logger.info("encode "+frameNr + "frame done!");
-//		timeElasper.push((int)(end-start));
+		timeElasper.push((int)(end-start));
+		
+		if(frameNr == 100 || frameNr == 500 || frameNr == 900
+				|| frameNr == 1300 || frameNr == 1700 || frameNr == 2100 || frameNr == 2500) {
+			logger.info("Encoder on "+encoderId+": Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(frameNr));
+		}
 //		
 //		if(frameNr == 100) {
-//			logger.info("Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(100));
-//		}				
+//			logger.info("Encoder on "+encoderId+": Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(100));
+//		}
+//		
+//		if(frameNr == 500) {
+//			logger.info("Encoder on "+encoderId+": Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(500));
+//		}
+//		
+//		if(frameNr == 900) {
+//			logger.info("Encoder on "+encoderId+": Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(900));
+//		}
+//		
+//		if(frameNr == 1300) {
+//			logger.info("Encoder on "+encoderId+": Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(1300));
+//		}
+//		
+//		if(frameNr == 1700) {
+//			logger.info("Encoder on "+encoderId+": Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(1700));
+//		}
 //		
 //		if(frameNr == 2000) {
-//			logger.info("Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(2000));
+//			logger.info("Encoder on "+encoderId+": Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(2000));
 //		}
-
+//
+//		if(frameNr == 2500) {
+//			logger.info("Encoder on "+encoderId+": Top "+frameNr+"'s time average cost: "+timeElasper.getKAve(2500));
+//		}
+		
 //		logger.info(++frameNr + "frame ecoded data bytes length: "+encodedData.length);
+		frameNr++;
         mEncoderCallBack.onDataEncoded(encodedData);
 //		logger.info("encode complete!");
     }
@@ -161,6 +220,7 @@ public class EncoderWorker extends Thread {
                     if (!frame.empty()) {
                         //System.out.println("channel: "+frame.channels() + " depth: " + frame.depth() + " elementSize:" + frame.elemSize());
                         processEncoding();
+//                        Highgui.imwrite("/home/jliu/Pictures/raw/"+frameNrRead++ +".jpg", frame);
                     }
                 }
             }
