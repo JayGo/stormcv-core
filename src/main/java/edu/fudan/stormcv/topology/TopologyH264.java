@@ -45,7 +45,7 @@ public class TopologyH264 extends BaseTopology {
     	LibLoader.loadHgCodecLib();
         LibLoader.loadOpenCVLib();
         LibLoader.loadRtmpStreamerLib();
-    	TopologyH264 mTopologyH264 = new TopologyH264("test1", GlobalConstants.DefaultRTMPServer, GlobalConstants.Video720p, "gray");
+    	TopologyH264 mTopologyH264 = new TopologyH264("test1", GlobalConstants.DefaultRTMPServer, GlobalConstants.Pseudo720pFaceRtspAddress, "gray");
     	try {
 			mTopologyH264.submitTopology();
 		} catch (Exception e) {

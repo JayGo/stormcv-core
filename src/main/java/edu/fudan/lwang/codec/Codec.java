@@ -5,7 +5,6 @@ import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.model.Frame;
 import kafka.serializer.Decoder;
 
-import org.apache.logging.log4j.core.appender.db.jpa.converter.StackTraceElementAttributeConverter;
 import org.opencv.core.Mat;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
