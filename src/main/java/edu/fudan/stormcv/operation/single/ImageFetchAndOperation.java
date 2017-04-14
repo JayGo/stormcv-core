@@ -11,6 +11,7 @@ import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.model.ImageHandle;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.model.serializer.FrameSerializer;
+import edu.fudan.stormcv.util.FileUtil;
 import edu.fudan.stormcv.util.connector.ConnectorHolder;
 import edu.fudan.stormcv.util.connector.FileConnector;
 import edu.fudan.stormcv.util.OpertionHandlerFactory;
@@ -45,6 +46,7 @@ public class ImageFetchAndOperation implements  ISingleInputOperation<CVParticle
     private boolean drawFrame = true;
     private DrawFeaturesOp drawFeaturesOp;
     private OpertionFactory opertionFactory;
+    private int taskIndex = 0;
 
     public ImageFetchAndOperation() {
         this.streamToOutputLocation = new HashMap<>();
@@ -70,6 +72,7 @@ public class ImageFetchAndOperation implements  ISingleInputOperation<CVParticle
         if (operation != null) {
             operation.prepare(stormConf, context);
         }
+        this.taskIndex = context.getThisTaskIndex();
     }
 
     @Override
@@ -120,6 +123,10 @@ public class ImageFetchAndOperation implements  ISingleInputOperation<CVParticle
                         if (drawFrame) {
                             if (this.streamToOutputLocation.get(input.getStreamId()) == null) {
                                 String outputLocation = (String) input.getMetadata().get("outputLocation");
+
+                                outputLocation += "-" + this.taskIndex;
+                                FileUtil.TestAndMkdir(outputLocation, false);
+
                                 streamToOutputLocation.put(input.getStreamId(), outputLocation);
                                 drawFeaturesOp = drawFeaturesOp.destination(outputLocation);
                             }

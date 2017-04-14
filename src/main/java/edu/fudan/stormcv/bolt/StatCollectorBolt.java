@@ -11,6 +11,7 @@ import com.itextpdf.text.pdf.PdfWriter;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.model.serializer.FrameSerializer;
+import edu.fudan.stormcv.util.FileUtil;
 import edu.fudan.stormcv.util.connector.ConnectorHolder;
 import edu.fudan.stormcv.util.connector.FileConnector;
 import edu.fudan.stormcv.util.connector.LocalFileConnector;
@@ -62,6 +63,8 @@ public class StatCollectorBolt extends CVParticleBolt {
         if (this.streamTotalTaskSize.get(streamId) == null) {
             int totalTaskSize = (int) frame.getMetadata().get("totalTaskSize");
             this.streamTotalTaskSize.put(streamId, totalTaskSize);
+            logger.info("{} - taskSize: {}", streamId, totalTaskSize);
+
             this.streamToImageProcessInfo.put(streamId, new ArrayList<BaseProcessInfo>());
             this.streamStartTime.put(streamId, Long.MAX_VALUE);
             this.streamEndTime.put(streamId, Long.MIN_VALUE);
@@ -87,7 +90,7 @@ public class StatCollectorBolt extends CVParticleBolt {
 
         this.streamTotalProcessTime.put(streamId, streamTotalProcessTime.get(streamId) + info.getProcessime());
 
-        if (this.streamTotalTaskSize.get(streamId) == this.streamReceivedTaskSize.get(streamId)) {
+        if ((int)this.streamTotalTaskSize.get(streamId) == (int)this.streamReceivedTaskSize.get(streamId)) {
             logger.info("stream {} has finished the image processing, start to generate the process report", streamId);
             generateReport(streamId);
             cleanStream(streamId);
@@ -97,6 +100,8 @@ public class StatCollectorBolt extends CVParticleBolt {
             String reportLocation = (String) input.getMetadata().get("outputLocation");
             reportLocation = reportLocation.endsWith("/") ? reportLocation : (reportLocation + "/");
             streamToOutputLocation.put(streamId, reportLocation);
+
+            FileUtil.TestAndMkdir(reportLocation, false);
         }
         return result;
     }
