@@ -198,7 +198,6 @@ public class BatchH264InputBolt extends CVParticleBolt implements RemovalListene
     void prepare(Map stormConf, TopologyContext context) {
         try {
             LibLoader.loadOpenCVLib();
-            LibLoader.loadH264CodecLib();
             LibLoader.loadHgCodecLib();
 //            operation.prepare(stormConf, context);
             init();

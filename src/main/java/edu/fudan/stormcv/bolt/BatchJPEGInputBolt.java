@@ -115,7 +115,6 @@ public class BatchJPEGInputBolt extends CVParticleBolt implements RemovalListene
     void prepare(Map stormConf, TopologyContext context) {
         try {
             LibLoader.loadOpenCVLib();
-            LibLoader.loadH264CodecLib();
             LibLoader.loadHgCodecLib();
             operation.prepare(stormConf, context);
         } catch (Exception e) {
