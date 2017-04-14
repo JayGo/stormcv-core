@@ -43,6 +43,7 @@ public class CVParticleSignalSpout extends BaseSignalSpout {
     protected SpoutOutputCollector collector;
     private boolean faultTolerant = false;
     private IFetcher<? extends CVParticle> fetcher;
+    private int sleepMs = 10;
 
     public CVParticleSignalSpout(String zkName, IFetcher<? extends CVParticle> fetcher) {
         super(zkName);
@@ -149,6 +150,8 @@ public class CVParticleSignalSpout extends BaseSignalSpout {
                         + e.getMessage());
             }
         }
+
+        Utils.sleep(sleepMs);
     }
 
     @Override

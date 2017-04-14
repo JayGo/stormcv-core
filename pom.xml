@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>edu.fudan</groupId>
     <artifactId>stormcv</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.2-SNAPSHOT</version>
     <name>StormCV</name>
     <description>A Storm contribution to ease the development of computer vision topologies</description>
     <packaging>jar</packaging>
