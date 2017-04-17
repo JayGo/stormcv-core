@@ -8,7 +8,7 @@ public class CodecTest {
         LibLoader.loadHgCodecLib();
         LibLoader.loadOpenCVLib();
 
-        SourceInfo mSourceInfo = Codec.fetchSourceInfo("/home/jliu/Videos/grass1080.mp4", "12345678", CodecType.CODEC_TYPE_H264_CPU);
+        SourceInfo mSourceInfo = Codec.fetchSourceInfo("/home/nfs/videos/grass1080.mp4", "12345678", CodecType.CODEC_TYPE_H264_CPU);
         System.out.println(mSourceInfo);
         //************* this block is a test of lwang's encoder and decoder ********
         Codec.startEncodeToFrameQueue(mSourceInfo);

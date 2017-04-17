@@ -173,6 +173,7 @@ public class HaarCascadeOp extends OpenCVOp<CVParticle> implements ISingleInputO
             } else {
                 frame.swapImageBytes(codecHandler.getEncodedData(frameImage, frame.getImageType()));
             }
+            image.release();
             Feature feature = new Feature(particle.getStreamId(), particle.getSequenceNr(), name, 0, descriptors, null);
             if (outputFrame) {
                 frame.getFeatures().add(feature);

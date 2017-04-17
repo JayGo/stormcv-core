@@ -112,7 +112,10 @@ public class GrayImageOp implements ISingleInputOperation<Frame> {
 //        	long startEncoding = System.currentTimeMillis();
             byte[] encodedData = codecHandler.getEncodedData(out, "CPU_H264");
 //        	long endEncoding = System.currentTimeMillis();
-        	
+
+            //release mat
+            in.release();
+            out.release();
         	
 //        	timeElasperEncoder.push((int)(endEncoding-startEncoding));
 //    		if(frameNrEncoded == 100 || frameNrEncoded == 500 || frameNrEncoded == 900

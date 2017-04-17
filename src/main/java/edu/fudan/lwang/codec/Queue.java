@@ -60,12 +60,13 @@ public class Queue<E> {
         if (queue.size() == limit) {
                 try {
                     if (queue.take() != null) {
+                        dropCount++;
                         if(input instanceof Mat) {
-                            logger.info("{} queue drop Mat count: {}", queueId, dropCount);
+                            logger.debug("{} queue drop Mat count: {}", queueId, dropCount);
                         }
 
                         if(input instanceof Frame) {
-                            logger.info("{} queue drop Frame count: {}", queueId, dropCount);
+                            logger.debug("{} queue drop Frame count: {}", queueId, dropCount);
                         }
                         //--size;
 //                        if (size < 0) {
