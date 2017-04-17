@@ -164,6 +164,10 @@ public class ColorHistogramOp extends OpenCVOp<CVParticle> implements
                 hist_descriptors.add(new Descriptor(streamId, sequenceNr, box, 0, values));
             }
             frame.swapImageBytes(codecHandler.getEncodedData(matImage, frame.getImageType()));
+
+            hist.release();
+            matImage.release();
+
         } else {
             BufferedImage bufferedImage = (BufferedImage) codecHandler.getDecodedData();
 

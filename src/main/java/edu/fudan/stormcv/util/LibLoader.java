@@ -21,9 +21,6 @@ public final class LibLoader {
     private static final String opencvlibName = "libopencv_java2413.so";
     private static final String defaultOpenCVLibPath = "/usr/local/opencv/share/OpenCV/java/";
 
-    private static final String h264LibName = "libHgCodec_alpha_0_0.so";
-    private static final String defaultH264LibPath = "/usr/local/LwangCodec/lib/";
-
     private static final String bayesFGELibName = "bayes_fge.so";
     private static final String defaultBayesFGELibPath = "/usr/local/storm/jniLib/";
 
@@ -38,10 +35,6 @@ public final class LibLoader {
 
     public static boolean loadOpenCVLib() {
         return loadLibrary(defaultOpenCVLibPath, opencvlibName);
-    }
-
-    public static boolean loadH264CodecLib() {
-        return loadLibrary(defaultH264LibPath, h264LibName);
     }
 
     public static boolean loadBayesFGELib() {

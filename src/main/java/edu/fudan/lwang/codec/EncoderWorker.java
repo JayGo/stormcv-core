@@ -160,6 +160,9 @@ public class EncoderWorker extends Thread {
 		long start = System.currentTimeMillis();
 //		logger.info("encode "+ ++frameNr + "frame started!");
         byte[] encodedData = CodecHelper.getInstance().encodeFrame(encoderId, processedMat.nativeObj);
+
+        processedMat.release();
+
 		long end = System.currentTimeMillis();
 //		logger.info("encode "+frameNr + "frame done!");
 		timeElasper.push((int)(end-start));
