@@ -7,22 +7,25 @@ import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.constant.RequestCode;
 import edu.fudan.stormcv.constant.ResultCode;
 import edu.fudan.stormcv.model.ImageRequest;
+import edu.fudan.stormcv.service.db.DBManager;
+import edu.fudan.stormcv.service.model.CameraInfo;
+import edu.fudan.stormcv.service.model.EffectRtmpInfo;
+import edu.fudan.stormcv.service.process.ProcessManager;
+import edu.fudan.stormcv.service.process.WorkerInfo;
 import edu.fudan.stormcv.spout.SpoutSignalClient;
-import edu.fudan.stormcv.topology.TCPCaptureTopology;
 import edu.fudan.stormcv.topology.TopologyH264;
-
-import org.apache.storm.shade.com.codahale.metrics.MetricRegistryListener.Base;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lwang
@@ -43,10 +46,14 @@ public class TCPCaptureServer {
 
     private List<TopologyH264> topologys;
 
+    private Map<String, TopologyH264> topologies;
+
     public TCPCaptureServer() {
         try {
             msgServerSocket = new ServerSocket(serverMsgPort);
             topologys = new ArrayList<TopologyH264>();
+
+            topologies = new HashMap<>();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -71,13 +78,214 @@ public class TCPCaptureServer {
                 e.printStackTrace();
             }
             logger.info("Accept from: " + socket.getInetAddress());
-            MessageReceiver receiver = new MessageReceiver(socket);
-            new Thread(receiver).start();
+//            MessageReceiver receiver = new MessageReceiver(socket);
+//            new Thread(receiver).start();
+            MessageHandler handler = new MessageHandler(socket);
+            new Thread(handler).start();
+        }
+    }
+
+    private class MessageHandler implements Runnable {
+
+        private Socket socket = null;
+
+        public MessageHandler(Socket socket) {
+            this.socket = socket;
+            logger.info("Now thread#: " + Thread.currentThread().getId());
+        }
+
+        @Override
+        public void run() {
+            String request = receiveMessage();
+            logger.info("receive message {}", request);
+            JSONObject jRequest = new JSONObject(request);
+            if (!jRequest.isNull("code")) {
+                int code = jRequest.getInt("code");
+                String result = null;
+                String streamId = jRequest.getString("streamId");;
+                switch (code) {
+                    case RequestCode.START_RAW :
+                        result = pushRawRtmpStream(streamId);
+                        break;
+                    case RequestCode.END_RAW :
+                        String host = jRequest.getString("host");
+                        long pid = jRequest.getLong("pid");
+                        result = stopRawtmp(streamId, host, pid);
+                        break;
+                    case RequestCode.START_EFFECT :
+                        logger.info("receive start effect request: {}", jRequest.toString());
+                        String effectType = jRequest.getString("effectType");
+                        Map<String, Object> effectParams = jRequest.getJSONObject("effectParams").toMap();
+                        result = startEffectTopology(streamId, effectType, effectParams);
+                        break;
+                    case RequestCode.END_EFFECT :
+                        logger.info("receive stop effect request: {}", jRequest.toString());
+                        int id = jRequest.getInt("id");
+                        result = stopEffectTopology(id);
+                        break;
+
+                    default:
+                        logger.error("Unsupport request: {}!", request);
+                        break;
+                }
+
+                if (result != null) {
+                    sendMessage(result);
+                } else {
+                    logger.error("no result for the request");
+                }
+            }
+            this.close();
+        }
+
+        String receiveMessage() {
+//            StringBuilder sb = new StringBuilder();
+//            try {
+//                Reader reader = new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8);
+//                char chars[] = new char[128];
+//                int len;
+//                while ((len = reader.read(chars)) != -1) {
+//                    sb.append(new String(chars, 0, len));
+//                }
+//            } catch (IOException e)  {
+//                e.printStackTrace();
+//            }
+            String result = null;
+            BufferedReader bufferedReader = null;
+            try {
+                bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                result = bufferedReader.readLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            logger.info("finished receive socket message, read:{}", result);
+            return result;
+//            logger.info("finished receive socket message, read:{}", sb.toString());
+//            return sb.toString();
+        }
+
+        void sendMessage(String msg) {
+            try {
+//                Writer writer = new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8);
+//                writer.write(msg);
+//                writer.flush();
+                PrintWriter printWriter =new PrintWriter(socket.getOutputStream(),true);
+                printWriter.println(msg);
+                printWriter.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            logger.info("finished send socket message {}", msg);
+        }
+
+        void close() {
+            try {
+                this.socket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private String pushRawRtmpStream(String streamId) {
+            JSONObject retJson = new JSONObject();
+            retJson.put("code", RequestCode.RET_START_RAW);
+            retJson.put("streamId", streamId);
+
+            CameraInfo info = DBManager.getInstance().getCameraInfo(streamId);
+            if (info.isValid()) {
+                String address = info.getAddress();
+                float frameRate = info.getFrameRate();
+                String rtmpAddr = GlobalConstants.DefaultRTMPServer + streamId;
+                String command = "ffmpeg -re -i " + address + " -qscale 0 -f flv -r " + frameRate + " -s " + info.getWidth() + "x" + info.getHeight() + " -an " + rtmpAddr;
+                logger.info("command: {}", command);
+                WorkerInfo worker = ProcessManager.getInstance().startProcess(command);
+                retJson.put("host", worker.getHostIp());
+                retJson.put("pid", worker.getPid());
+                retJson.put("rtmpAddress", rtmpAddr);
+                retJson.put("valid", true);
+                retJson.put("status", ResultCode.RESULT_SUCCESS);
+            } else {
+                retJson.put("status", ResultCode.RESULT_FAILED);
+            }
+            return retJson.toString();
+        }
+
+        public String stopRawtmp(String streamId, String host, long pid) {
+            boolean isKilled = ProcessManager.getInstance().killProcess(host, pid);
+            JSONObject retJson = new JSONObject();
+            retJson.put("code", RequestCode.RET_END_RAW);
+            retJson.put("streamId", streamId);
+            if (isKilled) {
+                retJson.put("status", ResultCode.RESULT_SUCCESS);
+            } else {
+                retJson.put("status", ResultCode.RESULT_FAILED);
+            }
+            return retJson.toString();
+        }
+
+        public String startEffectTopology(String streamId, String effectType, Map<String, Object> effectParams) {
+            JSONObject retJson = new JSONObject();
+            retJson.put("code", RequestCode.RET_START_EFFECT);
+            retJson.put("streamId", streamId);
+            String topoId = streamId + "_" + effectType + "_" + effectParams.hashCode();
+            String rtmpServerAddress = GlobalConstants.DefaultRTMPServer;
+
+            CameraInfo info = DBManager.getInstance().getCameraInfo(streamId);
+            if (info.isValid()) {
+                String address = info.getAddress();
+                TopologyH264 topologyH264 = new TopologyH264(topoId, rtmpServerAddress, address, effectType, effectParams, info.getFrameRate());
+                topologys.add(topologyH264);
+
+                topologies.put(topoId, topologyH264);
+
+                try {
+                    logger.info("submit topology {}, address = {}, rtmp = {}", topoId, address, rtmpServerAddress);
+                    topologyH264.submitTopology();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    retJson.put("status", ResultCode.RESULT_FAILED);
+                    return retJson.toString();
+                }
+
+                retJson.put("effectType", effectType);
+                retJson.put("effectParams", new JSONObject(effectParams));
+                retJson.put("rtmpAddress", (rtmpServerAddress + topoId));
+                retJson.put("topoId", topoId);
+                retJson.put("valid", true);
+                retJson.put("status", ResultCode.RESULT_SUCCESS);
+
+            } else {
+                retJson.put("status", ResultCode.RESULT_FAILED);
+            }
+
+            return retJson.toString();
+        }
+
+        public String stopEffectTopology(int id) {
+            JSONObject retJson = new JSONObject();
+            retJson.put("code", RequestCode.RET_END_EFFECT);
+
+            EffectRtmpInfo info = DBManager.getInstance().getCameraEffectRtmpInfo(id);
+            String topoId = info.getTopoId();
+            retJson.put("topoId", topoId);
+             TopologyH264 topology = topologies.get(topoId);
+            if (topology != null) {
+                String retStr = topology.killTopology();
+                if (retStr.contains("Error")) {
+                    retJson.put("status", ResultCode.RESULT_FAILED);
+                } else {
+                    retJson.put("status", ResultCode.RESULT_SUCCESS);
+                }
+            } else {
+                retJson.put("status", ResultCode.RESULT_FAILED);
+            }
+
+            return retJson.toString();
         }
     }
 
 
-    private class MessageReceiver implements Runnable {
+/*    private class MessageReceiver implements Runnable {
         private Socket socket = null;
 
         public MessageReceiver(Socket socket) {
@@ -254,7 +462,7 @@ public class TCPCaptureServer {
             result.setCode(ResultCode.RESULT_OK);
             return result;
         }
-    }
+    }*/
 
 
 }

@@ -46,6 +46,7 @@ public abstract class BaseTopology {
         setSpout();
         setBolts();
         cluster = new LocalCluster();
+
         cluster.submitTopology(getStreamId(), conf, builder.createTopology());
         isTopologyRunningAtLocal = true;
     }

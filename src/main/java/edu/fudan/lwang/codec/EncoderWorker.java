@@ -210,6 +210,8 @@ public class EncoderWorker extends Thread {
     public void run() {
         frame = null;
 
+
+
         if (capture == null) {
             while (!Thread.interrupted()) {
                 while ((frame = mEncoderCallBack.getDecodedData()) == null) ;
@@ -220,6 +222,7 @@ public class EncoderWorker extends Thread {
             while (!Thread.interrupted() && (capture != null && capture.open(videoAddr))) {
                 if (capture != null) logger.info("capture is opened for: " + videoAddr);
                 while (!Thread.interrupted() && (capture != null && capture.read(frame))) {
+
                     if (!frame.empty()) {
                         //System.out.println("channel: "+frame.channels() + " depth: " + frame.depth() + " elementSize:" + frame.elemSize());
                         processEncoding();
@@ -229,7 +232,8 @@ public class EncoderWorker extends Thread {
             }
         }
 
-        releaseEncoder();
+        capture.release();
+        //releaseEncoder();
         /**
          * send msg to stop decoder
          */
