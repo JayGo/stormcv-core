@@ -218,4 +218,12 @@ public class SingleH264InputBolt extends CVParticleBolt {
 //        }
         return results;
     }
+
+    @Override
+    public void cleanup() {
+        logger.info("stop Encoder {}", this.mEncodedQueueId);
+        Codec.stopEncoder(this.mEncodedQueueId);
+        logger.info("stop Decoder {}", this.mDecodeQueueId);
+        Codec.stopDecoder(this.mDecodeQueueId);
+    }
 }

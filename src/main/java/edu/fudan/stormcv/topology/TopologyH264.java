@@ -25,6 +25,9 @@ import com.xuggle.xuggler.Global;
 
 import clojure.stacktrace__init;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class TopologyH264 extends BaseTopology {
 
     private static final Logger logger = LoggerFactory.getLogger(TopologyH264.class);
@@ -33,13 +36,14 @@ public class TopologyH264 extends BaseTopology {
     private String rtmpAddr = GlobalConstants.DefaultRTMPServer;
     private SourceInfo sourceInfo;
     private int frameSkip = 0;
+    private float frameRate = 0.0f;
     private BOLT_OPERTION_TYPE type;
 
     private boolean sendRtmp = true;
-    private boolean view720p = true;
-    
+
     private boolean isEffect = false;
-    private String effect;
+
+    private Map<String, Object> effectParams;
     
     public static void main(String args[]) {
     	LibLoader.loadHgCodecLib();
@@ -61,6 +65,8 @@ public class TopologyH264 extends BaseTopology {
         this.type = BOLT_OPERTION_TYPE.UNSUPPORT;
         isTopologyRunningAtLocal = true;
         conf.setNumWorkers(2);
+
+        this.effectParams = new HashMap<>();
     }
     
     public TopologyH264(String streamId, String rtmpAddr, String videoAddr, String effectType) {
@@ -81,7 +87,17 @@ public class TopologyH264 extends BaseTopology {
     		this.type = findEffectType(emsg.getEffectType());
     	}
     	conf.setNumWorkers(2);
+
+        this.effectParams = new HashMap<>();
 	}
+
+	public TopologyH264(String streamId, String rtmpAddr, String videoAddr, String effectType, Map<String, Object> effectParams, float frameRate) {
+        this(streamId, rtmpAddr, videoAddr, effectType);
+        if (effectParams != null) {
+            this.effectParams.putAll(effectParams);
+        }
+        this.frameRate = frameRate;
+    }
     
 
     
@@ -159,7 +175,7 @@ public class TopologyH264 extends BaseTopology {
             case RTMPSTREAMER: {
                 builder.setBolt(BOLT_OPERTION_TYPE.RTMPSTREAMER.toString(),
                         new SingleH264InputBolt(new H264RtmpStreamOp().RTMPServer(rtmpAddr).appName(streamId)
-                                .frameRate(23.98)).setSourceInfo(sourceInfo), 1)
+                                .frameRate(frameRate)).setSourceInfo(sourceInfo), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }

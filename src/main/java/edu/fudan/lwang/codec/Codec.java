@@ -355,5 +355,16 @@ public class Codec {
 
         return true;
     }
+    
+    public static void stopEncoder(String encoderId) {
+        if (mCodecManager.isEncoderAlive(encoderId)) {
+            mCodecManager.stopEncode(encoderId);
+        }
+    }
 
+    public static void stopDecoder(String decoderId) {
+        if (mCodecManager.isDecoderAlive(decoderId)) {
+            mCodecManager.stopDecode(decoderId);
+        }
+    }
 }

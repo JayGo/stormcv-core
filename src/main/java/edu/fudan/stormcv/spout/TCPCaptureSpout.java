@@ -69,8 +69,9 @@ public class TCPCaptureSpout implements IRichSpout {
 
     @Override
     public void close() {
-        // TODO Auto-generated method stub
-
+        logger.info("stopEncodeToBuffer for sourceInfo {}", mSourceInfo);
+        //TODO:this will lead to Runtime error
+//        Codec.stopEncoder(mSourceInfo.getSourceId());
     }
 
     @Override

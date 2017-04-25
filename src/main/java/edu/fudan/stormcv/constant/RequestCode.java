@@ -16,4 +16,22 @@ public class RequestCode {
     public static final int PIC_PROCESS = 13;
 
     public static final int DEFAULT = 0;
+
+
+    public static final int ADD_CAMERA = 100;
+    public static final int RET_ADD_CAMERA = 200;
+    public static final int DELETE_CAMERA = 101;
+    public static final int RET_DELETE_CAMERA = 201;
+    public static final int START_RAW = 102;
+    public static final int RET_START_RAW = 202;
+    //public static final int START_EFFECT = 103;
+    public static final int RET_START_EFFECT = 203;
+    public static final int END_RAW = 104;
+    public static final int RET_END_RAW = 204;
+    //public static final int END_EFFECT = 105;
+    public static final int RET_END_EFFECT = 205;
+    public static final int START_PICTURE = 106;
+    public static final int RET_START_PICTURE = 206;
+    public static final int END_PICTURE = 107;
+    public static final int RET_END_PICTURE = 207;
 }
