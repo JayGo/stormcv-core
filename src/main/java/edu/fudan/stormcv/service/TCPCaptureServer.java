@@ -227,19 +227,19 @@ public class TCPCaptureServer {
             JSONObject retJson = new JSONObject();
             retJson.put("code", RequestCode.RET_START_EFFECT);
             retJson.put("streamId", streamId);
-            String topoId = streamId + "_" + effectType + "_" + effectParams.hashCode();
+            String topoName = streamId + "_" + effectType + "_" + effectParams.hashCode();
             String rtmpServerAddress = GlobalConstants.DefaultRTMPServer;
 
             CameraInfo info = DBManager.getInstance().getCameraInfo(streamId);
             if (info.isValid()) {
                 String address = info.getAddress();
-                TopologyH264 topologyH264 = new TopologyH264(topoId, rtmpServerAddress, address, effectType, effectParams, info.getFrameRate());
+                TopologyH264 topologyH264 = new TopologyH264(topoName, rtmpServerAddress, address, effectType, effectParams, info.getFrameRate());
                 topologys.add(topologyH264);
 
-                topologies.put(topoId, topologyH264);
+                topologies.put(topoName, topologyH264);
 
                 try {
-                    logger.info("submit topology {}, address = {}, rtmp = {}", topoId, address, rtmpServerAddress);
+                    logger.info("submit topology {}, address = {}, rtmp = {}", topoName, address, rtmpServerAddress);
                     topologyH264.submitTopology();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -249,8 +249,8 @@ public class TCPCaptureServer {
 
                 retJson.put("effectType", effectType);
                 retJson.put("effectParams", new JSONObject(effectParams));
-                retJson.put("rtmpAddress", (rtmpServerAddress + topoId));
-                retJson.put("topoId", topoId);
+                retJson.put("rtmpAddress", (rtmpServerAddress + topoName));
+                retJson.put("topoName", topoName);
                 retJson.put("valid", true);
                 retJson.put("status", ResultCode.RESULT_SUCCESS);
 
@@ -266,9 +266,9 @@ public class TCPCaptureServer {
             retJson.put("code", RequestCode.RET_END_EFFECT);
 
             EffectRtmpInfo info = DBManager.getInstance().getCameraEffectRtmpInfo(id);
-            String topoId = info.getTopoId();
-            retJson.put("topoId", topoId);
-             TopologyH264 topology = topologies.get(topoId);
+            String topoName = info.getTopoName();
+            retJson.put("topoName", topoName);
+             TopologyH264 topology = topologies.get(topoName);
             if (topology != null) {
                 String retStr = topology.killTopology();
                 if (retStr.contains("Error")) {

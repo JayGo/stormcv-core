@@ -9,17 +9,17 @@ public class EffectRtmpInfo extends RtmpInfo {
 	private int id = -1;
 	private String effectType;
 	private Map<String, Object> effectParams;
-	private String topoId;
+	private String topoName;
 	
 	public EffectRtmpInfo() {
 		this.effectParams = new HashMap<String, Object>();
 	}
 	
 	public EffectRtmpInfo(String streamId, String rtmpAddress, boolean valid, String effectType,
-			Map<String, String> effectParams, String topoId) {
+			Map<String, String> effectParams, String topoName) {
 		super(streamId, rtmpAddress, valid);
 		this.effectType = effectType;
-		this.topoId = topoId;
+		this.topoName = topoName;
 		this.effectParams = new HashMap<>();
 		if (effectParams != null) {
 			this.effectParams.putAll(effectParams);
@@ -27,11 +27,11 @@ public class EffectRtmpInfo extends RtmpInfo {
 	}
 
 	public EffectRtmpInfo(int id, String streamId, String rtmpAddress, boolean valid, String effectType,
-			Map<String, Object> effectParams, String topoId) {
+			Map<String, Object> effectParams, String topoName) {
 		super(streamId, rtmpAddress, valid);
 		this.id = id;
 		this.effectType = effectType;
-		this.topoId = topoId;
+		this.topoName = topoName;
 		this.effectParams = new HashMap<>();
 		if (effectParams != null) {
 			this.effectParams.putAll(effectParams);
@@ -44,7 +44,7 @@ public class EffectRtmpInfo extends RtmpInfo {
 		effectType = jsonObject.getString("effectType");
 		valid = jsonObject.getBoolean("valid");
 		rtmpAddress = jsonObject.getString("rtmpAddress");
-		this.topoId = jsonObject.getString("topoId");
+		this.topoName = jsonObject.getString("topoName");
 		this.effectParams = new HashMap<>();
 		JSONObject params = jsonObject.getJSONObject("effectParams");
 		Map<String, Object> paramsMap = params.toMap();
@@ -79,19 +79,19 @@ public class EffectRtmpInfo extends RtmpInfo {
 		}
 	}
 
-	public String getTopoId() {
-		return topoId;
+	public String getTopoName() {
+		return topoName;
 	}
 
-	public void setTopoId(String topoId) {
-		this.topoId = topoId;
+	public void setTopoName(String topoName) {
+		this.topoName = topoName;
 	}
 
 	@Override
 	public String toString() {
 		return "EffectRtmpInfo [id=" + id + ", streamId=" + getStreamId() + ", rtmpAddress="
 				+ getRtmpAddress() + ", valid=" + isValid() + ", effectType=" + effectType + ", effectParams="
-				+ (new JSONObject(effectParams).toString()) + ", topoId=" + topoId + "]";
+				+ (new JSONObject(effectParams).toString()) + ", topoName=" + topoName + "]";
 	}
 
 	
