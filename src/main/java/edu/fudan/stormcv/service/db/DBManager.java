@@ -175,7 +175,7 @@ public class DBManager {
         ret.setStreamId((String) rows.get("stream_id"));
         ret.setRtmpAddress((String) rows.get("rtmp_addr"));
         ret.setValid(((int) rows.get("valid") == 0) ? true : false);
-        ret.setTopoId((String) rows.get("topo_id"));
+        ret.setTopoName((String) rows.get("topo_name"));
         ret.setEffectType((String) rows.get("effect_type"));
         String paramStr = (String) rows.get("effect_params");
 
