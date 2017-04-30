@@ -3,8 +3,8 @@ package edu.fudan.stormcv.operation.single;
 import edu.fudan.lwang.codec.OperationHandler;
 import edu.fudan.stormcv.codec.ImageCodec;
 import edu.fudan.stormcv.codec.TurboImageCodec;
-import edu.fudan.stormcv.constant.BOLT_HANDLE_TYPE;
-import edu.fudan.stormcv.constant.BOLT_OPERTION_TYPE;
+import edu.fudan.stormcv.constant.BoltHandleType;
+import edu.fudan.stormcv.constant.BoltOperationType;
 import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.model.Frame;
@@ -40,7 +40,7 @@ public class ImageFetchAndOperation implements  ISingleInputOperation<CVParticle
     private ConnectorHolder connectorHolder;
     private FileConnector fileConnector = null;
     private ImageCodec codec;
-    private BOLT_HANDLE_TYPE type;
+    private BoltHandleType type;
     private  CVParticleSerializer serializer = new FrameSerializer();
     private Map<String, String> streamToOutputLocation = null;
     private boolean drawFrame = true;
@@ -52,7 +52,7 @@ public class ImageFetchAndOperation implements  ISingleInputOperation<CVParticle
         this.streamToOutputLocation = new HashMap<>();
     }
 
-    public ImageFetchAndOperation(ISingleInputOperation operation, BOLT_HANDLE_TYPE type) {
+    public ImageFetchAndOperation(ISingleInputOperation operation, BoltHandleType type) {
         this.operation = operation;
         this.type = type;
         this.streamToOutputLocation = new HashMap<>();
@@ -90,8 +90,8 @@ public class ImageFetchAndOperation implements  ISingleInputOperation<CVParticle
 
         if (count > 0) {
             List<String> locations = imageHandle.getLocations();
-            BOLT_OPERTION_TYPE opType = imageHandle.getType();
-            if (opType != BOLT_OPERTION_TYPE.CUSTOM) {
+            BoltOperationType opType = imageHandle.getType();
+            if (opType != BoltOperationType.CUSTOM) {
                 operation = opertionFactory.getOperation(opType);
                 type = opertionFactory.getOperationHandleType(opType);
             } else if (this.operation == null) {
@@ -130,7 +130,7 @@ public class ImageFetchAndOperation implements  ISingleInputOperation<CVParticle
                                 streamToOutputLocation.put(input.getStreamId(), outputLocation);
                                 drawFeaturesOp = drawFeaturesOp.destination(outputLocation);
                             }
-                            drawFeaturesOp.execute(particle, OpertionHandlerFactory.create(BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE));
+                            drawFeaturesOp.execute(particle, OpertionHandlerFactory.create(BoltHandleType.BOLT_HANDLE_TYPE_BUFFEREDIMAGE));
                         }
                     }
                     results.addAll(operatedResult);
@@ -151,21 +151,21 @@ public class ImageFetchAndOperation implements  ISingleInputOperation<CVParticle
     }
 
     private class OpertionFactory {
-        private Map<BOLT_OPERTION_TYPE, ISingleInputOperation> operationHolder;
-        private Map<BOLT_OPERTION_TYPE, BOLT_HANDLE_TYPE> operationHandleType;
+        private Map<BoltOperationType, ISingleInputOperation> operationHolder;
+        private Map<BoltOperationType, BoltHandleType> operationHandleType;
 
         public OpertionFactory() {
             operationHolder = new HashMap<>();
             operationHandleType = new HashMap<>();
-            registerOperation(BOLT_OPERTION_TYPE.FACEDETECT,
+            registerOperation(BoltOperationType.FACEDETECT,
                     new HaarCascadeOp("faceDetect", GlobalConstants.HaarCacascadeXMLFileName).useMat(true),
-                    BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_MAT);
-            registerOperation(BOLT_OPERTION_TYPE.GRAY, new GrayImageOp(),
-                    BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_MAT);
-            registerOperation(BOLT_OPERTION_TYPE.SCALE, new ScaleImageOp(0.5f).useMat(false),
-                    BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE);
-            registerOperation(BOLT_OPERTION_TYPE.COLORHISTOGRAM, new ColorHistogramOp("colorHistogram").useMat(true),
-                    BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_MAT);
+                    BoltHandleType.BOLT_HANDLE_TYPE_MAT);
+            registerOperation(BoltOperationType.GRAY, new GrayImageOp(),
+                    BoltHandleType.BOLT_HANDLE_TYPE_MAT);
+            registerOperation(BoltOperationType.SCALE, new ScaleImageOp(0.5f).useMat(false),
+                    BoltHandleType.BOLT_HANDLE_TYPE_BUFFEREDIMAGE);
+            registerOperation(BoltOperationType.COLORHISTOGRAM, new ColorHistogramOp("colorHistogram").useMat(true),
+                    BoltHandleType.BOLT_HANDLE_TYPE_MAT);
         }
 
         public void prepare(Map stormConf, TopologyContext context) throws Exception  {
@@ -174,19 +174,19 @@ public class ImageFetchAndOperation implements  ISingleInputOperation<CVParticle
             }
         }
 
-        public void registerOperation(BOLT_OPERTION_TYPE type, ISingleInputOperation operation, BOLT_HANDLE_TYPE handle_type) {
+        public void registerOperation(BoltOperationType type, ISingleInputOperation operation, BoltHandleType handle_type) {
             operationHolder.put(type, operation);
             operationHandleType.put(type, handle_type);
         }
 
-        public ISingleInputOperation getOperation(BOLT_OPERTION_TYPE type) {
+        public ISingleInputOperation getOperation(BoltOperationType type) {
             if (operationHolder.get(type) == null) {
                 logger.error("Unsupported operation type");
             }
             return operationHolder.get(type);
         }
 
-        public BOLT_HANDLE_TYPE getOperationHandleType(BOLT_OPERTION_TYPE type) {
+        public BoltHandleType getOperationHandleType(BoltOperationType type) {
             if (operationHandleType.get(type) == null) {
                 logger.error("Unsupported operation type");
             }

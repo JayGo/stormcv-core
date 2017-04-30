@@ -6,24 +6,19 @@ import edu.fudan.jliu.message.EffectMessage;
 import edu.fudan.lwang.codec.SourceInfo;
 import edu.fudan.stormcv.batcher.SlidingWindowBatcher;
 import edu.fudan.stormcv.bolt.BatchH264InputBolt;
-import edu.fudan.stormcv.bolt.BatchJPEGInputBolt;
 import edu.fudan.stormcv.bolt.SingleH264InputBolt;
-import edu.fudan.stormcv.bolt.SingleJPEGInputBolt;
-import edu.fudan.stormcv.constant.BOLT_HANDLE_TYPE;
-import edu.fudan.stormcv.constant.BOLT_OPERTION_TYPE;
+import edu.fudan.stormcv.constant.BoltOperationType;
 import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
 import edu.fudan.stormcv.operation.batch.MjpegStreamingOp;
 import edu.fudan.stormcv.operation.single.*;
 import edu.fudan.stormcv.spout.TCPCaptureSpout;
 import edu.fudan.stormcv.util.LibLoader;
+import org.apache.storm.Config;
 import org.apache.storm.tuple.Fields;
+import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.xuggle.xuggler.Global;
-
-import clojure.stacktrace__init;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,8 +31,8 @@ public class TopologyH264 extends BaseTopology {
     private String rtmpAddr = GlobalConstants.DefaultRTMPServer;
     private SourceInfo sourceInfo;
     private int frameSkip = 0;
-    private float frameRate = 0.0f;
-    private BOLT_OPERTION_TYPE type;
+    private float frameRate = 25.0f;
+    private BoltOperationType type;
 
     private boolean sendRtmp = true;
 
@@ -62,10 +57,9 @@ public class TopologyH264 extends BaseTopology {
         this.streamId = streamId;
         this.rtmpAddr = rtmpAddr;
         this.videoAddr = videoAddr;
-        this.type = BOLT_OPERTION_TYPE.UNSUPPORT;
+        this.type = BoltOperationType.UNSUPPORT;
         isTopologyRunningAtLocal = true;
         conf.setNumWorkers(2);
-
         this.effectParams = new HashMap<>();
     }
     
@@ -79,7 +73,7 @@ public class TopologyH264 extends BaseTopology {
         this.streamId = msg.getStreamId();
         this.rtmpAddr = msg.getRtmpAddr();
         this.videoAddr = msg.getAddr();
-        this.type = BOLT_OPERTION_TYPE.UNSUPPORT;
+        this.type = BoltOperationType.UNSUPPORT;
         isTopologyRunningAtLocal = true;
     	if(msg instanceof EffectMessage) {
     		isEffect = true;
@@ -98,18 +92,33 @@ public class TopologyH264 extends BaseTopology {
         }
         this.frameRate = frameRate;
     }
-    
 
+    public TopologyH264 isTopologyRunningAtLocal(boolean isTopologyRunningAtLocal) {
+        this.isTopologyRunningAtLocal = isTopologyRunningAtLocal;
+        return this;
+    }
+
+    public boolean isTopologyRunningAtLocal() {
+        return isTopologyRunningAtLocal;
+    }
+
+    public Config getConfig() {
+        Config config = new Config();
+        config.putAll(this.conf);
+        config.putAll(Utils.readCommandLineOpts());
+        config.putAll(Utils.readStormConfig());
+        return config;
+    }
     
-    private BOLT_OPERTION_TYPE findEffectType(String effect) {
-    	if(effect.equals(BOLT_OPERTION_TYPE.GRAY.toString())) {
-    		return BOLT_OPERTION_TYPE.GRAY;
-    	} else if(effect.equals(BOLT_OPERTION_TYPE.COLORHISTOGRAM.toString())) {
-    		return BOLT_OPERTION_TYPE.COLORHISTOGRAM;
-    	} else if(effect.equals(BOLT_OPERTION_TYPE.FACEDETECT.toString())){
-    		return BOLT_OPERTION_TYPE.FACEDETECT;
+    private BoltOperationType findEffectType(String effect) {
+    	if(effect.equals(BoltOperationType.GRAY.toString())) {
+    		return BoltOperationType.GRAY;
+    	} else if(effect.equals(BoltOperationType.COLORHISTOGRAM.toString())) {
+    		return BoltOperationType.COLORHISTOGRAM;
+    	} else if(effect.equals(BoltOperationType.FACEDETECT.toString())){
+    		return BoltOperationType.FACEDETECT;
     	} else {
-    		return BOLT_OPERTION_TYPE.UNSUPPORT;
+    		return BoltOperationType.UNSUPPORT;
     	}
     }
 
@@ -128,52 +137,52 @@ public class TopologyH264 extends BaseTopology {
     public void setBolts() {
         createOperationBolt(type, "tcpSpout");
         if (!sendRtmp) {
-            createOperationBolt(BOLT_OPERTION_TYPE.MJPEGSTREAMER, type.toString());
+            createOperationBolt(BoltOperationType.MJPEGSTREAMER, type.toString());
         } else {
-            createOperationBolt(BOLT_OPERTION_TYPE.RTMPSTREAMER, type.toString());
+            createOperationBolt(BoltOperationType.RTMPSTREAMER, type.toString());
         }
     }
 
-    public void createOperationBolt(BOLT_OPERTION_TYPE type, String sourceComp) {
+    public void createOperationBolt(BoltOperationType type, String sourceComp) {
         switch (type) {
             case GRAY: {
-                builder.setBolt(BOLT_OPERTION_TYPE.GRAY.toString(),
+                builder.setBolt(BoltOperationType.GRAY.toString(),
                         new SingleH264InputBolt(new GrayImageOp()).setSourceInfo(sourceInfo), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }
             /*scale not supported*/
 //            case SCALE: {
-//                builder.setBolt(BOLT_OPERTION_TYPE.SCALE.toString(),
+//                builder.setBolt(BoltOperationType.SCALE.toString(),
 //                        new SingleH264InputBolt(new ScaleImageOp(0.5f).useMat(true)).setSourceInfo(sourceInfo), 1)
 //                        .localOrShuffleGrouping(sourceComp);
 //                break;
 //            }
             case COLORHISTOGRAM: {
-                builder.setBolt(BOLT_OPERTION_TYPE.COLORHISTOGRAM.toString(),
+                builder.setBolt(BoltOperationType.COLORHISTOGRAM.toString(),
                         new SingleH264InputBolt(new ColorHistogramOp(streamId)
                                 .useMat(true).outputFrame(true)).setSourceInfo(sourceInfo), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }
             case FACEDETECT: {
-                builder.setBolt(BOLT_OPERTION_TYPE.FACEDETECT.toString(),
+                builder.setBolt(BoltOperationType.FACEDETECT.toString(),
                         new SingleH264InputBolt(new HaarCascadeOp(streamId, GlobalConstants.HaarCacascadeXMLFileName)
                                 .useMat(true).outputFrame(true)).setSourceInfo(sourceInfo), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }
             case MJPEGSTREAMER: {
-                builder.setBolt(BOLT_OPERTION_TYPE.MJPEGSTREAMER.toString(),
+                builder.setBolt(BoltOperationType.MJPEGSTREAMER.toString(),
                         new BatchH264InputBolt(new SlidingWindowBatcher(2, frameSkip)
                                 .maxSize(6), new MjpegStreamingOp()
-                                .useMat(true).port(8558).framerate(24)).setSourceInfo(sourceInfo)
+                                .useMat(true).port(8558).framerate((int)frameRate)).setSourceInfo(sourceInfo)
                                 .groupBy(new Fields(CVParticleSerializer.STREAMID)), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }
             case RTMPSTREAMER: {
-                builder.setBolt(BOLT_OPERTION_TYPE.RTMPSTREAMER.toString(),
+                builder.setBolt(BoltOperationType.RTMPSTREAMER.toString(),
                         new SingleH264InputBolt(new H264RtmpStreamOp().RTMPServer(rtmpAddr).appName(streamId)
                                 .frameRate(frameRate)).setSourceInfo(sourceInfo), 1)
                         .localOrShuffleGrouping(sourceComp);

@@ -34,6 +34,14 @@ public class DBManager {
     public static final String EFFECT_RTMP_TABLE = "effect_rtmp";
     public static final String EFFECT_RTMP_TABLE_COLS = "(stream_id, effect_type, effect_params, rtmp_addr, topo_id, valid)";
 
+    public static final String TOPOLOGY_TABLE = "topology";
+
+
+    public static final String TOPOLOGY_COMPONENT_INFO = "topology_component_info";
+
+
+    public static final String TOPOLOGY_WORKER_INFO = "topology_worker_info";
+
     private DriverManagerDataSource dataSource = null;
     private static final DBManager dbManager = new DBManager();
     private JdbcTemplate jdbcTemplate = null;

@@ -6,7 +6,7 @@ package edu.fudan.stormcv.constant;
  * Time: 3/1/17 - 10:28 AM
  * Description:
  */
-public enum BOLT_OPERTION_TYPE {
+public enum BoltOperationType {
     /*Basic Image Operation*/
     GRAY(1, "gray"),
     FACEDETECT(2, "faceDetect"),
@@ -25,13 +25,13 @@ public enum BOLT_OPERTION_TYPE {
     private String operationName = "";
     private int code;
 
-    private BOLT_OPERTION_TYPE(int code, String operationName) {
+    BoltOperationType(int code, String operationName) {
         this.code = code;
         this.operationName = operationName;
     }
 
-    public static BOLT_OPERTION_TYPE getOpType(int code) {
-        for (BOLT_OPERTION_TYPE type : BOLT_OPERTION_TYPE.values()) {
+    public static BoltOperationType getOpType(int code) {
+        for (BoltOperationType type : BoltOperationType.values()) {
             if (type.getCode() == code) {
                 return type;
             }
@@ -39,8 +39,8 @@ public enum BOLT_OPERTION_TYPE {
         return null;
     }
     
-    public static BOLT_OPERTION_TYPE getOpTypeByString(String effectType) {
-        for (BOLT_OPERTION_TYPE type : BOLT_OPERTION_TYPE.values()) {
+    public static BoltOperationType getOpTypeByString(String effectType) {
+        for (BoltOperationType type : BoltOperationType.values()) {
             if (type.toString().equals(effectType)) {
                 return type;
             }

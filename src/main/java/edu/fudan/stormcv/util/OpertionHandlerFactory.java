@@ -2,7 +2,7 @@ package edu.fudan.stormcv.util;
 
 import edu.fudan.lwang.codec.OperationHandler;
 import edu.fudan.stormcv.codec.ImageCodec;
-import edu.fudan.stormcv.constant.BOLT_HANDLE_TYPE;
+import edu.fudan.stormcv.constant.BoltHandleType;
 import edu.fudan.stormcv.codec.TurboImageCodec;
 import edu.fudan.stormcv.model.Frame;
 import org.opencv.core.Mat;
@@ -16,7 +16,7 @@ import java.awt.image.BufferedImage;
  * Description:
  */
 public class OpertionHandlerFactory {
-    public static OperationHandler<?> create(BOLT_HANDLE_TYPE type) {
+    public static OperationHandler<?> create(BoltHandleType type) {
         switch (type) {
             case BOLT_HANDLE_TYPE_BUFFEREDIMAGE: {
                 return new OperationHandler<BufferedImage>() {

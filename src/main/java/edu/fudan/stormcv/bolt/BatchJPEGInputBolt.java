@@ -1,12 +1,10 @@
 package edu.fudan.stormcv.bolt;
 
 import com.google.common.cache.*;
-import edu.fudan.lwang.codec.*;
 import edu.fudan.stormcv.StormCVConfig;
 import edu.fudan.stormcv.batcher.IBatcher;
-import edu.fudan.stormcv.constant.BOLT_HANDLE_TYPE;
+import edu.fudan.stormcv.constant.BoltHandleType;
 import edu.fudan.stormcv.model.CVParticle;
-import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.operation.batch.IBatchOperation;
 import edu.fudan.stormcv.operation.single.ISingleInputOperation;
 import edu.fudan.stormcv.util.LibLoader;
@@ -17,7 +15,6 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
-import org.opencv.core.Mat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +41,7 @@ public class BatchJPEGInputBolt extends CVParticleBolt implements RemovalListene
     private Fields groupBy;
     private History history;
     private boolean refreshExperation = true;
-    private BOLT_HANDLE_TYPE boltHandleType;
+    private BoltHandleType boltHandleType;
 
     private long startTime;
     private long endTime;
@@ -56,7 +53,7 @@ public class BatchJPEGInputBolt extends CVParticleBolt implements RemovalListene
      *
      * @param operation the operation to be performed
      */
-    public BatchJPEGInputBolt(IBatcher batcher, IBatchOperation<? extends CVParticle> operation, BOLT_HANDLE_TYPE type) {
+    public BatchJPEGInputBolt(IBatcher batcher, IBatchOperation<? extends CVParticle> operation, BoltHandleType type) {
         this.operation = operation;
         this.batcher = batcher;
         this.boltHandleType = type;

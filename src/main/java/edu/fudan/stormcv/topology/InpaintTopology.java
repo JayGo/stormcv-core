@@ -1,7 +1,7 @@
 package edu.fudan.stormcv.topology;
 
 import edu.fudan.stormcv.bolt.SingleJPEGInputBolt;
-import edu.fudan.stormcv.constant.BOLT_HANDLE_TYPE;
+import edu.fudan.stormcv.constant.BoltHandleType;
 import edu.fudan.stormcv.fetcher.ImageFetcher;
 import edu.fudan.stormcv.StormCVConfig;
 import edu.fudan.stormcv.operation.single.DrawFeaturesOp;
@@ -41,7 +41,7 @@ public class InpaintTopology {
         builder.setSpout("spout", new CVParticleSpout(
                 new ImageFetcher(files).sleepTime(100)), 8);
 
-        builder.setBolt("inpaint", new SingleJPEGInputBolt(new InpaintOp(), BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 8)
+        builder.setBolt("inpaint", new SingleJPEGInputBolt(new InpaintOp(), BoltHandleType.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 8)
                 .shuffleGrouping("spout");
         String outDir = files.get(0) + "/output/";
         File tmp = new File(outDir);
@@ -49,7 +49,7 @@ public class InpaintTopology {
             tmp.mkdir();
         }
         builder.setBolt("drawer", new SingleJPEGInputBolt(
-                new DrawFeaturesOp().destination(outDir), BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 8)
+                new DrawFeaturesOp().destination(outDir), BoltHandleType.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 8)
                 .shuffleGrouping("inpaint");
 
         String topoName = "InpaintTopo";

@@ -1,4 +1,4 @@
-package edu.fudan.stormcv.service.process;
+package edu.fudan.stormcv.service.model;
 
 /**
  * Created by IntelliJ IDEA.
@@ -6,11 +6,11 @@ package edu.fudan.stormcv.service.process;
  * Time: 4/24/17 - 3:34 PM
  * Description:
  */
-public class WorkerInfo {
+public class ProcessInfo {
     private String hostIp;
     private long pid;
 
-    public WorkerInfo(String hostIp, long pid) {
+    public ProcessInfo(String hostIp, long pid) {
         this.hostIp = hostIp;
         this.pid = pid;
     }

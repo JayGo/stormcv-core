@@ -1,18 +1,14 @@
 package edu.fudan.stormcv.service;
 
-import edu.fudan.jliu.message.BaseMessage;
-import edu.fudan.jliu.message.EffectMessage;
-import edu.fudan.stormcv.constant.BOLT_OPERTION_TYPE;
 import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.constant.RequestCode;
 import edu.fudan.stormcv.constant.ResultCode;
-import edu.fudan.stormcv.model.ImageRequest;
 import edu.fudan.stormcv.service.db.DBManager;
 import edu.fudan.stormcv.service.model.CameraInfo;
 import edu.fudan.stormcv.service.model.EffectRtmpInfo;
 import edu.fudan.stormcv.service.process.ProcessManager;
-import edu.fudan.stormcv.service.process.WorkerInfo;
-import edu.fudan.stormcv.spout.SpoutSignalClient;
+import edu.fudan.stormcv.service.process.TopologyManager;
+import edu.fudan.stormcv.service.model.ProcessInfo;
 import edu.fudan.stormcv.topology.TopologyH264;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -21,10 +17,6 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,16 +36,14 @@ public class TCPCaptureServer {
 
     private static TCPCaptureServer mTCPCaptureServer;
 
-    private List<TopologyH264> topologys;
-
-    private Map<String, TopologyH264> topologies;
+//    private List<TopologyH264> topologys;
+//    private Map<String, TopologyH264> topologies;
 
     public TCPCaptureServer() {
         try {
             msgServerSocket = new ServerSocket(serverMsgPort);
-            topologys = new ArrayList<TopologyH264>();
-
-            topologies = new HashMap<>();
+//            topologys = new ArrayList<TopologyH264>();
+//            topologies = new HashMap<>();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -198,7 +188,7 @@ public class TCPCaptureServer {
                 String rtmpAddr = GlobalConstants.DefaultRTMPServer + streamId;
                 String command = "ffmpeg -re -i " + address + " -qscale 0 -f flv -r " + frameRate + " -s " + info.getWidth() + "x" + info.getHeight() + " -an " + rtmpAddr;
                 logger.info("command: {}", command);
-                WorkerInfo worker = ProcessManager.getInstance().startProcess(command);
+                ProcessInfo worker = ProcessManager.getInstance().startProcess(command);
                 retJson.put("host", worker.getHostIp());
                 retJson.put("pid", worker.getPid());
                 retJson.put("rtmpAddress", rtmpAddr);
@@ -234,9 +224,10 @@ public class TCPCaptureServer {
             if (info.isValid()) {
                 String address = info.getAddress();
                 TopologyH264 topologyH264 = new TopologyH264(topoName, rtmpServerAddress, address, effectType, effectParams, info.getFrameRate());
-                topologys.add(topologyH264);
+                TopologyManager.getInstance().addTopology(topoName, topologyH264);
 
-                topologies.put(topoName, topologyH264);
+//                topologys.add(topologyH264);
+//                topologies.put(topoName, topologyH264);
 
                 try {
                     logger.info("submit topology {}, address = {}, rtmp = {}", topoName, address, rtmpServerAddress);
@@ -268,16 +259,12 @@ public class TCPCaptureServer {
             EffectRtmpInfo info = DBManager.getInstance().getCameraEffectRtmpInfo(id);
             String topoName = info.getTopoName();
             retJson.put("topoName", topoName);
-             TopologyH264 topology = topologies.get(topoName);
-            if (topology != null) {
-                String retStr = topology.killTopology();
-                if (retStr.contains("Error")) {
-                    retJson.put("status", ResultCode.RESULT_FAILED);
-                } else {
-                    retJson.put("status", ResultCode.RESULT_SUCCESS);
-                }
-            } else {
+
+            String retStr = TopologyManager.getInstance().killTopology(topoName);
+            if (retStr.contains("Error")) {
                 retJson.put("status", ResultCode.RESULT_FAILED);
+            } else {
+                retJson.put("status", ResultCode.RESULT_SUCCESS);
             }
 
             return retJson.toString();
@@ -378,7 +365,7 @@ public class TCPCaptureServer {
         private BaseMessage processPicture(EffectMessage fmsg) {
         	BaseMessage result = new BaseMessage(ResultCode.UNKNOWN_ERROR);
         	
-        	int processType = BOLT_OPERTION_TYPE.getOpTypeByString(fmsg.getEffectType()).getCode();
+        	int processType = BoltOperationType.getOpTypeByString(fmsg.getEffectType()).getCode();
         	String streamId = fmsg.getStreamId();
         	
         	String srcPath = !fmsg.getAddr().startsWith("file://") ? "file://"+fmsg.getAddr() : fmsg.getAddr();
