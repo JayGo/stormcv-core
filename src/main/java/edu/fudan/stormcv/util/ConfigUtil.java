@@ -17,8 +17,9 @@ public class ConfigUtil {
 	static File dbFile = null;
 	static {
 		try {
-			dbFile = new File("config.properties");
-			dbProps.load(new FileInputStream(dbFile.getAbsolutePath()));
+//			dbFile = new File("config.properties");
+			String dbFilePath = LibLoader.getSelfJarDenpendencyFileTmp("config.properties", false);
+			dbProps.load(new FileInputStream(dbFilePath));
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
 		} catch (IOException e) {

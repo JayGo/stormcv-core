@@ -1,6 +1,7 @@
 package edu.fudan.stormcv.service.monitor;
 
 import edu.fudan.stormcv.service.db.DBManager;
+import edu.fudan.stormcv.service.process.ProcessManager;
 import edu.fudan.stormcv.service.process.TopologyManager;
 import edu.fudan.stormcv.topology.TopologyH264;
 
@@ -16,7 +17,13 @@ import static java.lang.Thread.sleep;
  */
 public class ProcessMonitor implements Runnable {
 
-    private DBManager dbManager = DBManager.getInstance();
+    private DBManager dbManager;
+    private MetricsCollector metricsCollector;
+
+    public ProcessMonitor() {
+        dbManager = DBManager.getInstance();
+        metricsCollector = new MetricsCollector();
+    }
 
     @Override
     public void run() {
@@ -43,11 +50,13 @@ public class ProcessMonitor implements Runnable {
 
         for (String topoName : topologyH264Map.keySet()) {
             TopologyH264 topology = topologyH264Map.get(topoName);
-            if (topology.isTopologyRunningAtLocal()) {
-
-            } else {
-
-            }
+            metricsCollector.setName(topoName, topology.getConfig());
+            metricsCollector.run();
+//            if (topology.isTopologyRunningAtLocal()) {
+//
+//            } else {
+//
+//            }
         }
     }
 

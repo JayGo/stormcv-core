@@ -2,6 +2,8 @@ package edu.fudan.stormcv.service.monitor;
 
 import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.constant.ServerConstant;
+import edu.fudan.stormcv.service.db.TopologyDao;
+import edu.fudan.stormcv.service.db.TopologyDaoImpl;
 import edu.fudan.stormcv.service.model.TopologyBasicInfo;
 import edu.fudan.stormcv.service.model.TopologyComponentInfo;
 import edu.fudan.stormcv.service.model.TopologyWorkerInfo;
@@ -42,9 +44,9 @@ public class MetricsCollector {
             e.printStackTrace();
         }
 
-        MetricsCollector collector = new MetricsCollector(topoName, config);
+        MetricsCollector collector = new MetricsCollector();
+        collector.setName(topoName, config);
         while (true) {
-
             try {
                 Thread.sleep(15000);
             } catch (InterruptedException e) {
@@ -71,20 +73,23 @@ public class MetricsCollector {
 
     private static final String ALL_TIME = ":all-time";
     private String name;
-    private Config config;
     private Nimbus.Client client;
     private TopologyBasicInfo basicInfo = null;
     private List<TopologyComponentInfo> componentInfoList = null;
     private List<TopologyWorkerInfo> workerInfoList = null;
     private Set<WorkerSlot> workerSlotSet;
+    private TopologyDao topologyDao;
 
-    public MetricsCollector(String name, Config config) {
-        this.name = name;
-        this.config = config;
-        this.client = NimbusClient.getConfiguredClient(config).getClient();
+    public MetricsCollector() {
         this.componentInfoList = new ArrayList<>();
         this.workerInfoList = new ArrayList<>();
         this.workerSlotSet = new HashSet<>();
+        topologyDao = new TopologyDaoImpl();
+    }
+
+    public void setName(String name, Config config) {
+        this.name = name;
+        this.client = NimbusClient.getConfiguredClient(config).getClient();
     }
 
     public TopologyBasicInfo getBasicInfo() {
@@ -106,6 +111,15 @@ public class MetricsCollector {
     public void run() {
         pollTopologyComponentInfo();
         pollTopologyWorkerInfo();
+        if (this.basicInfo != null) {
+            topologyDao.addTopologyBasicInfo(this.basicInfo);
+        }
+        if (this.componentInfoList != null && !this.componentInfoList.isEmpty()) {
+            topologyDao.addTopologyComponentInfo(this.componentInfoList);
+        }
+        if (this.workerInfoList != null && !(this.workerInfoList.isEmpty())) {
+            topologyDao.addTopologyWorkerInfo(this.workerInfoList);
+        }
     }
 
     public boolean pollTopologyComponentInfo() {
@@ -159,6 +173,7 @@ public class MetricsCollector {
                 long emitted = commonStats.get_emitted();
                 long failed = commonStats.get_failed();
                 double completeLatency = componentAggregateStats.get_specific_stats().get_spout().get_complete_latency_ms();
+                completeLatency = (long)(completeLatency * 100) / 100.0;
                 TopologyComponentInfo info = new TopologyComponentInfo(this.name, spoutId, "spout", executorNum, taskNum, emitted, failed, completeLatency);
                 this.componentInfoList.add(info);
             }
@@ -173,6 +188,7 @@ public class MetricsCollector {
                 long executed = boltStats.get_executed();
                 long failed = commonStats.get_failed();
                 double executedLatency = boltStats.get_execute_latency_ms();
+                executedLatency = (long)(executedLatency * 100) / 100.0;
                 TopologyComponentInfo info = new TopologyComponentInfo(this.name, boltId, "bolt", executorNum, taskNum, executed, failed, executedLatency);
                 this.componentInfoList.add(info);
             }

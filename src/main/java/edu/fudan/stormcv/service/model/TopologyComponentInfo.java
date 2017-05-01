@@ -16,6 +16,9 @@ public class TopologyComponentInfo {
     private long allTimeFailed;
     private double allTimeLatency;
 
+    public TopologyComponentInfo() {
+
+    }
 
     public TopologyComponentInfo(String topoName, String componentId, String type, int executorNum, int taskNum, long allTimeProcessed, long allTimeFailed, double allTimeLatency) {
         this.topoName = topoName;
