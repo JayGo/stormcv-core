@@ -13,6 +13,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -34,14 +35,61 @@ public class DBManager {
     public static final String EFFECT_RTMP_TABLE = "effect_rtmp";
     public static final String EFFECT_RTMP_TABLE_COLS = "(stream_id, effect_type, effect_params, rtmp_addr, topo_id, valid)";
 
+    public static final String TOPOLOGY_TABLE = "topology";
+    public static final String CREATE_TOPOLOGY_TABLE = "CREATE TABLE topology(" +
+            "topo_name varchar(255) NOT NULL," +
+            "topo_id varchar(255) NOT NULL, " +
+            "worker_num int NOT NULL DEFAULT 0, " +
+            "owner varchar(255) NOT NULL, " +
+            "uptime_secs int NOT NULL DEFAULT 0, " +
+            "task_num int NOT NULL DEFAULT 0, " +
+            "executor_num int NOT NULL DEFAULT 0, " +
+            "status int NOT NULL DEFAULT 0, " +
+            "PRIMARY KEY(topo_name));";
+    public static final String TOPOLOGY_TABLE_COLS = "(topo_name, topo_id, worker_num, owner, uptime_secs, task_num, " +
+            "executor_num, status)";
+
+
+    public static final String TOPOLOGY_COMPONENT_INFO_TABLE = "topology_component_info";
+    public static final String CREATE_TOPOLOGY_COMPONENT_INFO_TABLE = "CREATE TABLE topology_component_info(" +
+            "topo_name varchar(255) NOT NULL, " +
+            "component_id varchar(255) NOT NULL, " +
+            "type varchar(255) NOT NULL, " +
+            "executor_num int NOT NULL DEFAULT 0, " +
+            "task_num int NOT NULL DEFAULT 0, " +
+            "alltime_processed bigint NOT NULL DEFAULT 0, " +
+            "alltime_failed bigint NOT NULL DEFAULT 0, " +
+            "alltime_latency double NOT NULL DEFAULT 0.0, " +
+            "PRIMARY KEY(topo_name, component_id));";
+    public static final String TOPOLOGY_COMPONENT_INFO_COLS = "(topo_name, component_id, type, executor_num, " +
+            "task_num, alltime_processed, alltime_failed, alltime_latency)";
+
+
+    public static final String TOPOLOGY_WORKER_INFO_TABLE = "topology_worker_info";
+    public static final String CREATE_TOPOLOGY_WORKER_INFO_TABLE = "CREATE TABLE topology_worker_info(" +
+            "topo_name varchar(255) NOT NULL, " +
+            "host varchar(255) NOT NULL, " +
+            "pid bigint NOT NULL DEFAULT 0, " +
+            "port int NOT NULL DEFAULT 0, " +
+            "cpu_usage double NOT NULL DEFAULT 0.0, " +
+            "memory_usage double NOT NULL DEFAULT 0.0, " +
+            "PRIMARY KEY(topo_name, host, port));";
+    public static final String TOPOLOGY_WORKER_INFO_TABLE_COLS = "(topo_name, host, pid, port, cpu_usage, memory_usage)";
+
+
     private DriverManagerDataSource dataSource = null;
-    private static final DBManager dbManager = new DBManager();
+    private static DBManager dbManager = null;
     private JdbcTemplate jdbcTemplate = null;
+
+    private Map<String, String> createTableMap = new HashMap<>();
 
     /**
      * Get DBManager Instance
      */
-    public static DBManager getInstance() {
+    public static synchronized DBManager getInstance() {
+        if (dbManager == null) {
+            dbManager = new DBManager();
+        }
         return dbManager;
     }
 
@@ -51,6 +99,16 @@ public class DBManager {
     private DBManager() {
         initDataSource();
         this.jdbcTemplate = new JdbcTemplate(this.dataSource);
+        dropAllTables();
+        try {
+            initAllTables();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        DBManager.getInstance();
     }
 
     /**
@@ -71,29 +129,29 @@ public class DBManager {
         dataSource.setPassword(password);
     }
 
-//    /**
-//     * Create all necessary table
-//     *
-//     * @throws SQLException
-//     */
-//    private void initAllTables() throws SQLException {
-//        createTableMap.put(CAMERA_INFO_TABLE, CREATE_CAMERA_INFO_TABLE);
-//        createTableMap.put(RAW_RTMP_TABLE, CREATE_RAW_RTMP_TABLE);
-//        createTableMap.put(EFFECT_RTMP_TABLE, CREATE_EFFECT_RTMP_TABLE);
-//        for (String table : createTableMap.keySet()) {
-//            if (!validateTableExist(table)) {
-//                this.jdbcTemplate.execute(createTableMap.get(table));
-//            }
-//        }
-//        logger.info("cerate all tables...");
-//    }
+    /**
+     * Create all necessary table
+     *
+     * @throws SQLException
+     */
+    private void initAllTables() throws SQLException {
+        createTableMap.put(TOPOLOGY_TABLE, CREATE_TOPOLOGY_TABLE);
+        createTableMap.put(TOPOLOGY_WORKER_INFO_TABLE, CREATE_TOPOLOGY_WORKER_INFO_TABLE);
+        createTableMap.put(TOPOLOGY_COMPONENT_INFO_TABLE, CREATE_TOPOLOGY_COMPONENT_INFO_TABLE);
+        for (String table : createTableMap.keySet()) {
+            if (!validateTableExist(table)) {
+                this.jdbcTemplate.execute(createTableMap.get(table));
+            }
+        }
+        logger.info("cerate all tables...");
+    }
 
-//    private void dropAllTables() {
-//        dropTable(CAMERA_INFO_TABLE);
-//        dropTable(RAW_RTMP_TABLE);
-//        dropTable(EFFECT_RTMP_TABLE);
-//        logger.info("drop all Tables...");
-//    }
+    private void dropAllTables() {
+        dropTable(TOPOLOGY_TABLE);
+        dropTable(TOPOLOGY_COMPONENT_INFO_TABLE);
+        dropTable(TOPOLOGY_WORKER_INFO_TABLE);
+        logger.info("drop all Tables...");
+    }
 
     /**
      * validate if the table exist
@@ -122,7 +180,7 @@ public class DBManager {
         return dataSource;
     }
 
-    public JdbcTemplate geJdbcTemplate() {
+    public JdbcTemplate getJdbcTemplate() {
         return this.jdbcTemplate;
     }
 
@@ -143,7 +201,7 @@ public class DBManager {
     public String getCameraRawRtmpAddress(String streamId) {
         String address = null;
         try {
-            address = dbManager.geJdbcTemplate().queryForObject("SELECT rtmp_addr FROM " + DBManager.RAW_RTMP_TABLE + " WHERE stream_id = ?", new Object[] {streamId}, String.class);
+            address = dbManager.getJdbcTemplate().queryForObject("SELECT rtmp_addr FROM " + DBManager.RAW_RTMP_TABLE + " WHERE stream_id = ?", new Object[] {streamId}, String.class);
         } catch (Exception e) {
             logger.error("cannot query rtmp_addr for streamId {} due to {}", streamId, e.getMessage());
         }
@@ -153,7 +211,7 @@ public class DBManager {
     public CameraInfo getCameraInfo(String streamId) {
         CameraInfo ret = new CameraInfo();
 
-        Map<String, Object> queryRet = dbManager.geJdbcTemplate().queryForMap(
+        Map<String, Object> queryRet = dbManager.getJdbcTemplate().queryForMap(
                 "SELECT * FROM " + DBManager.CAMERA_INFO_TABLE + " WHERE stream_id = ?", new Object[] { streamId });
         ret.setStreamId((String) queryRet.get("stream_id"));
         ret.setAddress((String) queryRet.get("address"));
@@ -169,7 +227,7 @@ public class DBManager {
 
     public EffectRtmpInfo getCameraEffectRtmpInfo(int id) {
         EffectRtmpInfo ret = new EffectRtmpInfo();
-        Map<String, Object> rows = dbManager.geJdbcTemplate()
+        Map<String, Object> rows = dbManager.getJdbcTemplate()
                 .queryForMap("SELECT * FROM " + DBManager.EFFECT_RTMP_TABLE + " WHERE id = ?", new Object[] { id });
         ret.setId(id);
         ret.setStreamId((String) rows.get("stream_id"));

@@ -3,7 +3,7 @@ package edu.fudan.stormcv.model.serializer;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import edu.fudan.stormcv.constant.BOLT_OPERTION_TYPE;
+import edu.fudan.stormcv.constant.BoltOperationType;
 import edu.fudan.stormcv.model.CVParticle;
 import edu.fudan.stormcv.model.ImageHandle;
 import org.apache.storm.tuple.Tuple;
@@ -38,7 +38,7 @@ public class ImageHandleSerializer extends CVParticleSerializer<ImageHandle> imp
     @Override
     protected ImageHandle createObject(Tuple tuple) throws IOException {
         return new ImageHandle(tuple, (List<String>)tuple.getValueByField(LOCATION_LIST),
-                (BOLT_OPERTION_TYPE)tuple.getValueByField(OPERATION_TYPE));
+                (BoltOperationType)tuple.getValueByField(OPERATION_TYPE));
     }
 
     @Override

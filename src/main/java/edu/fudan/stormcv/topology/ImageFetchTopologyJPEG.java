@@ -3,16 +3,13 @@ package edu.fudan.stormcv.topology;
 import edu.fudan.stormcv.StormCVConfig;
 import edu.fudan.stormcv.bolt.SingleJPEGInputBolt;
 import edu.fudan.stormcv.bolt.StatCollectorBolt;
-import edu.fudan.stormcv.constant.BOLT_HANDLE_TYPE;
-import edu.fudan.stormcv.constant.BOLT_OPERTION_TYPE;
+import edu.fudan.stormcv.constant.BoltHandleType;
+import edu.fudan.stormcv.constant.BoltOperationType;
 import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.fetcher.ImageUrlFetcher;
 import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.operation.single.ImageFetchAndOperation;
-import edu.fudan.stormcv.operation.single.*;
 import edu.fudan.stormcv.spout.CVParticleSignalSpout;
-
-import java.awt.image.BufferedImage;
 
 /**
  * Created by IntelliJ IDEA.
@@ -44,13 +41,13 @@ public class ImageFetchTopologyJPEG extends BaseTopology {
     @Override
     public void setSpout() {
         builder.setSpout("spout", new CVParticleSignalSpout(GlobalConstants.ImageRequestZKRoot, new ImageUrlFetcher("cat", readLocations, writeLocations,
-                BOLT_OPERTION_TYPE.COLORHISTOGRAM).batchSize(32)), 1);
+                BoltOperationType.COLORHISTOGRAM).batchSize(32)), 1);
     }
 
     @Override
     public void setBolts() {
         builder.setBolt("operation", new SingleJPEGInputBolt(new ImageFetchAndOperation(),
-                BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 1).localOrShuffleGrouping("spout");
+                BoltHandleType.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 1).localOrShuffleGrouping("spout");
 
         builder.setBolt("collector", new StatCollectorBolt(), 1).localOrShuffleGrouping("operation");
     }

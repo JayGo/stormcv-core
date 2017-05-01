@@ -5,8 +5,8 @@ import edu.fudan.stormcv.batcher.SequenceNrBatcher;
 import edu.fudan.stormcv.batcher.SlidingWindowBatcher;
 import edu.fudan.stormcv.bolt.BatchJPEGInputBolt;
 import edu.fudan.stormcv.bolt.SingleJPEGInputBolt;
-import edu.fudan.stormcv.constant.BOLT_HANDLE_TYPE;
-import edu.fudan.stormcv.constant.BOLT_OPERTION_TYPE;
+import edu.fudan.stormcv.constant.BoltHandleType;
+import edu.fudan.stormcv.constant.BoltOperationType;
 import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.fetcher.OpenCVStreamFrameFetcher;
 import edu.fudan.stormcv.model.Frame;
@@ -34,12 +34,12 @@ public class VideoOperationTopologyJPEG extends BaseTopology {
     private String inputLocation = "file:///home/nfs/videos/bigbang480-1.mkv";
     private String outputLocation = "file:///home/nfs/videos/output/";
     private String streamId = "VideoOperationTopologyJPEG";
-    private BOLT_OPERTION_TYPE type;
+    private BoltOperationType type;
     private long totalFrames;
     private double frameRate;
 
     public static void main(String[] args) {
-        VideoOperationTopologyJPEG topology = new VideoOperationTopologyJPEG(BOLT_OPERTION_TYPE.FACEDETECT);
+        VideoOperationTopologyJPEG topology = new VideoOperationTopologyJPEG(BoltOperationType.FACEDETECT);
         try {
             topology.submitTopology();
         } catch (Exception e) {
@@ -47,14 +47,14 @@ public class VideoOperationTopologyJPEG extends BaseTopology {
         }
     }
 
-    public VideoOperationTopologyJPEG(BOLT_OPERTION_TYPE type) {
+    public VideoOperationTopologyJPEG(BoltOperationType type) {
         conf.setNumWorkers(2);
         conf.put(StormCVConfig.STORMCV_FRAME_ENCODING, Frame.JPG_IMAGE);
         isTopologyRunningAtLocal = true;
         this.type = type;
     }
 
-    public VideoOperationTopologyJPEG(String inputLocation, String outputLocation, BOLT_OPERTION_TYPE type) {
+    public VideoOperationTopologyJPEG(String inputLocation, String outputLocation, BoltOperationType type) {
         this(type);
         this.inputLocation = inputLocation;
         this.outputLocation = outputLocation;
@@ -80,58 +80,58 @@ public class VideoOperationTopologyJPEG extends BaseTopology {
     public void setBolts() {
         prepare();
         createOperationBolt(type, "spout");
-        builder.setBolt(BOLT_OPERTION_TYPE.MJPEGSTREAMER.toString(),
+        builder.setBolt(BoltOperationType.MJPEGSTREAMER.toString(),
                 new BatchJPEGInputBolt(new SequenceNrBatcher(2), new FramesToVideoOp(outputLocation, totalFrames)
                         .bitrate(886000).speed(1.0f).frameRate(frameRate),
-                        BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE)
+                        BoltHandleType.BOLT_HANDLE_TYPE_BUFFEREDIMAGE)
                         .groupBy(new Fields(CVParticleSerializer.STREAMID)), 1)
                 .localOrShuffleGrouping(type.toString());
 
     }
 
-    public void createOperationBolt(BOLT_OPERTION_TYPE type, String sourceComp) {
+    public void createOperationBolt(BoltOperationType type, String sourceComp) {
         switch (type) {
             case GRAY: {
-                builder.setBolt(BOLT_OPERTION_TYPE.GRAY.toString(),
-                        new SingleJPEGInputBolt(new GrayImageOp(), BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_MAT), 1)
+                builder.setBolt(BoltOperationType.GRAY.toString(),
+                        new SingleJPEGInputBolt(new GrayImageOp(), BoltHandleType.BOLT_HANDLE_TYPE_MAT), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }
             case SCALE: {
-                builder.setBolt(BOLT_OPERTION_TYPE.SCALE.toString(),
+                builder.setBolt(BoltOperationType.SCALE.toString(),
                         new SingleJPEGInputBolt(new ScaleImageOp(0.5f).useMat(false),
-                                BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 1)
+                                BoltHandleType.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }
             case COLORHISTOGRAM: {
-                builder.setBolt(BOLT_OPERTION_TYPE.COLORHISTOGRAM.toString(),
+                builder.setBolt(BoltOperationType.COLORHISTOGRAM.toString(),
                         new SingleJPEGInputBolt(new ColorHistogramOp(streamId).useMat(false).outputFrame(true),
-                                BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 1)
+                                BoltHandleType.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }
             case FACEDETECT: {
-                builder.setBolt(BOLT_OPERTION_TYPE.FACEDETECT.toString(),
+                builder.setBolt(BoltOperationType.FACEDETECT.toString(),
                         new SingleJPEGInputBolt(new HaarCascadeOp(streamId, GlobalConstants.HaarCacascadeXMLFileName)
                                 .useMat(true).outputFrame(true).minSize(0, 0),
-                                BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_MAT), 1)
+                                BoltHandleType.BOLT_HANDLE_TYPE_MAT), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }
             case MJPEGSTREAMER: {
-                builder.setBolt(BOLT_OPERTION_TYPE.MJPEGSTREAMER.toString(),
+                builder.setBolt(BoltOperationType.MJPEGSTREAMER.toString(),
                         new BatchJPEGInputBolt(new SlidingWindowBatcher(2, frameSkip)
                                 .maxSize(6), new MjpegStreamingOp().useMat(false).port(8558).framerate(24),
-                                BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE)
+                                BoltHandleType.BOLT_HANDLE_TYPE_BUFFEREDIMAGE)
                                 .groupBy(new Fields(CVParticleSerializer.STREAMID)), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }
             case RTMPSTREAMER: {
-                builder.setBolt(BOLT_OPERTION_TYPE.RTMPSTREAMER.toString(),
+                builder.setBolt(BoltOperationType.RTMPSTREAMER.toString(),
                         new SingleJPEGInputBolt(new SingleRTMPWriterOp().appName("grayscale")
-                                .frameRate(23.98).bitRate(886000), BOLT_HANDLE_TYPE.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 1)
+                                .frameRate(23.98).bitRate(886000), BoltHandleType.BOLT_HANDLE_TYPE_BUFFEREDIMAGE), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }

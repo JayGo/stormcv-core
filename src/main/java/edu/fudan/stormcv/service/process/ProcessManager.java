@@ -1,14 +1,12 @@
 package edu.fudan.stormcv.service.process;
 
-import de.flapdoodle.embed.process.config.ISupportConfig;
-import de.flapdoodle.embed.process.distribution.Platform;
-import de.flapdoodle.embed.process.io.Processors;
-import de.flapdoodle.embed.process.io.StreamToLineProcessor;
-import de.flapdoodle.embed.process.runtime.Processes;
+import edu.fudan.stormcv.constant.ServerConstant;
+import edu.fudan.stormcv.service.model.ProcessInfo;
 import edu.fudan.stormcv.util.ServerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -51,7 +49,11 @@ public class ProcessManager {
         return instance;
     }
 
-    public WorkerInfo startProcess(String command) {
+    public Map<String, List<Long>> getServerPidMap() {
+        return this.serverPidMap;
+    }
+
+    public ProcessInfo startProcess(String command) {
         logger.info("start process: {}", command);
         String randomServer = AVAIABLE_FFMPEG_SERVERS[random.nextInt(AVAIABLE_FFMPEG_SERVERS.length)];
         logger.info("randomServer:{}, localServer:{}", randomServer, localAddress);
@@ -59,7 +61,12 @@ public class ProcessManager {
         if (randomServer.equals(localAddress)) {
             pid = ServerUtil.runLocalCommand(command);
         } else {
-            pid = ServerUtil.runRemoteCommand(command, "jkyan", "jkyan");
+            try {
+                ServerConstant.UserInfo userInfo = ServerConstant.ServerAuthentication.get(randomServer);
+                pid = ServerUtil.runRemoteCommand(command, randomServer, userInfo.getUsername(), userInfo.getPassword());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         if (pid > 0) {
             if (serverPidMap.get(randomServer) == null) {
@@ -68,7 +75,7 @@ public class ProcessManager {
             serverPidMap.get(randomServer).add(pid);
         }
         processCommandMap.put(pid, command);
-        return new WorkerInfo(randomServer, pid);
+        return new ProcessInfo(randomServer, pid);
     }
 
     public boolean killProcess(String hostIp, long pid) {
@@ -76,7 +83,8 @@ public class ProcessManager {
         if (hostIp.equals(localAddress)) {
             ret = ServerUtil.killLocalProcess(pid);
         } else {
-            ret = ServerUtil.killRemoteProcess(pid);
+            ServerConstant.UserInfo userInfo = ServerConstant.ServerAuthentication.get(hostIp);
+            ret = ServerUtil.killRemoteProcess(hostIp, pid, userInfo.getUsername(), userInfo.getPassword());
         }
 
         List<Long> pids = serverPidMap.get(hostIp);

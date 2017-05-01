@@ -2,8 +2,7 @@ package edu.fudan.stormcv.fetcher;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
-import edu.fudan.stormcv.constant.BOLT_OPERTION_TYPE;
-import edu.fudan.stormcv.model.Frame;
+import edu.fudan.stormcv.constant.BoltOperationType;
 import edu.fudan.stormcv.model.ImageHandle;
 import edu.fudan.stormcv.model.ImageRequest;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
@@ -11,18 +10,11 @@ import edu.fudan.stormcv.model.serializer.ImageHandleSerializer;
 import edu.fudan.stormcv.model.serializer.ImageRequestSerializer;
 import edu.fudan.stormcv.util.connector.ConnectorHolder;
 import edu.fudan.stormcv.util.connector.FileConnector;
-import edu.fudan.stormcv.util.connector.LocalFileConnector;
 import org.apache.storm.task.TopologyContext;
-import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -42,13 +34,13 @@ public class ImageUrlFetcher implements IFetcher<ImageHandle> {
     private String outputLocation = null;
     private Kryo kryo = null;
     private int count = 0;
-    private BOLT_OPERTION_TYPE type;
+    private BoltOperationType type;
 
     public ImageUrlFetcher() {
         this.locations = new ArrayList<>();
     }
 
-    public ImageUrlFetcher(String streamId, String location, String outputLocation, BOLT_OPERTION_TYPE type) {
+    public ImageUrlFetcher(String streamId, String location, String outputLocation, BoltOperationType type) {
         this.locations = new ArrayList<>();
         locations.add(location);
         this.streamId = streamId;
@@ -56,7 +48,7 @@ public class ImageUrlFetcher implements IFetcher<ImageHandle> {
         this.type = type;
     }
 
-    public ImageUrlFetcher(String streamId, List<String> locations, String outputLocation, BOLT_OPERTION_TYPE type) {
+    public ImageUrlFetcher(String streamId, List<String> locations, String outputLocation, BoltOperationType type) {
         this.streamId = streamId;
         this.locations = locations;
         this.outputLocation = outputLocation;
@@ -144,7 +136,7 @@ public class ImageUrlFetcher implements IFetcher<ImageHandle> {
         this.streamId = request.getStreamId();
         this.locations.add(request.getInputLocation());
         this.outputLocation = request.getOutputLocation();
-        this.type = BOLT_OPERTION_TYPE.getOpType(request.getProcessType());
+        this.type = BoltOperationType.getOpType(request.getProcessType());
         partionTasks();
     }
 

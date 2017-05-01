@@ -1,9 +1,8 @@
 package edu.fudan.stormcv.model;
 
-import edu.fudan.stormcv.constant.BOLT_OPERTION_TYPE;
+import edu.fudan.stormcv.constant.BoltOperationType;
 import org.apache.storm.tuple.Tuple;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,15 +15,15 @@ public class ImageHandle extends CVParticle {
 
     private List<String> locations;
 
-    private BOLT_OPERTION_TYPE type;
+    private BoltOperationType type;
 
-    public ImageHandle(String streamId, long sequenceNr, List<String> locations, BOLT_OPERTION_TYPE type) {
+    public ImageHandle(String streamId, long sequenceNr, List<String> locations, BoltOperationType type) {
         super(streamId, sequenceNr);
         this.locations = locations;
         this.type = type;
     }
 
-    public ImageHandle(Tuple tuple, List<String> locations, BOLT_OPERTION_TYPE type) {
+    public ImageHandle(Tuple tuple, List<String> locations, BoltOperationType type) {
         super(tuple);
         this.locations = locations;
         this.type = type;
@@ -38,7 +37,7 @@ public class ImageHandle extends CVParticle {
         return this.locations.size();
     }
 
-    public BOLT_OPERTION_TYPE getType() {
+    public BoltOperationType getType() {
         return this.type;
     }
 

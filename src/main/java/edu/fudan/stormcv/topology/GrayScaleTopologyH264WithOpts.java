@@ -6,7 +6,7 @@ import edu.fudan.stormcv.StormCVConfig;
 import edu.fudan.stormcv.batcher.SlidingWindowBatcher;
 import edu.fudan.stormcv.bolt.BatchH264InputBolt;
 import edu.fudan.stormcv.bolt.SingleH264InputBolt;
-import edu.fudan.stormcv.constant.BOLT_OPERTION_TYPE;
+import edu.fudan.stormcv.constant.BoltOperationType;
 import edu.fudan.stormcv.constant.GlobalConstants;
 import edu.fudan.stormcv.model.Frame;
 import edu.fudan.stormcv.model.serializer.CVParticleSerializer;
@@ -30,7 +30,7 @@ public class GrayScaleTopologyH264WithOpts extends BaseTopology {
     private String rtmpAddr = GlobalConstants.DefaultRTMPServer;
     private SourceInfo sourceInfo;
     private int frameSkip = 0;
-    private BOLT_OPERTION_TYPE type;
+    private BoltOperationType type;
 
 
     private boolean sendRtmp = true;
@@ -43,7 +43,7 @@ public class GrayScaleTopologyH264WithOpts extends BaseTopology {
         LibLoader.loadOpenCVLib();
         LibLoader.loadRtmpStreamerLib();
 
-        GrayScaleTopologyH264WithOpts topology = new GrayScaleTopologyH264WithOpts(BOLT_OPERTION_TYPE.COLORHISTOGRAM);
+        GrayScaleTopologyH264WithOpts topology = new GrayScaleTopologyH264WithOpts(BoltOperationType.COLORHISTOGRAM);
         topology.parseCommandArgs(args);
 
         try {
@@ -53,20 +53,20 @@ public class GrayScaleTopologyH264WithOpts extends BaseTopology {
         }
     }
 
-    public GrayScaleTopologyH264WithOpts(BOLT_OPERTION_TYPE type) {
+    public GrayScaleTopologyH264WithOpts(BoltOperationType type) {
         conf.setNumWorkers(workerNum);
         conf.put(StormCVConfig.STORMCV_FRAME_ENCODING, Frame.X264_IMAGE);
         this.type = type;
         isTopologyRunningAtLocal = true;
 
         if (view720p) {
-            if (this.type == BOLT_OPERTION_TYPE.FACEDETECT) {
+            if (this.type == BoltOperationType.FACEDETECT) {
 //                videoAddr = GlobalConstants.Pseudo720pFaceRtspAddress;
             } else {
                 videoAddr = GlobalConstants.Pseudo720pRtspAddress;
             }
         } else {
-            if (this.type == BOLT_OPERTION_TYPE.FACEDETECT) {
+            if (this.type == BoltOperationType.FACEDETECT) {
 //                videoAddr = GlobalConstants.PseudoFaceRtspAddress;
             } else {
                 videoAddr = GlobalConstants.PseudoRtspAddress;
@@ -100,43 +100,43 @@ public class GrayScaleTopologyH264WithOpts extends BaseTopology {
     public void setBolts() {
         createOperationBolt(type, "tcpSpout");
         if (!sendRtmp) {
-            createOperationBolt(BOLT_OPERTION_TYPE.MJPEGSTREAMER, type.toString());
+            createOperationBolt(BoltOperationType.MJPEGSTREAMER, type.toString());
         } else {
-            createOperationBolt(BOLT_OPERTION_TYPE.RTMPSTREAMER, type.toString());
+            createOperationBolt(BoltOperationType.RTMPSTREAMER, type.toString());
         }
     }
 
-    public void createOperationBolt(BOLT_OPERTION_TYPE type, String sourceComp) {
+    public void createOperationBolt(BoltOperationType type, String sourceComp) {
         switch (type) {
             case GRAY: {
-                builder.setBolt(BOLT_OPERTION_TYPE.GRAY.toString(),
+                builder.setBolt(BoltOperationType.GRAY.toString(),
                         new SingleH264InputBolt(new GrayImageOp()).setSourceInfo(sourceInfo), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }
             /*scale not supported*/
 //            case SCALE: {
-//                builder.setBolt(BOLT_OPERTION_TYPE.SCALE.toString(),
+//                builder.setBolt(BoltOperationType.SCALE.toString(),
 //                        new SingleH264InputBolt(new ScaleImageOp(0.5f).useMat(true)).setSourceInfo(sourceInfo), 1)
 //                        .localOrShuffleGrouping(sourceComp);
 //                break;
 //            }
             case COLORHISTOGRAM: {
-                builder.setBolt(BOLT_OPERTION_TYPE.COLORHISTOGRAM.toString(),
+                builder.setBolt(BoltOperationType.COLORHISTOGRAM.toString(),
                         new SingleH264InputBolt(new ColorHistogramOp(streamId)
                                 .useMat(true).outputFrame(true)).setSourceInfo(sourceInfo), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }
             case FACEDETECT: {
-                builder.setBolt(BOLT_OPERTION_TYPE.FACEDETECT.toString(),
+                builder.setBolt(BoltOperationType.FACEDETECT.toString(),
                         new SingleH264InputBolt(new HaarCascadeOp(streamId, GlobalConstants.HaarCacascadeXMLFileName)
                                 .useMat(true).outputFrame(true)).setSourceInfo(sourceInfo), 1)
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }
             case MJPEGSTREAMER: {
-                builder.setBolt(BOLT_OPERTION_TYPE.MJPEGSTREAMER.toString(),
+                builder.setBolt(BoltOperationType.MJPEGSTREAMER.toString(),
                         new BatchH264InputBolt(new SlidingWindowBatcher(2, frameSkip)
                                 .maxSize(6), new MjpegStreamingOp()
                                 .useMat(true).port(8558).framerate(24)).setSourceInfo(sourceInfo)
@@ -145,7 +145,7 @@ public class GrayScaleTopologyH264WithOpts extends BaseTopology {
                 break;
             }
             case RTMPSTREAMER: {
-                builder.setBolt(BOLT_OPERTION_TYPE.RTMPSTREAMER.toString(),
+                builder.setBolt(BoltOperationType.RTMPSTREAMER.toString(),
                         new SingleH264InputBolt(new H264RtmpStreamOp().RTMPServer(rtmpAddr).appName("grayscale")
                                 .frameRate(23.98)).setSourceInfo(sourceInfo), 1)
                         .localOrShuffleGrouping(sourceComp);
@@ -186,7 +186,7 @@ public class GrayScaleTopologyH264WithOpts extends BaseTopology {
 
         if (commandLine.hasOption("720p")) {
             view720p = true;
-            if (this.type == BOLT_OPERTION_TYPE.FACEDETECT) {
+            if (this.type == BoltOperationType.FACEDETECT) {
 //                videoAddr = GlobalConstants.Pseudo720pFaceRtspAddress;
             } else {
                 videoAddr = GlobalConstants.Pseudo720pRtspAddress;

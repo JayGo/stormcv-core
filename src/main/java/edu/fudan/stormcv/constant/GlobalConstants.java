@@ -14,8 +14,8 @@ public class GlobalConstants {
     public static final String Pseudo720pFaceRtspAddress = RTSPServer + "bigbang720.mkv";
     
     public static final String Video1080p = "rtsp://10.134.142.114/sherlock.mkv";
-    
-    
+
+
 
     public static final String QueueTypeMat = "Mat";
     public static final String QueueTypeBufferedImage = "BufferedImage";
