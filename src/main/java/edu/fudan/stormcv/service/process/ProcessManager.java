@@ -24,7 +24,8 @@ public class ProcessManager {
     private Map<Long, String> processCommandMap;
     private Map<Long, Process> pidProcessMap;
 
-    private static final String[] AVAIABLE_FFMPEG_SERVERS = {"10.134.142.114"};
+//    private static final String[] AVAIABLE_FFMPEG_SERVERS = {"10.134.142.114"};
+    private static final String[] AVAIABLE_FFMPEG_SERVERS = {"10.134.142.141"};
 
     private static final String localAddress = ServerUtil.getIp();
 

@@ -224,6 +224,7 @@ public class TCPCaptureServer {
             if (info.isValid()) {
                 String address = info.getAddress();
                 TopologyH264 topologyH264 = new TopologyH264(topoName, rtmpServerAddress, address, effectType, effectParams, info.getFrameRate());
+                topologyH264.isTopologyRunningAtLocal(false);
                 TopologyManager.getInstance().addTopology(topoName, topologyH264);
 
 //                topologys.add(topologyH264);
