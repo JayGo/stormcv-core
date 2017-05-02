@@ -233,6 +233,7 @@ public class MetricsCollector {
 
             if (host.equals(ServerUtil.getHostname())) {
                 long pid = ServerUtil.getLocalPidForPort(port);
+                logger.info("get local pid for host {} : {}", host, pid);
                 double cpuUsage = ServerUtil.getLocalProcessCpuUsage(pid);
                 double memoryUsage = ServerUtil.getLocalProcessMemoryUsage(pid);
                 TopologyWorkerInfo info = new TopologyWorkerInfo(this.name, host, pid, port, cpuUsage, memoryUsage);
@@ -240,6 +241,7 @@ public class MetricsCollector {
             } else {
                 ServerConstant.UserInfo userInfo = ServerConstant.ServerAuthentication.get(host);
                 long pid = ServerUtil.getRemotePidForPort(host, port, userInfo.getUsername(), userInfo.getPassword());
+                logger.info("get remote pid for host {} : {}", host, pid);
                 double cpuUsage = ServerUtil.getRemoteProcessCpuUsage(host, pid, userInfo.getUsername(), userInfo.getPassword());
                 double memoryUsage = ServerUtil.getRemoteProcessMemoryUsage(host, pid, userInfo.getUsername(), userInfo.getPassword());
                 TopologyWorkerInfo info = new TopologyWorkerInfo(this.name, host, pid, port, cpuUsage, memoryUsage);

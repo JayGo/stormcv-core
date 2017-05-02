@@ -7,6 +7,10 @@ import edu.fudan.stormcv.topology.TopologyH264;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 import static java.lang.Thread.sleep;
 
 /**
@@ -18,6 +22,7 @@ import static java.lang.Thread.sleep;
 public class ProcessMonitor implements Runnable {
 
     private MetricsCollector metricsCollector;
+    private Logger logger = LoggerFactory.getLogger(ProcessMonitor.class);
 
     public ProcessMonitor() {
         metricsCollector = new MetricsCollector();
@@ -25,18 +30,22 @@ public class ProcessMonitor implements Runnable {
 
     @Override
     public void run() {
-        try {
-            sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        checkProcess();
-        try {
-            sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        checkTopology();
+    	while(true) {
+    		logger.info("monitor start to get infos...");
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            checkProcess();
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            checkTopology();	
+    	}
+
     }
 
     private void checkProcess() {

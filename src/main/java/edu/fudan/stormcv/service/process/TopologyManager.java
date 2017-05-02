@@ -48,10 +48,17 @@ public class TopologyManager {
         TopologyH264 topologyH264 = topologyH264Map.get(topoName);
         String retStr = null;
         if (topologyH264 != null) {
+        	retStr = topologyH264.killTopology();
+        	this.topologyH264Map.remove(topoName);
+        	try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
             this.topologyDao.deleteTopologyBasicInfo(topoName);
             this.topologyDao.deleteAllTopologyComponentInfo(topoName);
             this.topologyDao.deleteAllTopologyWorkerInfo(topoName);
-            retStr = topologyH264.killTopology();
         } else {
             retStr = new String("Error: NO alive topology named " + topoName);
         }

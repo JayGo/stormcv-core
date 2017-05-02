@@ -213,6 +213,7 @@ public class ServerUtil {
             br = new BufferedReader(new InputStreamReader(process.getInputStream()));
             String line;
             while ((line = br.readLine()) != null) {
+            	logger.info("get pid ret line: {}", line);
                 if (line.startsWith("java") && line.contains("LISTEN")) {
                     String[] records = line.split(" +");
                     pid = Long.parseLong(records[1]);
