@@ -1,5 +1,7 @@
 package edu.fudan.stormcv.service.process;
 
+import edu.fudan.stormcv.service.db.TopologyDao;
+import edu.fudan.stormcv.service.db.TopologyDaoImpl;
 import edu.fudan.stormcv.topology.TopologyH264;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +22,11 @@ public class TopologyManager {
 
     private Map<String, TopologyH264> topologyH264Map;
 
+    private TopologyDao topologyDao;
+
     private TopologyManager() {
         this.topologyH264Map = new HashMap<>();
+        this.topologyDao = new TopologyDaoImpl();
     }
 
     public static synchronized TopologyManager getInstance() {
@@ -43,13 +48,14 @@ public class TopologyManager {
         TopologyH264 topologyH264 = topologyH264Map.get(topoName);
         String retStr = null;
         if (topologyH264 != null) {
+            this.topologyDao.deleteTopologyBasicInfo(topoName);
+            this.topologyDao.deleteAllTopologyComponentInfo(topoName);
+            this.topologyDao.deleteAllTopologyWorkerInfo(topoName);
             retStr = topologyH264.killTopology();
         } else {
             retStr = new String("Error: NO alive topology named " + topoName);
         }
         return retStr;
     }
-
-
 
 }
