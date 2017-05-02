@@ -17,11 +17,9 @@ import static java.lang.Thread.sleep;
  */
 public class ProcessMonitor implements Runnable {
 
-    private DBManager dbManager;
     private MetricsCollector metricsCollector;
 
     public ProcessMonitor() {
-        dbManager = DBManager.getInstance();
         metricsCollector = new MetricsCollector();
     }
 
