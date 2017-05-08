@@ -1,5 +1,7 @@
 package edu.fudan.stormcv.constant;
 
+import edu.fudan.stormcv.operation.single.CannyEdgeOp;
+
 /**
  * Created by IntelliJ IDEA.
  * User: jkyan
@@ -12,6 +14,7 @@ public enum BoltOperationType {
     FACEDETECT(2, "faceDetect"),
     COLORHISTOGRAM(3, "colorHistogram"),
     SCALE(4, "scale"),
+    CANNYEDGE(5, "cannyEdge"),
 
     /*Basic Video Write Mathod*/
     RTMPSTREAMER(101, "rtmpStreamer"),

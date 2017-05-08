@@ -20,13 +20,21 @@ import java.util.Map;
 public class CannyEdgeOp extends OpenCVOp<CVParticle> implements
         ISingleInputOperation<CVParticle> {
 
-    private Logger logger = LoggerFactory.getLogger(GrayImageOp.class);
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 692473218169428570L;
+	private Logger logger = LoggerFactory.getLogger(GrayImageOp.class);
     private CVParticleSerializer serializer = new FrameSerializer();
     private String name;
 
     public CannyEdgeOp(String name) {
         this.name = name;
     }
+    
+    public CannyEdgeOp() {
+		// TODO Auto-generated constructor stub
+	}
 
     @Override
     protected void prepareOpenCVOp(Map stormConf, TopologyContext context)
@@ -62,7 +70,7 @@ public class CannyEdgeOp extends OpenCVOp<CVParticle> implements
         Mat output = new Mat();
         List<CVParticle> results = new ArrayList<>();
 
-        Imgproc.Canny(inputGray, output, 255, 500);
+        Imgproc.Canny(inputGray, output, 200, 300);
 
         Mat output3Bytes = new Mat();
         Imgproc.cvtColor(output, output3Bytes, Imgproc.COLOR_GRAY2BGR);
