@@ -31,7 +31,6 @@ public class ProcessMonitor implements Runnable {
     @Override
     public void run() {
     	while(true) {
-    		logger.info("monitor start to get infos...");
             try {
                 sleep(1000);
             } catch (InterruptedException e) {

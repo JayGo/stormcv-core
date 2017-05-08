@@ -20,6 +20,8 @@ import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +29,7 @@ public class TopologyH264 extends BaseTopology {
 
     private static final Logger logger = LoggerFactory.getLogger(TopologyH264.class);
     private String streamId;
+
     private String videoAddr;
     private String rtmpAddr = GlobalConstants.DefaultRTMPServer;
     private SourceInfo sourceInfo;
@@ -117,6 +120,8 @@ public class TopologyH264 extends BaseTopology {
     		return BoltOperationType.COLORHISTOGRAM;
     	} else if(effect.equals(BoltOperationType.FACEDETECT.toString())){
     		return BoltOperationType.FACEDETECT;
+    	} else if(effect.equals(BoltOperationType.CANNYEDGE.toString())){
+    		return BoltOperationType.CANNYEDGE;
     	} else {
     		return BoltOperationType.UNSUPPORT;
     	}
@@ -165,6 +170,7 @@ public class TopologyH264 extends BaseTopology {
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }
+            
             case FACEDETECT: {
                 builder.setBolt(BoltOperationType.FACEDETECT.toString(),
                         new SingleH264InputBolt(new HaarCascadeOp(streamId, GlobalConstants.HaarCacascadeXMLFileName)
@@ -181,6 +187,14 @@ public class TopologyH264 extends BaseTopology {
                         .localOrShuffleGrouping(sourceComp);
                 break;
             }
+            
+            case CANNYEDGE: {
+                builder.setBolt(BoltOperationType.CANNYEDGE.toString(),
+                        new SingleH264InputBolt(new CannyEdgeOp()).setSourceInfo(sourceInfo), 1)
+                        .localOrShuffleGrouping(sourceComp);
+                break;
+            }
+            
             case RTMPSTREAMER: {
                 builder.setBolt(BoltOperationType.RTMPSTREAMER.toString(),
                         new SingleH264InputBolt(new H264RtmpStreamOp().RTMPServer(rtmpAddr).appName(streamId)
